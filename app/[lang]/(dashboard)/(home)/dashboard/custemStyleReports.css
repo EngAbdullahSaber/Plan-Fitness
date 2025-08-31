@@ -1,0 +1,22 @@
+.iconsMap{
+    display: flex;
+    gap: 20px;
+}
+
+.iconsMap span{
+    display: flex;
+}
+
+.iconsMap span img{
+    width:15px;
+    height:auto;
+    margin-right: 5px;
+}
+
+.iconsMap span p{
+    margin-top:5px;
+}
+
+.flexGap{
+    justify-content: space-between;
+}
