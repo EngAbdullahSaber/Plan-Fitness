@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import BreadcrumbComponent from "../shared/BreadcrumbComponent";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,11 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import TrainingTable from "./TrainingTable";
+import { useTranslate } from "@/config/useTranslation";
 
 const TrainingPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const { t } = useTranslate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
@@ -29,7 +30,7 @@ const TrainingPage = () => {
           <div className="space-y-4">
             <div className="relative">
               <h1 className="text-4xl font-bold text-[#25235F] leading-tight">
-                Training Management
+                {t("Training Management")}
               </h1>
               <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full"></div>
             </div>
@@ -68,73 +69,6 @@ const TrainingPage = () => {
             </Link>
           </div>
         </div>
-
-        {/* Filters Section */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Search</Label>
-                <Input
-                  placeholder="Search programs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border-gray-300 focus:border-[#25235F]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="border-gray-300 focus:border-[#25235F]">
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Category</Label>
-                <Select
-                  value={categoryFilter}
-                  onValueChange={setCategoryFilter}
-                >
-                  <SelectTrigger className="border-gray-300 focus:border-[#25235F]">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="strength">Strength</SelectItem>
-                    <SelectItem value="cardio">Cardio</SelectItem>
-                    <SelectItem value="flexibility">Flexibility</SelectItem>
-                    <SelectItem value="endurance">Endurance</SelectItem>
-                    <SelectItem value="bodyweight">Bodyweight</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Actions</Label>
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setCategoryFilter("all");
-                  }}
-                >
-                  <Icon icon="heroicons:arrow-path" className="h-4 w-4 mr-2" />
-                  Reset Filters
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -249,11 +183,7 @@ const TrainingPage = () => {
                 </div>
 
                 <div className="p-6">
-                  <TrainingTable
-                    searchTerm={searchTerm}
-                    statusFilter={statusFilter}
-                    categoryFilter={categoryFilter}
-                  />
+                  <TrainingTable />
                 </div>
               </div>
             </div>

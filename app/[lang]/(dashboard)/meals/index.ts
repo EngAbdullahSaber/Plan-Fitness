@@ -8,7 +8,7 @@ export const mealData = [
     carbs: 45,
     fat: 12,
     status: "active",
-    price: 12.99,
+
     featured: true,
     ingredients: ["Oats", "Greek Yogurt", "Berries", "Protein Powder", "Nuts"],
   },
@@ -21,7 +21,7 @@ export const mealData = [
     carbs: 15,
     fat: 8,
     status: "active",
-    price: 15.99,
+
     featured: false,
     ingredients: [
       "Chicken Breast",
@@ -40,7 +40,6 @@ export const mealData = [
     carbs: 55,
     fat: 10,
     status: "active",
-    price: 14.5,
     featured: true,
     ingredients: ["Quinoa", "Sweet Potato", "Avocado", "Chickpeas", "Tahini"],
   },
@@ -53,7 +52,6 @@ export const mealData = [
     carbs: 25,
     fat: 6,
     status: "active",
-    price: 8.99,
     featured: false,
     ingredients: [
       "Whey Protein",
@@ -72,7 +70,7 @@ export const mealData = [
     carbs: 40,
     fat: 9,
     status: "inactive",
-    price: 11.99,
+
     featured: false,
     ingredients: [
       "Whole Wheat Wrap",
@@ -91,7 +89,6 @@ export const mealData = [
     carbs: 20,
     fat: 8,
     status: "active",
-    price: 6.99,
     featured: true,
     ingredients: ["Oats", "Protein Powder", "Dates", "Nuts", "Dark Chocolate"],
   },
@@ -104,8 +101,7 @@ export const mealData = [
     carbs: 35,
     fat: 18,
     status: "active",
-    price: 18.99,
-    featured: true,
+
     ingredients: ["Salmon Fillet", "Quinoa", "Asparagus", "Lemon", "Herbs"],
   },
   {
@@ -117,7 +113,6 @@ export const mealData = [
     carbs: 45,
     fat: 7,
     status: "inactive",
-    price: 9.99,
     featured: false,
     ingredients: [
       "Rolled Oats",

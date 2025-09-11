@@ -2,12 +2,15 @@
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { trainingData } from ".";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "../tables/advanced/components/data-table-column-header";
 import { DataTable } from "../tables/advanced/components/data-table";
 import DeleteConfirmationDialog from "../shared/DeleteConfirmationDialog";
 import Link from "next/link";
-import { trainingData } from ".";
+import { useState, useMemo } from "react";
+import GenericFilter, { FilterOption } from "../shared/GenericFilter";
+import TrainingDetailsModal from "./TrainingDetailsModal";
 
 interface Training {
   id: string;
@@ -17,38 +20,134 @@ interface Training {
   difficulty: string;
   calories: number;
   status: string;
-  price: number;
-  featured: boolean;
-  exercises: string[];
+  show: boolean;
+  count?: number;
 }
 
-const TrainingTable = ({
-  searchTerm,
-  statusFilter,
-  categoryFilter,
-}: {
-  searchTerm: string;
-  statusFilter: string;
-  categoryFilter: string;
-}) => {
-  // Filter data based on search and filters
-  const filteredData = trainingData.filter((training) => {
-    const matchesSearch =
-      training.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      training.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || training.status === statusFilter;
-    const matchesCategory =
-      categoryFilter === "all" || training.category === categoryFilter;
+const TrainingTable = ({ t }: { t: any }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTraining, setSelectedTraining] = useState<Training | null>(
+    null
+  );
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+  const handleViewTraining = (training: Training) => {
+    setSelectedTraining(training);
+    setIsModalOpen(true);
+  };
+
+  const handleFilterChange = (newFilters: Record<string, string>) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+  };
+
+  // Get unique values for filter dropdowns
+  const statusOptions = useMemo(
+    () => Array.from(new Set(trainingData.map((item) => item.status))),
+    []
+  );
+  const categoryOptions = useMemo(
+    () => Array.from(new Set(trainingData.map((item) => item.category))),
+    []
+  );
+  const difficultyOptions = useMemo(
+    () => Array.from(new Set(trainingData.map((item) => item.difficulty))),
+    []
+  );
+  const showOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(trainingData.map((item) => (item.show ? "Yes" : "No")))
+      ),
+    []
+  );
+
+  // Define filter configuration
+  const filterConfig: FilterOption[] = [
+    {
+      key: "search",
+      label: "Search",
+      type: "text",
+      placeholder: "Search by name...",
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "select",
+      placeholder: "All Statuses",
+      options: statusOptions.map((status) => ({
+        value: status,
+        label: status,
+      })),
+    },
+    {
+      key: "category",
+      label: "Category",
+      type: "select",
+      placeholder: "All Categories",
+      options: categoryOptions.map((category) => ({
+        value: category,
+        label: category,
+      })),
+    },
+    {
+      key: "difficulty",
+      label: "Difficulty",
+      type: "select",
+      placeholder: "All Difficulties",
+      options: difficultyOptions.map((difficulty) => ({
+        value: difficulty,
+        label: difficulty,
+      })),
+    },
+    {
+      key: "show",
+      label: "Show",
+      type: "select",
+      placeholder: "All",
+      options: [
+        { value: "Yes", label: "Yes" },
+        { value: "No", label: "No" },
+      ],
+    },
+  ];
+
+  // Filter data based on applied filters
+  const filteredData = useMemo(() => {
+    return trainingData.filter((training) => {
+      const isShowMatch =
+        filters.show === "" ||
+        (filters.show === "Yes" && training.show) ||
+        (filters.show === "No" && !training.show);
+
+      return (
+        (filters.status === "" || training.status === filters.status) &&
+        (filters.category === "" || training.category === filters.category) &&
+        (filters.difficulty === "" ||
+          training.difficulty === filters.difficulty) &&
+        isShowMatch &&
+        (filters.search === "" ||
+          training.name.toLowerCase().includes(filters.search.toLowerCase()))
+      );
+    });
+  }, [trainingData, filters]);
 
   const columns: ColumnDef<Training>[] = [
     {
       id: "actions",
       cell: ({ row }) => (
         <div className="flex flex-row gap-3 items-center justify-center">
+          <Button
+            size="icon"
+            onClick={() => handleViewTraining(row.original)}
+            variant="outline"
+            className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            <Icon icon="carbon:view" className="h-4 w-4" />
+          </Button>
           <Link href={`/training/${row.original.id}/edit`}>
             <Button
               size="icon"
@@ -114,7 +213,7 @@ const TrainingTable = ({
                 {row.original.name}
               </span>
               <span className="text-xs text-gray-500">
-                {row.original.exercises.slice(0, 2).join(", ")}...
+                {row.original.category} • {row.original.difficulty}
               </span>
             </div>
           </div>
@@ -154,6 +253,9 @@ const TrainingTable = ({
             </Badge>
           </div>
         );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
       },
     },
     {
@@ -207,6 +309,9 @@ const TrainingTable = ({
           </div>
         );
       },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
     },
     {
       accessorKey: "calories",
@@ -229,20 +334,24 @@ const TrainingTable = ({
       },
     },
     {
-      accessorKey: "price",
+      accessorKey: "count",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Price"}
+          title={"Count"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center">
-            <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold px-3 py-1 rounded-full border-0">
-              ${row.original.price}
-            </Badge>
+            {row.original.count ? (
+              <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-3 py-1 rounded-full border-0">
+                {row.original.count}
+              </Badge>
+            ) : (
+              <span className="text-sm text-gray-500">-</span>
+            )}
           </div>
         );
       },
@@ -276,40 +385,93 @@ const TrainingTable = ({
           </div>
         );
       },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
     },
     {
-      accessorKey: "featured",
+      accessorKey: "show",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Featured"}
+          title={"Show"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center">
-            {row.original.featured ? (
+            {row.original.show ? (
               <Badge className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white font-semibold px-3 py-1 rounded-full border-0">
-                Featured
+                Show
               </Badge>
             ) : (
-              <span className="text-sm text-gray-500">-</span>
+              <span className="text-sm text-gray-500">Hidden</span>
             )}
           </div>
         );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
       },
     },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Generic Filter Component */}
+      <GenericFilter
+        filters={filterConfig}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        initialFilters={filters}
+      />
+
+      {/* Enhanced Data Table with Custom Styling */}
+      <div className="flex flex-wrap gap-4 items-center justify-between p-4 bg-gradient-to-r from-[#25235F]/5 to-[#ED4135]/5 rounded-xl border border-gray-200">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Active Programs:{" "}
+              {filteredData.filter((t) => t.status === "active").length}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Visible Programs: {filteredData.filter((t) => t.show).length}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Total Programs: {filteredData.length}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[#25235F] hover:text-[#ED4135] hover:bg-[#25235F]/10 transition-all duration-300"
+          >
+            <Icon icon="heroicons:arrow-path" className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
+        </div>
+      </div>
+
       <div className="rounded-xl overflow-hidden bg-white">
-        <DataTable
-          data={filteredData}
-          columns={columns}
-          className="[&_table]:bg-white [&_thead]:bg-gradient-to-r [&_thead]:from-gray-50 [&_thead]:to-white [&_th]:text-[#25235F] [&_th]:font-bold [&_th]:border-gray-200 [&_td]:border-gray-100 [&_tr:hover]:bg-gradient-to-r [&_tr:hover]:from-[#25235F]/5 [&_tr:hover]:to-[#ED4135]/5 [&_tr]:transition-all [&_tr]:duration-300"
-        />
+        <DataTable data={trainingData} columns={columns} />
+        {selectedTraining && (
+          <TrainingDetailsModal
+            training={selectedTraining}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

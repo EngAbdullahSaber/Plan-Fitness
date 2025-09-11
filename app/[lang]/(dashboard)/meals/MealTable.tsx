@@ -8,6 +8,8 @@ import { DataTable } from "../tables/advanced/components/data-table";
 import DeleteConfirmationDialog from "../shared/DeleteConfirmationDialog";
 import Link from "next/link";
 import { mealData } from ".";
+import { useState } from "react";
+import MealDetailsModal from "./MealDetailsModal";
 
 interface Meal {
   id: string;
@@ -44,12 +46,25 @@ const MealTable = ({
 
     return matchesSearch && matchesStatus && matchesCategory;
   });
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns: ColumnDef<Meal>[] = [
     {
       id: "actions",
       cell: ({ row }) => (
         <div className="flex flex-row gap-3 items-center justify-center">
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+            onClick={() => {
+              setSelectedMeal(row.original);
+              setIsModalOpen(true);
+            }}
+          >
+            <Icon icon="heroicons:eye" className="h-4 w-4" />
+          </Button>{" "}
           <Link href={`/meals/${row.original.id}/edit`}>
             <Button
               size="icon"
@@ -233,25 +248,7 @@ const MealTable = ({
         );
       },
     },
-    {
-      accessorKey: "price",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Price"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center">
-            <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold px-3 py-1 rounded-full border-0">
-              ${row.original.price}
-            </Badge>
-          </div>
-        );
-      },
-    },
+    
     {
       accessorKey: "status",
       header: ({ column }) => (
@@ -282,39 +279,23 @@ const MealTable = ({
         );
       },
     },
-    {
-      accessorKey: "featured",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Featured"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center">
-            {row.original.featured ? (
-              <Badge className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white font-semibold px-3 py-1 rounded-full border-0">
-                Featured
-              </Badge>
-            ) : (
-              <span className="text-sm text-gray-500">-</span>
-            )}
-          </div>
-        );
-      },
-    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="rounded-xl overflow-hidden bg-white">
-        <DataTable
-          data={filteredData}
-          columns={columns}
-          className="[&_table]:bg-white [&_thead]:bg-gradient-to-r [&_thead]:from-gray-50 [&_thead]:to-white [&_th]:text-[#25235F] [&_th]:font-bold [&_th]:border-gray-200 [&_td]:border-gray-100 [&_tr:hover]:bg-gradient-to-r [&_tr:hover]:from-[#25235F]/5 [&_tr:hover]:to-[#ED4135]/5 [&_tr]:transition-all [&_tr]:duration-300"
-        />
+        <DataTable data={filteredData} columns={columns} />
+
+        {selectedMeal && (
+          <MealDetailsModal
+            meal={selectedMeal}
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedMeal(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

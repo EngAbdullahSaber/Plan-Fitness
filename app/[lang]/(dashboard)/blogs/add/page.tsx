@@ -1,469 +1,271 @@
 "use client";
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import GenericCreateForm from "../../shared/GenericCreateForm";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 import { useTranslate } from "@/config/useTranslation";
-import { Icon } from "@iconify/react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 
-const AddNewBlog = ({ onClose }: { onClose?: () => void }) => {
-  const { t, loading, error } = useTranslate();
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    excerpt: "",
-    content: "",
-    category: "",
-    tags: "",
-    status: "draft",
-    author: "",
-    publishDate: new Date().toISOString().split("T")[0],
-    featuredImage: "",
-    metaTitle: "",
-    metaDescription: "",
-    allowComments: true,
-    featuredPost: false,
-  });
+const BlogCreateForm = ({ onClose }: { onClose?: () => void }) => {
+  const router = useRouter();
+  const { t } = useTranslate();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Blog form submitted:", formData);
+  const handleSubmit = (data: Record<string, any>) => {
+    console.log("Form submitted:", data);
     // Here you would typically send the data to your API
     if (onClose) onClose();
   };
 
-  // Sample data for dropdowns
+  const initialData = {
+    id: `BLOG-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: "",
+    description: "",
+    author: "",
+    category: "",
+    status: "draft",
+    publishDate: new Date().toISOString().split("T")[0],
+    featured: false,
+    tags: "",
+    metaTitle: "",
+    metaDescription: "",
+    featuredImage: "",
+    content: "",
+  };
+
   const categories = [
-    "Fitness",
-    "Nutrition",
-    "Lifestyle",
-    "Training",
-    "Wellness",
-    "Recipes",
+    "fitness",
+    "nutrition",
+    "lifestyle",
+    "training",
+    "wellness",
+    "recipes",
+    "motivation",
   ];
 
+  const statusOptions = ["draft", "published", "archived"];
   const authors = [
+    "David Lee",
     "Sarah Johnson",
     "Mike Thompson",
-    "Emma Wilson",
-    "David Lee",
-    "Lisa Rodriguez",
+    "Emily Wilson",
+    "Alex Rodriguez",
   ];
 
-  const statusOptions = [
-    { value: "draft", label: "Draft" },
-    { value: "published", label: "Published" },
-    { value: "archived", label: "Archived" },
+  const fields = [
+    // Basic Information Section
+    [
+      {
+        name: "title",
+        label: "Blog Title",
+        type: "text",
+        placeholder: "Enter blog title",
+        required: true,
+        validation: {
+          minLength: 5,
+          maxLength: 200,
+          custom: (value) => {
+            if (!value || value.trim() === "") return "Blog title is required";
+            if (value.length < 5) return "Title must be at least 5 characters";
+            return null;
+          },
+        },
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Enter a brief description of the blog post",
+        required: true,
+        validation: {
+          minLength: 20,
+          maxLength: 300,
+          custom: (value) => {
+            if (!value || value.trim() === "") return "Description is required";
+            if (value.length < 20)
+              return "Description must be at least 20 characters";
+            return null;
+          },
+        },
+      },
+      {
+        name: "author",
+        label: "Author",
+        type: "select",
+        options: authors,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select an author";
+            return null;
+          },
+        },
+      },
+      {
+        name: "category",
+        label: "Category",
+        type: "select",
+        options: categories,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a category";
+            return null;
+          },
+        },
+      },
+    ],
+
+    // Content & Publishing Section
+    [
+      {
+        name: "content",
+        label: "Blog Content",
+        type: "richtext",
+        placeholder: "Write your blog content here...",
+        required: true,
+        validation: {
+          minLength: 100,
+          custom: (value) => {
+            if (!value || value.trim() === "")
+              return "Blog content is required";
+            if (value.length < 100)
+              return "Content must be at least 100 characters";
+            return null;
+          },
+        },
+      },
+      {
+        name: "publishDate",
+        label: "Publish Date",
+        type: "date",
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Publish date is required";
+            return null;
+          },
+        },
+      },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: statusOptions,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a status";
+            return null;
+          },
+        },
+      },
+      {
+        name: "featured",
+        label: "Featured Post",
+        type: "switch",
+        description: "Show this post in featured sections",
+      },
+    ],
+
+    // SEO & Metadata Section
+    [
+      {
+        name: "metaTitle",
+        label: "Meta Title",
+        type: "text",
+        placeholder: "SEO title for search engines",
+        validation: {
+          maxLength: 60,
+          custom: (value) => {
+            if (value && value.length > 60)
+              return "Meta title must be 60 characters or less";
+            return null;
+          },
+        },
+      },
+      {
+        name: "metaDescription",
+        label: "Meta Description",
+        type: "textarea",
+        placeholder: "SEO description for search engines",
+        validation: {
+          maxLength: 160,
+          custom: (value) => {
+            if (value && value.length > 160)
+              return "Meta description must be 160 characters or less";
+            return null;
+          },
+        },
+      },
+      {
+        name: "tags",
+        label: "Tags",
+        type: "text",
+        placeholder: "comma, separated, tags",
+        description: "Separate tags with commas",
+      },
+      {
+        name: "featuredImage",
+        label: "Featured Image URL",
+        type: "text",
+        placeholder: "https://example.com/image.jpg",
+        validation: {
+          pattern: /^https?:\/\/.+/,
+          patternMessage:
+            "Please enter a valid URL starting with http:// or https://",
+          custom: (value) => {
+            if (value && !/^https?:\/\/.+/.test(value)) {
+              return "Please enter a valid URL";
+            }
+            return null;
+          },
+        },
+      },
+    ],
+  ];
+
+  const sections = [
+    { title: "Basic Information", icon: "heroicons:document-text" },
+    { title: "Content & Publishing", icon: "heroicons:calendar" },
+    { title: "SEO & Metadata", icon: "heroicons:magnifying-glass" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header Section */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-[#25235F]">
-              Add New Blog Post
-            </h1>
-            <p className="text-gray-600">
-              Create a new blog post for your fitness website
-            </p>
-          </div>
-          {onClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-10 w-10 rounded-full hover:bg-gray-200"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-
-        {/* Main Form Card */}
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          {/* Card Header with Gradient */}
-          <CardHeader className="bg-gradient-to-r from-[#25235F] to-[#25235F]/90 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
-            <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
-              <div className="w-2 h-8 bg-[#ED4135] rounded-full"></div>
-              Blog Post Information
-              <div className="ml-auto">
-                <div className="w-8 h-8 rounded-full bg-[#ED4135]/20 flex items-center justify-center">
-                  <Icon
-                    icon="heroicons:document-plus"
-                    className="h-5 w-5 text-[#ED4135]"
-                  />
-                </div>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Basic Information Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:document-text"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  Basic Information
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-[#25235F] font-medium">
-                    Blog Title *
-                  </Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Enter blog title"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="slug"
-                      className="text-[#25235F] font-medium"
-                    >
-                      URL Slug *
-                    </Label>
-                    <Input
-                      id="slug"
-                      name="slug"
-                      value={formData.slug}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="blog-post-url-slug"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="category"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Category *
-                    </Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) =>
-                        handleSelectChange("category", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem
-                            key={category}
-                            value={category.toLowerCase()}
-                          >
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="excerpt"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Excerpt
-                  </Label>
-                  <Textarea
-                    id="excerpt"
-                    name="excerpt"
-                    value={formData.excerpt}
-                    onChange={handleInputChange}
-                    placeholder="Brief description of the blog post"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[80px]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="content"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Content *
-                  </Label>
-                  <Textarea
-                    id="content"
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Write your blog content here..."
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[200px]"
-                  />
-                </div>
-              </div>
-
-              {/* Metadata Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:information-circle"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  Metadata & Settings
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="author"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Author *
-                    </Label>
-                    <Select
-                      value={formData.author}
-                      onValueChange={(value) =>
-                        handleSelectChange("author", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select author" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {authors.map((author) => (
-                          <SelectItem key={author} value={author}>
-                            {author}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="status"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Status
-                    </Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) =>
-                        handleSelectChange("status", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="publishDate"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Publish Date
-                    </Label>
-                    <Input
-                      id="publishDate"
-                      name="publishDate"
-                      type="date"
-                      value={formData.publishDate}
-                      onChange={handleInputChange}
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="tags"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Tags
-                    </Label>
-                    <Input
-                      id="tags"
-                      name="tags"
-                      value={formData.tags}
-                      onChange={handleInputChange}
-                      placeholder="fitness, nutrition, health (comma separated)"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="featuredImage"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Featured Image URL
-                  </Label>
-                  <Input
-                    id="featuredImage"
-                    name="featuredImage"
-                    value={formData.featuredImage}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com/image.jpg"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                  />
-                </div>
-              </div>
-
-              {/* SEO Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:globe-alt"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  SEO Settings
-                </h3>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="metaTitle"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Meta Title
-                  </Label>
-                  <Input
-                    id="metaTitle"
-                    name="metaTitle"
-                    value={formData.metaTitle}
-                    onChange={handleInputChange}
-                    placeholder="Meta title for SEO"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="metaDescription"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Meta Description
-                  </Label>
-                  <Textarea
-                    id="metaDescription"
-                    name="metaDescription"
-                    value={formData.metaDescription}
-                    onChange={handleInputChange}
-                    placeholder="Meta description for SEO"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[80px]"
-                  />
-                </div>
-              </div>
-
-              {/* Additional Settings Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon icon="heroicons:cog" className="h-5 w-5 inline mr-2" />
-                  Additional Settings
-                </h3>
-
-                <div className="flex items-center justify-between space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="allowComments"
-                      checked={formData.allowComments}
-                      onCheckedChange={(checked) =>
-                        handleSwitchChange("allowComments", checked)
-                      }
-                    />
-                    <Label htmlFor="allowComments" className="cursor-pointer">
-                      Allow Comments
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featuredPost"
-                      checked={formData.featuredPost}
-                      onCheckedChange={(checked) =>
-                        handleSwitchChange("featuredPost", checked)
-                      }
-                    />
-                    <Label htmlFor="featuredPost" className="cursor-pointer">
-                      Feature this post
-                    </Label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-3"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/90 hover:from-[#ED4135]/90 hover:to-[#ED4135] text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Icon
-                    icon="heroicons:document-plus"
-                    className="h-5 w-5 mr-2"
-                  />
-                  Create Blog Post
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      {/* زر الرجوع */}
+      <div className="space-y-2">
+        <Button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          {t("Back")}
+        </Button>
       </div>
+      <GenericCreateForm
+        title="Create New Blog Post"
+        description="Fill in the details below to create a new blog post"
+        initialData={initialData}
+        fields={fields}
+        sections={sections}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+        submitButtonText="Create Blog Post"
+        cancelButtonText="Cancel"
+      />
     </div>
   );
 };
 
-export default AddNewBlog;
+export default BlogCreateForm;

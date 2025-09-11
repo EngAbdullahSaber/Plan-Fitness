@@ -1,515 +1,523 @@
 "use client";
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import GenericCreateForm from "../../shared/GenericCreateForm";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useTranslate } from "@/config/useTranslation";
-import { Icon } from "@iconify/react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
-const page = ({ onClose }: { onClose?: () => void }) => {
-  const { t, loading, error } = useTranslate();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-    gender: "",
-    address: "",
-    membershipPlan: "",
-    membershipStatus: "Active",
-    assignedTrainer: "",
-    emergencyContact: "",
-    emergencyPhone: "",
-    startDate: new Date().toISOString().split("T")[0],
-    notes: "",
-    sendWelcomeEmail: true,
-    agreeToTerms: false,
-  });
+const MemberCreateForm = ({ onClose }: { onClose?: () => void }) => {
+  const router = useRouter();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
+  const handleSubmit = (data: Record<string, any>) => {
+    console.log("Form submitted:", data);
     // Here you would typically send the data to your API
     if (onClose) onClose();
   };
 
-  // Sample data for dropdowns
+  const initialData = {
+    id: `MEMBER-${Math.floor(1000 + Math.random() * 9000)}`,
+    fullName: "",
+    password: "",
+    weight: "",
+    age: "",
+    height: "",
+    chest: "",
+    biceps: "",
+    triceps: "",
+    thigh: "",
+    waist: "",
+    belly: "",
+    buttock: "",
+    gender: "",
+    totalSteps: "0",
+    totalDaysTraining: "0",
+    goal: "",
+    sleepTime: "",
+    bmi: "",
+    caloriesBurnedLast7Days: "0",
+    timeTrainingLast7Days: "0",
+    email: "",
+    phone: "",
+    address: "",
+    birthDate: "",
+    status: "Active",
+    membershipStatus: "Active",
+    joinDate: new Date().toISOString().split("T")[0],
+    lastCheckin: new Date().toISOString(),
+    trainer: "",
+    membershipPlan: "",
+    role: "Standard Member",
+    emergencyContact: "",
+    emergencyPhone: "",
+    notes: "",
+    sendWelcomeEmail: true,
+    agreeToTerms: false,
+  };
+
   const membershipPlans = [
+    "Premium Plus",
     "Premium",
     "Standard",
     "Basic",
     "Student",
     "Corporate",
+    "Staff Membership",
   ];
+
   const trainers = [
+    "Mike Thompson",
+    "Lisa Rodriguez",
     "John Smith",
     "Emily Johnson",
     "Michael Brown",
     "Sarah Williams",
     "David Lee",
+    "N/A",
+  ];
+
+  const roles = [
+    "Premium Member",
+    "Standard Member",
+    "Trainer",
+    "Admin",
+    "Staff",
+  ];
+
+  const statusOptions = ["Active", "Inactive"];
+  const membershipStatusOptions = ["Active", "Frozen", "Expired", "Staff"];
+  const genderOptions = ["Male", "Female"];
+
+  const fields = [
+    // Personal Information Section
+    [
+      {
+        name: "fullName",
+        label: "Full Name",
+        type: "text",
+        placeholder: "Enter full name",
+        required: true,
+        validation: {
+          minLength: 2,
+          maxLength: 100,
+          custom: (value) => {
+            if (!value || value.trim() === "") return "Full name is required";
+            if (value.length < 2)
+              return "Full name must be at least 2 characters";
+            if (!/^[a-zA-Z\s]+$/.test(value))
+              return "Full name can only contain letters and spaces";
+            return null;
+          },
+        },
+      },
+      {
+        name: "password",
+        label: "Password",
+        type: "password",
+        placeholder: "Set a password",
+        required: true,
+        validation: {
+          minLength: 8,
+          pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+          patternMessage:
+            "Password must contain at least one lowercase letter, one uppercase letter, and one number",
+          custom: (value) => {
+            if (!value) return "Password is required";
+            if (value.length < 8)
+              return "Password must be at least 8 characters";
+            if (!/(?=.*[a-z])/.test(value))
+              return "Must contain at least one lowercase letter";
+            if (!/(?=.*[A-Z])/.test(value))
+              return "Must contain at least one uppercase letter";
+            if (!/(?=.*\d)/.test(value))
+              return "Must contain at least one number";
+            return null;
+          },
+        },
+      },
+      {
+        name: "email",
+        label: "Email Address",
+        type: "email",
+        placeholder: "member@example.com",
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Email address is required";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value))
+              return "Please enter a valid email address";
+            return null;
+          },
+        },
+      },
+      {
+        name: "phone",
+        label: "Phone Number",
+        type: "text",
+        placeholder: "+1 (555) 123-4567",
+        required: true,
+        validation: {
+          pattern: /^\+?[\d\s\-()]{10,}$/,
+          patternMessage: "Please enter a valid phone number",
+          custom: (value) => {
+            if (!value) return "Phone number is required";
+            const phoneRegex = /^\+?[\d\s\-()]{10,}$/;
+            if (!phoneRegex.test(value))
+              return "Please enter a valid phone number";
+            return null;
+          },
+        },
+      },
+      {
+        name: "birthDate",
+        label: "Date of Birth",
+        type: "date",
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Date of birth is required";
+            const birthDate = new Date(value);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            if (age < 16) return "Must be at least 16 years old";
+            if (age > 100) return "Please enter a valid birth date";
+            return null;
+          },
+        },
+      },
+      {
+        name: "gender",
+        label: "Gender",
+        type: "radio",
+        required: true,
+        options: genderOptions,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a gender";
+            return null;
+          },
+        },
+      },
+      {
+        name: "address",
+        label: "Address",
+        type: "textarea",
+        placeholder: "Enter full address",
+        cols: 2,
+        required: true,
+        validation: {
+          minLength: 10,
+          maxLength: 200,
+          custom: (value) => {
+            if (!value) return "Address is required";
+            if (value.length < 10)
+              return "Address must be at least 10 characters";
+            return null;
+          },
+        },
+      },
+    ],
+
+    // Physical Measurements Section
+    [
+      {
+        name: "weight",
+        label: "Weight (kg)",
+        type: "number",
+        placeholder: "e.g., 68.5",
+        required: true,
+        validation: {
+          min: 20,
+          max: 300,
+          custom: (value) => {
+            if (!value) return "Weight is required";
+            const numValue = Number(value);
+            if (isNaN(numValue)) return "Please enter a valid weight";
+            if (numValue < 20) return "Weight must be at least 20 kg";
+            if (numValue > 300) return "Weight must be at most 300 kg";
+            return null;
+          },
+        },
+      },
+      {
+        name: "height",
+        label: "Height (cm)",
+        type: "number",
+        placeholder: "e.g., 172",
+        required: true,
+        validation: {
+          min: 100,
+          max: 250,
+          custom: (value) => {
+            if (!value) return "Height is required";
+            const numValue = Number(value);
+            if (isNaN(numValue)) return "Please enter a valid height";
+            if (numValue < 100) return "Height must be at least 100 cm";
+            if (numValue > 250) return "Height must be at most 250 cm";
+            return null;
+          },
+        },
+      },
+      {
+        name: "chest",
+        label: "Chest (cm)",
+        type: "number",
+        placeholder: "e.g., 95",
+        validation: {
+          min: 50,
+          max: 200,
+          custom: (value) => {
+            if (!value) return null;
+            const numValue = Number(value);
+            if (isNaN(numValue)) return "Please enter a valid measurement";
+            if (numValue < 50)
+              return "Chest measurement must be at least 50 cm";
+            if (numValue > 200)
+              return "Chest measurement must be at most 200 cm";
+            return null;
+          },
+        },
+      },
+      // ... other measurement fields with similar validation
+      {
+        name: "bmi",
+        label: "BMI",
+        type: "number",
+        step: 0.1,
+        placeholder: "e.g., 23.1",
+        validation: {
+          min: 10,
+          max: 50,
+          custom: (value) => {
+            if (!value) return null;
+            const numValue = Number(value);
+            if (isNaN(numValue)) return "Please enter a valid BMI";
+            if (numValue < 10) return "BMI must be at least 10";
+            if (numValue > 50) return "BMI must be at most 50";
+            return null;
+          },
+        },
+      },
+      {
+        name: "goal",
+        label: "Fitness Goal",
+        type: "textarea",
+        placeholder: "e.g., Weight loss and muscle toning",
+        cols: 2,
+        validation: {
+          maxLength: 500,
+          custom: (value) => {
+            if (!value) return null;
+            if (value.length > 500)
+              return "Goal must be less than 500 characters";
+            return null;
+          },
+        },
+      },
+    ],
+
+    // Membership Information Section
+    [
+      {
+        name: "membershipPlan",
+        label: "Membership Plan",
+        type: "select",
+        options: membershipPlans,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a membership plan";
+            return null;
+          },
+        },
+      },
+      {
+        name: "role",
+        label: "Role",
+        type: "select",
+        options: roles,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a role";
+            return null;
+          },
+        },
+      },
+      {
+        name: "trainer",
+        label: "Assigned Trainer",
+        type: "select",
+        options: trainers,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select a trainer";
+            return null;
+          },
+        },
+      },
+      {
+        name: "membershipStatus",
+        label: "Membership Status",
+        type: "select",
+        options: membershipStatusOptions,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select membership status";
+            return null;
+          },
+        },
+      },
+      {
+        name: "joinDate",
+        label: "Join Date",
+        type: "date",
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Join date is required";
+            const joinDate = new Date(value);
+            const today = new Date();
+            if (joinDate > today) return "Join date cannot be in the future";
+            return null;
+          },
+        },
+      },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: statusOptions,
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "Please select status";
+            return null;
+          },
+        },
+      },
+    ],
+
+    // Emergency Contact Section
+    [
+      {
+        name: "emergencyContact",
+        label: "Emergency Contact Name",
+        type: "text",
+        placeholder: "Full name",
+        required: true,
+        validation: {
+          minLength: 2,
+          maxLength: 100,
+          custom: (value) => {
+            if (!value) return "Emergency contact name is required";
+            if (value.length < 2) return "Name must be at least 2 characters";
+            return null;
+          },
+        },
+      },
+      {
+        name: "emergencyPhone",
+        label: "Emergency Phone Number",
+        type: "text",
+        placeholder: "+1 (555) 123-4567",
+        required: true,
+        validation: {
+          pattern: /^\+?[\d\s\-()]{10,}$/,
+          patternMessage: "Please enter a valid phone number",
+          custom: (value) => {
+            if (!value) return "Emergency phone number is required";
+            const phoneRegex = /^\+?[\d\s\-()]{10,}$/;
+            if (!phoneRegex.test(value))
+              return "Please enter a valid phone number";
+            return null;
+          },
+        },
+      },
+    ],
+
+    // Additional Information Section
+    [
+      {
+        name: "notes",
+        label: "Notes",
+        type: "textarea",
+        placeholder: "Any additional information about this member",
+        cols: 2,
+        validation: {
+          maxLength: 1000,
+          custom: (value) => {
+            if (!value) return null;
+            if (value.length > 1000)
+              return "Notes must be less than 1000 characters";
+            return null;
+          },
+        },
+      },
+      { name: "sendWelcomeEmail", label: "Send welcome email", type: "switch" },
+      {
+        name: "agreeToTerms",
+        label: "I agree to terms and conditions",
+        type: "switch",
+        required: true,
+        validation: {
+          custom: (value) => {
+            if (!value) return "You must agree to the terms and conditions";
+            return null;
+          },
+        },
+      },
+    ],
+  ];
+
+  const sections = [
+    { title: "Personal Information", icon: "heroicons:user" },
+    {
+      title: "Physical Measurements",
+      icon: "heroicons:clipboard-document-list",
+    },
+    { title: "Membership Information", icon: "heroicons:identification" },
+    { title: "Emergency Contact", icon: "heroicons:phone" },
+    { title: "Additional Information", icon: "heroicons:clipboard-document" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
-      <div className=" ">
-        {/* Header Section */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-[#25235F]">
-              Add New Member
-            </h1>
-            <p className="text-gray-600">
-              Fill in the details below to add a new gym member
-            </p>
-          </div>
-          {onClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-10 w-10 rounded-full hover:bg-gray-200"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-
-        {/* Main Form Card */}
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          {/* Card Header with Gradient */}
-          <CardHeader className="bg-gradient-to-r from-[#25235F] to-[#25235F]/90 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
-            <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
-              <div className="w-2 h-8 bg-[#ED4135] rounded-full"></div>
-              Member Information
-              <div className="ml-auto">
-                <div className="w-8 h-8 rounded-full bg-[#ED4135]/20 flex items-center justify-center">
-                  <Icon
-                    icon="heroicons:user-plus"
-                    className="h-5 w-5 text-[#ED4135]"
-                  />
-                </div>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Personal Information Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon icon="heroicons:user" className="h-5 w-5 inline mr-2" />
-                  Personal Information
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="firstName"
-                      className="text-[#25235F] font-medium"
-                    >
-                      First Name *
-                    </Label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Enter first name"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="lastName"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Last Name *
-                    </Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Enter last name"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Email Address *
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="member@example.com"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="phone"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Phone Number *
-                    </Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="+1 (555) 123-4567"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="birthDate"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Date of Birth
-                    </Label>
-                    <Input
-                      id="birthDate"
-                      name="birthDate"
-                      type="date"
-                      value={formData.birthDate}
-                      onChange={handleInputChange}
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[#25235F] font-medium">Gender</Label>
-                    <RadioGroup
-                      value={formData.gender}
-                      onValueChange={(value) =>
-                        handleSelectChange("gender", value)
-                      }
-                      className="flex space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="male" id="male" />
-                        <Label htmlFor="male" className="cursor-pointer">
-                          Male
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="female" id="female" />
-                        <Label htmlFor="female" className="cursor-pointer">
-                          Female
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="other" id="other" />
-                        <Label htmlFor="other" className="cursor-pointer">
-                          Other
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="address"
-                    className="text-[#25235F] font-medium"
-                  >
-                    Address
-                  </Label>
-                  <Textarea
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter full address"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[80px]"
-                  />
-                </div>
-              </div>
-
-              {/* Membership Information Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:identification"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  Membership Information
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="membershipPlan"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Membership Plan *
-                    </Label>
-                    <Select
-                      value={formData.membershipPlan}
-                      onValueChange={(value) =>
-                        handleSelectChange("membershipPlan", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select a plan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {membershipPlans.map((plan) => (
-                          <SelectItem key={plan} value={plan}>
-                            {plan}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="startDate"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Start Date
-                    </Label>
-                    <Input
-                      id="startDate"
-                      name="startDate"
-                      type="date"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="assignedTrainer"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Assigned Trainer
-                    </Label>
-                    <Select
-                      value={formData.assignedTrainer}
-                      onValueChange={(value) =>
-                        handleSelectChange("assignedTrainer", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select a trainer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {trainers.map((trainer) => (
-                          <SelectItem key={trainer} value={trainer}>
-                            {trainer}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="membershipStatus"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Membership Status
-                    </Label>
-                    <Select
-                      value={formData.membershipStatus}
-                      onValueChange={(value) =>
-                        handleSelectChange("membershipStatus", value)
-                      }
-                    >
-                      <SelectTrigger className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Frozen">Frozen</SelectItem>
-                        <SelectItem value="Expired">Expired</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Emergency Contact Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:phone"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  Emergency Contact
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="emergencyContact"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Emergency Contact Name
-                    </Label>
-                    <Input
-                      id="emergencyContact"
-                      name="emergencyContact"
-                      value={formData.emergencyContact}
-                      onChange={handleInputChange}
-                      placeholder="Full name"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="emergencyPhone"
-                      className="text-[#25235F] font-medium"
-                    >
-                      Emergency Phone Number
-                    </Label>
-                    <Input
-                      id="emergencyPhone"
-                      name="emergencyPhone"
-                      value={formData.emergencyPhone}
-                      onChange={handleInputChange}
-                      placeholder="+1 (555) 123-4567"
-                      className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Additional Information Section */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                  <Icon
-                    icon="heroicons:clipboard-document"
-                    className="h-5 w-5 inline mr-2"
-                  />
-                  Additional Information
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="text-[#25235F] font-medium">
-                    Notes
-                  </Label>
-                  <Textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    placeholder="Any additional information about this member"
-                    className="border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[100px]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between space-x-4 pt-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="sendWelcomeEmail"
-                      checked={formData.sendWelcomeEmail}
-                      onCheckedChange={(checked) =>
-                        handleSwitchChange("sendWelcomeEmail", checked)
-                      }
-                    />
-                    <Label
-                      htmlFor="sendWelcomeEmail"
-                      className="cursor-pointer"
-                    >
-                      Send welcome email
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) =>
-                        handleSwitchChange("agreeToTerms", checked)
-                      }
-                      required
-                    />
-                    <Label htmlFor="agreeToTerms" className="cursor-pointer">
-                      I agree to terms and conditions *
-                    </Label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-3"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/90 hover:from-[#ED4135]/90 hover:to-[#ED4135] text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Icon icon="heroicons:user-plus" className="h-5 w-5 mr-2" />
-                  Create Member
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      {/* زر الرجوع */}
+      <div className="space-y-2">
+        <Button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          {t("Back")}
+        </Button>
       </div>
+      <GenericCreateForm
+        title="Add New Member"
+        description="Fill in the details below to add a new gym member"
+        initialData={initialData}
+        fields={fields}
+        sections={sections}
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+        submitButtonText="Create Member"
+        cancelButtonText="Cancel"
+      />
     </div>
   );
 };
 
-export default page;
+export default MemberCreateForm;

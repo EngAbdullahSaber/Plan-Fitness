@@ -2,68 +2,140 @@
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { data } from ".";
+import { mealData } from ".";
 import { ColumnDef } from "@tanstack/react-table";
-import DeleteButton from "../shared/DeleteConfirmationDialog";
 import { DataTableColumnHeader } from "../tables/advanced/components/data-table-column-header";
 import { DataTable } from "../tables/advanced/components/data-table";
 import DeleteConfirmationDialog from "../shared/DeleteConfirmationDialog";
 import Link from "next/link";
-import MemberDetailsModal from "./MemberDetailsModal";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import MealDetailsModal from "./MealDetailsModal";
+import GenericFilter, { FilterOption } from "../shared/GenericFilter";
 
-interface Member {
+interface Meal {
   id: string;
-  Role?: string;
-  MembershipId?: string;
-  Name?: string;
-  JOIN_DATE?: string;
-  Email?: string;
-  STATUS?: string;
-  MEMBERSHIP_STATUS?: string;
-  GENDER?: string;
-  BIRTH?: string;
-  ADDRESS?: string;
-  PHONE?: string;
-  LAST_CHECKIN?: string;
-  TRAINER?: string;
-  MEMBERSHIP_PLAN?: string;
+  name: string;
+  category: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  status: string;
+  price: number;
+  featured: boolean;
+  ingredients: string[];
 }
 
-const TableData = ({ t }: { t: any }) => {
+const MealTable = ({ t }: { t: any }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const sampleMember: Member = {
-    id: "001",
-    Name: "John Smith",
-    Role: "Premium Member",
-    MembershipId: "GYM-2024-001",
-    Email: "john.smith@email.com",
-    PHONE: "+1 (555) 123-4567",
-    STATUS: "Active",
-    MEMBERSHIP_STATUS: "Active",
-    GENDER: "Male",
-    BIRTH: "1990-05-15",
-    ADDRESS: "123 Main St, New York, NY 10001",
-    JOIN_DATE: "2024-01-15",
-    LAST_CHECKIN: "2024-08-30 09:30 AM",
-    TRAINER: "Mike Johnson",
-    MEMBERSHIP_PLAN: "Premium Annual",
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+
+  const handleViewMeal = (meal: Meal) => {
+    setSelectedMeal(meal);
+    setIsModalOpen(true);
   };
-  const columns: ColumnDef<Member>[] = [
+
+  const handleFilterChange = (newFilters: Record<string, string>) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+  };
+
+  // Get unique values for filter dropdowns
+  const statusOptions = useMemo(
+    () => Array.from(new Set(mealData.map((item) => item.status))),
+    []
+  );
+  const categoryOptions = useMemo(
+    () => Array.from(new Set(mealData.map((item) => item.category))),
+    []
+  );
+  const featuredOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(mealData.map((item) => (item.featured ? "Yes" : "No")))
+      ),
+    []
+  );
+
+  // Define filter configuration
+  const filterConfig: FilterOption[] = [
+    {
+      key: "search",
+      label: "Search",
+      type: "text",
+      placeholder: "Search by name, ingredients...",
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "select",
+      placeholder: "All Statuses",
+      options: statusOptions.map((status) => ({
+        value: status,
+        label: status,
+      })),
+    },
+    {
+      key: "category",
+      label: "Category",
+      type: "select",
+      placeholder: "All Categories",
+      options: categoryOptions.map((category) => ({
+        value: category,
+        label: category,
+      })),
+    },
+    {
+      key: "featured",
+      label: "Featured",
+      type: "select",
+      placeholder: "All",
+      options: [
+        { value: "Yes", label: "Yes" },
+        { value: "No", label: "No" },
+      ],
+    },
+  ];
+
+  // Filter data based on applied filters
+  const filteredData = useMemo(() => {
+    return mealData.filter((meal) => {
+      const isFeaturedMatch =
+        filters.featured === "" ||
+        (filters.featured === "Yes" && meal.featured) ||
+        (filters.featured === "No" && !meal.featured);
+
+      return (
+        (filters.status === "" || meal.status === filters.status) &&
+        (filters.category === "" || meal.category === filters.category) &&
+        isFeaturedMatch &&
+        (filters.search === "" ||
+          meal.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+          meal.ingredients.some((ingredient) =>
+            ingredient.toLowerCase().includes(filters.search.toLowerCase())
+          ))
+      );
+    });
+  }, [mealData, filters]);
+
+  const columns: ColumnDef<Meal>[] = [
     {
       id: "actions",
       cell: ({ row }) => (
         <div className="flex flex-row gap-3 items-center justify-center">
           <Button
             size="icon"
-            onClick={() => setIsModalOpen(!isModalOpen)}
+            onClick={() => handleViewMeal(row.original)}
             variant="outline"
             className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
           >
             <Icon icon="carbon:view" className="h-4 w-4" />
           </Button>
-          <Link href={`/users/${row.original.id}/edit`}>
+          <Link href={`/meals/${row.original.id}/edit`}>
             <Button
               size="icon"
               variant="outline"
@@ -73,14 +145,14 @@ const TableData = ({ t }: { t: any }) => {
             </Button>
           </Link>
           <DeleteConfirmationDialog
-            onConfirm={() => console.log("Archive item")}
-            title="Archive Item"
-            description="Are you sure you want to archive this item?"
-            confirmText="Archive"
-            itemName="document"
+            onConfirm={() => console.log(`Deleting meal: ${row.original.name}`)}
+            title="Delete Meal"
+            description="Are you sure you want to delete this meal? This action cannot be undone."
+            confirmText="Delete"
+            itemName="meal"
             destructive={true}
             icon="fluent:delete-48-filled"
-          />{" "}
+          />
         </div>
       ),
     },
@@ -96,7 +168,7 @@ const TableData = ({ t }: { t: any }) => {
       cell: ({ row }) => (
         <div className="w-[80px]">
           <span className="inline-flex items-center justify-center w-8 h-8 text-xs font-bold text-white bg-gradient-to-r from-[#25235F] to-[#25235F]/80 rounded-full">
-            {row.original.id}
+            {row.original.id.slice(0, 3)}
           </span>
         </div>
       ),
@@ -104,11 +176,11 @@ const TableData = ({ t }: { t: any }) => {
       enableHiding: false,
     },
     {
-      accessorKey: "Member Name",
+      accessorKey: "name",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Member Name"}
+          title={"Meal Name"}
           className="text-[#25235F] font-bold"
         />
       ),
@@ -116,45 +188,48 @@ const TableData = ({ t }: { t: any }) => {
         return (
           <div className="flex items-center justify-start gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 flex items-center justify-center">
-              <Icon icon="heroicons:user" className="h-5 w-5 text-[#25235F]" />
+              <Icon icon="heroicons:heart" className="h-5 w-5 text-[#25235F]" />
             </div>
-            <span className="max-w-[200px] truncate font-semibold text-gray-800 hover:text-[#25235F] transition-colors duration-200">
-              {row.original.Name}
-            </span>
+            <div className="flex flex-col">
+              <span className="max-w-[200px] truncate font-semibold text-gray-800 hover:text-[#25235F] transition-colors duration-200">
+                {row.original.name}
+              </span>
+              <span className="text-xs text-gray-500">
+                {row.original.ingredients.slice(0, 2).join(", ")}...
+              </span>
+            </div>
           </div>
         );
       },
     },
     {
-      accessorKey: "Role",
+      accessorKey: "category",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Role"}
+          title={"Category"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
-        const roleColors = {
-          "Premium Member":
-            "bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white shadow-lg",
-          "Standard Member":
-            "bg-gradient-to-r from-[#25235F] to-[#25235F]/80 text-white shadow-lg",
-          Trainer:
-            "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg",
-          Admin:
-            "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg",
+        const categoryColors = {
+          breakfast:
+            "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
+          lunch: "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
+          dinner: "bg-gradient-to-r from-purple-500 to-purple-600 text-white",
+          snacks: "bg-gradient-to-r from-green-500 to-green-600 text-white",
         };
 
         return (
           <div className="flex items-center justify-center">
             <Badge
-              className={`text-center font-semibold px-4 py-2 rounded-full border-0 transform hover:scale-105 transition-all duration-300 ${
-                roleColors[row.original.Role as keyof typeof roleColors] ||
-                "bg-gray-500 text-white"
+              className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${
+                categoryColors[
+                  row.original.category as keyof typeof categoryColors
+                ] || "bg-gray-500 text-white"
               }`}
             >
-              {row.original.Role}
+              {row.original.category}
             </Badge>
           </div>
         );
@@ -164,97 +239,109 @@ const TableData = ({ t }: { t: any }) => {
       },
     },
     {
-      accessorKey: "Membership ID",
+      accessorKey: "calories",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Membership ID"}
+          title={"Calories"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center justify-center">
-            <span className="max-w-[150px] truncate font-mono text-sm bg-gray-100 px-3 py-1 rounded-md border hover:bg-gray-200 transition-colors duration-200">
-              {row.original.MembershipId}
+          <div className="flex items-center justify-center gap-2">
+            <Icon icon="heroicons:fire" className="h-4 w-4 text-[#25235F]" />
+            <span className="text-sm font-medium text-gray-700">
+              {row.original.calories}
             </span>
           </div>
         );
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
     },
     {
-      accessorKey: "Email",
+      accessorKey: "protein",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Email"}
+          title={"Protein (g)"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center justify-start gap-2">
+          <div className="flex items-center justify-center gap-2">
+            <Icon icon="heroicons:muscle" className="h-4 w-4 text-[#25235F]" />
+            <span className="text-sm font-medium text-gray-700">
+              {row.original.protein}g
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "carbs",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={"Carbs (g)"}
+          className="text-[#25235F] font-bold"
+        />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center justify-center gap-2">
             <Icon
-              icon="heroicons:envelope"
+              icon="heroicons:academic-cap"
               className="h-4 w-4 text-[#25235F]"
             />
-            <span className="max-w-[200px] truncate text-sm text-blue-700 hover:text-[#25235F] transition-colors duration-200 cursor-pointer">
-              {row.original.Email}
+            <span className="text-sm font-medium text-gray-700">
+              {row.original.carbs}g
             </span>
           </div>
         );
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
     },
     {
-      accessorKey: "Phone",
+      accessorKey: "fat",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Phone"}
+          title={"Fat (g)"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center justify-start gap-2">
-            <Icon icon="heroicons:phone" className="h-4 w-4 text-[#25235F]" />
-            <span className="max-w-[150px] truncate font-medium text-gray-700 hover:text-[#25235F] transition-colors duration-200">
-              {row.original.PHONE}
+          <div className="flex items-center justify-center gap-2">
+            <Icon icon="heroicons:cube" className="h-4 w-4 text-[#25235F]" />
+            <span className="text-sm font-medium text-gray-700">
+              {row.original.fat}g
             </span>
           </div>
         );
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
     },
     {
-      accessorKey: "Membership Plan",
+      accessorKey: "price",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Membership Plan"}
+          title={"Price"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center">
-            <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-3 py-1 rounded-full border-0">
-              {row.original.MEMBERSHIP_PLAN}
+            <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold px-3 py-1 rounded-full border-0">
+              ${row.original.price}
             </Badge>
           </div>
         );
       },
     },
     {
-      accessorKey: "Status",
+      accessorKey: "status",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -263,22 +350,21 @@ const TableData = ({ t }: { t: any }) => {
         />
       ),
       cell: ({ row }) => {
-        const isActive = row.original.STATUS === "Active";
+        const statusColors = {
+          active: "bg-gradient-to-r from-green-500 to-green-600 text-white",
+          inactive: "bg-gradient-to-r from-gray-500 to-gray-600 text-white",
+        };
+
         return (
           <div className="flex items-center justify-center">
             <Badge
-              className={`text-center font-semibold px-4 py-2 rounded-full border-0 transform hover:scale-105 transition-all duration-300 flex items-center gap-2 ${
-                isActive
-                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
-                  : "bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white shadow-lg"
+              className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${
+                statusColors[
+                  row.original.status as keyof typeof statusColors
+                ] || "bg-gray-500 text-white"
               }`}
             >
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  isActive ? "bg-white" : "bg-white/80"
-                } animate-pulse`}
-              ></div>
-              {row.original.STATUS}
+              {row.original.status}
             </Badge>
           </div>
         );
@@ -288,103 +374,63 @@ const TableData = ({ t }: { t: any }) => {
       },
     },
     {
-      accessorKey: "Membership Status",
+      accessorKey: "featured",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Membership Status"}
+          title={"Featured"}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
-        const statusColors = {
-          Active: "bg-gradient-to-r from-green-500 to-green-600 text-white",
-          Frozen: "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
-          Expired: "bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white",
-          Staff: "bg-gradient-to-r from-purple-500 to-purple-600 text-white",
-        };
-
         return (
           <div className="flex items-center justify-center">
-            <Badge
-              className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${
-                statusColors[
-                  row.original.MEMBERSHIP_STATUS as keyof typeof statusColors
-                ] || "bg-gray-500 text-white"
-              }`}
-            >
-              {row.original.MEMBERSHIP_STATUS}
-            </Badge>
+            {row.original.featured ? (
+              <Badge className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/80 text-white font-semibold px-3 py-1 rounded-full border-0">
+                Featured
+              </Badge>
+            ) : (
+              <span className="text-sm text-gray-500">-</span>
+            )}
           </div>
         );
       },
-    },
-    {
-      accessorKey: "Last Check-in",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Last Check-in"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-start gap-2">
-            <Icon icon="heroicons:clock" className="h-4 w-4 text-[#25235F]" />
-            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
-              {row.original.LAST_CHECKIN}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "Trainer",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Assigned Trainer"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-start gap-2">
-            <Icon
-              icon="heroicons:academic-cap"
-              className="h-4 w-4 text-[#25235F]"
-            />
-            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
-              {row.original.TRAINER}
-            </span>
-          </div>
-        );
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
       },
     },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Generic Filter Component */}
+      <GenericFilter
+        filters={filterConfig}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        initialFilters={filters}
+      />
+
       {/* Enhanced Data Table with Custom Styling */}
       <div className="flex flex-wrap gap-4 items-center justify-between p-4 bg-gradient-to-r from-[#25235F]/5 to-[#ED4135]/5 rounded-xl border border-gray-200">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             <span className="text-sm font-medium text-gray-700">
-              Active Members
+              Active Meals:{" "}
+              {filteredData.filter((m) => m.status === "active").length}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Featured Meals: {filteredData.filter((m) => m.featured).length}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
             <span className="text-sm font-medium text-gray-700">
-              Frozen Memberships
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-[#ED4135] rounded-full"></div>
-            <span className="text-sm font-medium text-gray-700">
-              Expired Memberships
+              Total Meals: {filteredData.length}
             </span>
           </div>
         </div>
@@ -400,20 +446,19 @@ const TableData = ({ t }: { t: any }) => {
           </Button>
         </div>
       </div>
-      <div className="rounded-xl overflow-hidden     bg-white">
-        <DataTable
-          data={data}
-          columns={columns}
-          className="[&_table]:bg-white [&_thead]:bg-gradient-to-r [&_thead]:from-gray-50 [&_thead]:to-white [&_th]:text-[#25235F] [&_th]:font-bold [&_th]:border-gray-200 [&_td]:border-gray-100 [&_tr:hover]:bg-gradient-to-r [&_tr:hover]:from-[#25235F]/5 [&_tr:hover]:to-[#ED4135]/5 [&_tr]:transition-all [&_tr]:duration-300"
-        />
-        <MemberDetailsModal
-          member={sampleMember}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
+
+      <div className="rounded-xl overflow-hidden bg-white">
+        <DataTable data={filteredData} columns={columns} />
+        {selectedMeal && (
+          <MealDetailsModal
+            meal={selectedMeal}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
       </div>
     </div>
   );
 };
 
-export default TableData;
+export default MealTable;

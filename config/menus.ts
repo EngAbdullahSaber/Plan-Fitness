@@ -1,6 +1,6 @@
 import {
   Settings,
-  Communication,
+  Meals,
   Features,
   Notification,
   Finance,
@@ -9,9 +9,9 @@ import {
   Property,
   Reports,
   Account,
-  Package,
+  Blogs,
   ChartBar,
-  Vendors,
+  Exercises,
   Dashboard,
 } from "@/components/svg";
 
@@ -29,10 +29,10 @@ export interface MenuItemProps {
 // Define menu configurations for admin and user roles
 const adminMenu = [
   { title: "Dashboard", icon: Dashboard, href: "/dashboard" },
-  { title: "users", icon: Dashboard, href: "/users" },
-  { title: "blogs", icon: Dashboard, href: "/blogs" },
-  { title: "meals", icon: Dashboard, href: "/meals" },
-  { title: "training", icon: Dashboard, href: "/training" },
+  { title: "users", icon: userss, href: "/users" },
+  { title: "blogs", icon: Blogs, href: "/blogs" },
+  { title: "meals", icon: Meals, href: "/meals" },
+  { title: "training", icon: Exercises, href: "/training" },
 ];
 
 // Conditional menu configuration based on the role

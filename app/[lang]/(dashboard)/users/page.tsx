@@ -9,7 +9,7 @@ import BreadcrumbComponent from "../shared/BreadcrumbComponent";
 import Link from "next/link";
 
 const GymMembersPage = () => {
-  const { t, loading, error } = useTranslate();
+  const { t } = useTranslate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
@@ -19,7 +19,7 @@ const GymMembersPage = () => {
           <div className="space-y-4">
             <div className="relative">
               <h1 className="text-4xl font-bold text-[#25235F] leading-tight">
-                Gym Management
+                {t("Gym Management")}
               </h1>
               <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full"></div>
             </div>

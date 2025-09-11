@@ -54,14 +54,12 @@ export { default as Reports } from "./home/reports.svg";
 export { default as Property } from "./home/property.svg";
 export { default as Repeat } from "./home/repeat.svg";
 export { default as Rate } from "./home/rate.svg";
-export { default as Booking } from "./home/booking.svg";
 export { default as Reservation } from "./home/Reservation.svg";
 export { default as Finance } from "./home/Finance.svg";
 export { default as Features } from "./home/features.svg";
 export { default as Settings } from "./duel-tone/settings.svg";
-export { default as Communication } from "./home/Communication.svg";
-export { default as Package } from "./home/package.svg";
-
+export { default as Meals } from "./home/meals.svg";
+export { default as Blogs } from "./home/blogs.svg";
 
 export { default as DSearch } from "./duel-tone/dsearch.svg";
 export { default as Session } from "./home/session.svg";
@@ -93,7 +91,7 @@ export { default as cubicss } from "./home/cubicss.svg";
 export { default as salesTtarget } from "./home/sales-target.svg";
 export { default as stores } from "./home/stores.svg";
 export { default as Levels } from "./home/levels.svg";
-export { default as Brands } from "./home/brands.svg";
+export { default as Exercises } from "./home/exercises.svg";
 export { default as Products } from "./home/products.svg";
 export { default as Counter } from "./home/counter.svg";
 export { default as Docs } from "./home/docs.svg";

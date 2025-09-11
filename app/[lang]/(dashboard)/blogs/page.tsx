@@ -1,25 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import BreadcrumbComponent from "../shared/BreadcrumbComponent";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import BlogTable from "./BlogTable";
+import { useTranslate } from "@/config/useTranslation";
+import { blogData } from ".";
 
 const BlogsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const { t } = useTranslate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
@@ -54,7 +46,7 @@ const BlogsPage = () => {
               <span className="font-semibold">Export Blogs</span>
             </Button>
 
-            <Link href={"/blogs/create"}>
+            <Link href={"/blogs/add"}>
               <Button
                 variant="outline"
                 className="group border-2 border-[#ED4135]/20 hover:border-[#ED4135] hover:bg-[#ED4135] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 px-6 py-3 h-auto"
@@ -68,76 +60,8 @@ const BlogsPage = () => {
             </Link>
           </div>
         </div>
-
-        {/* Filters Section */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Search</Label>
-                <Input
-                  placeholder="Search blog posts..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border-gray-300 focus:border-[#25235F]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="border-gray-300 focus:border-[#25235F]">
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Category</Label>
-                <Select
-                  value={categoryFilter}
-                  onValueChange={setCategoryFilter}
-                >
-                  <SelectTrigger className="border-gray-300 focus:border-[#25235F]">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="fitness">Fitness</SelectItem>
-                    <SelectItem value="nutrition">Nutrition</SelectItem>
-                    <SelectItem value="lifestyle">Lifestyle</SelectItem>
-                    <SelectItem value="training">Training</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#25235F] font-medium">Actions</Label>
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setCategoryFilter("all");
-                  }}
-                >
-                  <Icon icon="heroicons:arrow-path" className="h-4 w-4 mr-2" />
-                  Reset Filters
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Total Posts */}
           <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-[#25235F]">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -148,47 +72,56 @@ const BlogsPage = () => {
                   />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[#25235F]">147</p>
-                  <p className="text-sm text-gray-600">Total Posts</p>
+                  <p className="text-2xl font-bold text-[#25235F]">
+                    {blogData.length}
+                  </p>
+                  <p className="text-sm text-gray-600">{t("Total Posts")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Categories */}
           <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-green-500">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300">
                   <Icon
-                    icon="heroicons:eye"
+                    icon="heroicons:tag"
                     className="h-6 w-6 text-green-600"
                   />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[#25235F]">24.5K</p>
-                  <p className="text-sm text-gray-600">Total Views</p>
+                  <p className="text-2xl font-bold text-[#25235F]">
+                    {new Set(blogData.map((blog) => blog.category)).size}
+                  </p>
+                  <p className="text-sm text-gray-600">{t("Categories")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Authors */}
           <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-blue-500">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300">
                   <Icon
-                    icon="heroicons:chat-bubble-left-ellipsis"
+                    icon="heroicons:user-group"
                     className="h-6 w-6 text-blue-600"
                   />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[#25235F]">356</p>
-                  <p className="text-sm text-gray-600">Total Comments</p>
+                  <p className="text-2xl font-bold text-[#25235F]">
+                    {new Set(blogData.map((blog) => blog.author)).size}
+                  </p>
+                  <p className="text-sm text-gray-600">{t("Authors")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Draft Posts */}
           <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-[#ED4135]">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -199,8 +132,10 @@ const BlogsPage = () => {
                   />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-[#25235F]">12</p>
-                  <p className="text-sm text-gray-600">Draft Posts</p>
+                  <p className="text-2xl font-bold text-[#25235F]">
+                    {blogData.filter((blog) => blog.status === "draft").length}
+                  </p>
+                  <p className="text-sm text-gray-600">{t("Draft Posts")}</p>
                 </div>
               </div>
             </CardContent>
@@ -214,7 +149,7 @@ const BlogsPage = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
             <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
               <div className="w-2 h-8 bg-[#ED4135] rounded-full"></div>
-              Blog Posts
+              {t("Blog Posts")}
               <div className="ml-auto">
                 <div className="w-8 h-8 rounded-full bg-[#ED4135]/20 flex items-center justify-center">
                   <Icon
@@ -239,7 +174,7 @@ const BlogsPage = () => {
                   <div className="flex items-center gap-2">
                     <div className="w-1 h-6 bg-[#25235F] rounded-full"></div>
                     <h3 className="text-lg font-semibold text-[#25235F]">
-                      Blog Management
+                      {t("Blog Management")}
                     </h3>
                     <div className="ml-auto flex items-center gap-2">
                       <div className="w-2 h-2 bg-[#ED4135] rounded-full animate-pulse"></div>
@@ -249,11 +184,7 @@ const BlogsPage = () => {
                 </div>
 
                 <div className="p-6">
-                  <BlogTable
-                    searchTerm={searchTerm}
-                    statusFilter={statusFilter}
-                    categoryFilter={categoryFilter}
-                  />
+                  <BlogTable />
                 </div>
               </div>
             </div>
