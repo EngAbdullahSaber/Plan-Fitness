@@ -32,7 +32,15 @@ import { Icon } from "@iconify/react";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  data: any;
+  data: TData[];
+  isLoading?: boolean;
+  searchTerm?: string;
+  onSearchChange?: (value: string) => void;
+  page?: number;
+  pageSize?: number;
+  totalItems?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
   filterNames?: string[];
   filters?: { title: string; options: any[] }[];
 }
@@ -40,8 +48,16 @@ interface DataTableProps<TData> {
 export function DataTable<TData>({
   columns,
   data,
-  filterNames,
-  filters,
+  isLoading = false,
+  searchTerm = "",
+  onSearchChange,
+  page = 1,
+  pageSize = 10,
+  totalItems = 0,
+  onPageChange,
+  onPageSizeChange,
+  filterNames = [],
+  filters = [],
 }: DataTableProps<TData>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -50,7 +66,7 @@ export function DataTable<TData>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const { t, loading, error } = useTranslate();
+  const { t } = useTranslate();
 
   const table = useReactTable({
     data,
@@ -60,22 +76,38 @@ export function DataTable<TData>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: pageSize,
+      },
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const newState = updater({
+          pageIndex: page - 1,
+          pageSize: pageSize,
+        });
+        onPageChange?.(newState.pageIndex + 1);
+        onPageSizeChange?.(newState.pageSize);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualPagination: true,
+    pageCount: Math.ceil(totalItems / pageSize),
   });
 
   const selectedRowsCount = table.getFilteredSelectedRowModel().rows.length;
-  const totalRowsCount = table.getFilteredRowModel().rows.length;
+  const totalRowsCount = data.length;
 
   return (
     <div className="space-y-6">
@@ -85,6 +117,9 @@ export function DataTable<TData>({
           table={table}
           filterNames={filterNames}
           filters={filters}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          isLoading={isLoading}
         />
       </div>
 
@@ -107,11 +142,11 @@ export function DataTable<TData>({
           <div className="flex gap-2">
             <button className="px-4 py-2 text-sm font-medium text-[#ED4135] hover:bg-[#ED4135]/10 rounded-lg transition-all duration-300 flex items-center gap-2">
               <Icon icon="heroicons:trash" className="h-4 w-4" />
-              Delete Selected
+              {t("delete_selected")}
             </button>
             <button className="px-4 py-2 text-sm font-medium text-[#25235F] hover:bg-[#25235F]/10 rounded-lg transition-all duration-300 flex items-center gap-2">
               <Icon icon="heroicons:pencil" className="h-4 w-4" />
-              Edit Selected
+              {t("edit_selected")}
             </button>
           </div>
         </div>
@@ -162,7 +197,31 @@ export function DataTable<TData>({
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center"
+                >
+                  <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                      <Icon
+                        icon="heroicons:arrow-path"
+                        className="h-8 w-8 text-gray-400 animate-spin"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-lg font-semibold text-gray-600">
+                        {t("loading")}...
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {t("loading_data")}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
@@ -215,10 +274,10 @@ export function DataTable<TData>({
                     </div>
                     <div className="space-y-2">
                       <p className="text-lg font-semibold text-gray-600">
-                        {t("No results")}
+                        {t("no_results")}
                       </p>
                       <p className="text-sm text-gray-400">
-                        No data matches your current filters
+                        {t("no_data_matches_filters")}
                       </p>
                     </div>
                   </div>
@@ -236,8 +295,8 @@ export function DataTable<TData>({
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#25235F] rounded-full"></div>
               <span className="text-sm font-medium text-gray-700">
-                Showing {table.getRowModel().rows.length} of {data.length}{" "}
-                entries
+                {t("showing")} {data.length} {t("of")} {totalItems}{" "}
+                {t("entries")}
               </span>
             </div>
             {selectedRowsCount > 0 && (
@@ -247,14 +306,19 @@ export function DataTable<TData>({
                   className="h-4 w-4 text-[#25235F]"
                 />
                 <span className="text-sm font-medium text-[#25235F]">
-                  {selectedRowsCount} selected
+                  {selectedRowsCount} {t("selected")}
                 </span>
               </div>
             )}
           </div>
         </div>
 
-        <DataTablePagination table={table} />
+        <DataTablePagination
+          table={table}
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalItems}
+        />
       </div>
     </div>
   );

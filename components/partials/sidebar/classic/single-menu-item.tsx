@@ -3,7 +3,7 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn, isLocationMatch, getDynamicPath } from "@/lib/utils";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useTranslate } from "@/config/useTranslation";
 
@@ -11,16 +11,21 @@ const SingleMenuItem = ({
   item,
   collapsed,
   trans,
+  isRTL,
 }: {
   item: any;
   collapsed: boolean;
   trans: any;
+  isRTL: any;
 }) => {
   const { badge, href, title } = item;
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);
   const { Navigate, t } = useTranslate();
   const isActive = isLocationMatch(href, locationName);
+  const { lang } = useParams();
+
+  console.log(isRTL);
 
   return (
     <li className="relative w-full">
@@ -36,7 +41,7 @@ const SingleMenuItem = ({
                       {
                         "bg-[#eef1f9] text-blue-600": isActive,
                         "text-white hover:bg-[#eef1f9]": !isActive,
-                      }
+                      },
                     )}
                   >
                     <item.icon className="w-6 h-6" />
@@ -44,7 +49,7 @@ const SingleMenuItem = ({
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                   <Tooltip.Content
-                    side="right"
+                    side={isRTL ? "left" : "right"}
                     className="bg-gray-800 text-white rounded-md px-3 py-2 text-sm shadow-lg z-50"
                     sideOffset={10}
                   >
@@ -56,21 +61,45 @@ const SingleMenuItem = ({
             </Tooltip.Provider>
           </div>
         ) : (
-          <div className="relative flex items-center h-16 px-4">
-            {/* Active background with curved edges */}
+          <div className="relative flex items-center h-16 px-4 group">
+            {/* Active background with curved edges - Dynamic for RTL/LTR */}
             {isActive && (
-              <div className="absolute inset-0 bg-[#eef1f9] rounded-l-3xl"></div>
+              <div
+                className={cn(
+                  "absolute inset-0 bg-[#eef1f9]",
+                  isRTL
+                    ? "rounded-r-3xl rounded-l-none"
+                    : "rounded-r-3xl rounded-l-none",
+                )}
+              ></div>
             )}
 
-            <div className="relative z-10 flex items-center w-full">
+            {/* Hover background - only shown when not active */}
+            {!isActive && (
+              <div
+                className={cn(
+                  "absolute inset-0 bg-transparent group-hover:bg-[#eef1f9] transition-all duration-300",
+                  isRTL
+                    ? "rounded-r-3xl rounded-l-none"
+                    : "rounded-r-3xl rounded-l-none",
+                )}
+              ></div>
+            )}
+
+            <div
+              className={cn(
+                "relative z-10 flex items-center w-full",
+                isRTL ? "flex-row-reverse" : "flex-row",
+              )}
+            >
               {/* Icon */}
               <div
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
                   {
                     "bg-blue-100 text-blue-600": isActive,
-                    "text-white": !isActive,
-                  }
+                    "text-white group-hover:text-blue-600": !isActive,
+                  },
                 )}
               >
                 <item.icon className="w-5 h-5" />
@@ -80,11 +109,12 @@ const SingleMenuItem = ({
               {!collapsed && (
                 <span
                   className={cn(
-                    "ml-4 font-medium transition-all duration-300 whitespace-nowrap",
+                    "font-medium transition-all duration-300 whitespace-nowrap",
+                    isRTL ? "mr-4 ml-0" : "ml-4 mr-0",
                     {
                       "text-blue-600": isActive,
-                      "text-white": !isActive,
-                    }
+                      "text-white group-hover:text-blue-600": !isActive,
+                    },
                   )}
                 >
                   {t(title)}
@@ -95,11 +125,12 @@ const SingleMenuItem = ({
               {badge && !collapsed && (
                 <Badge
                   className={cn(
-                    "ml-auto px-2 py-1 text-xs font-medium rounded-full",
+                    "px-2 py-1 text-xs font-medium rounded-full",
+                    isRTL ? "mr-auto ml-0" : "ml-auto mr-0",
                     {
                       "bg-blue-100 text-blue-600": isActive,
                       "bg-[#eef1f9] text-white": !isActive,
-                    }
+                    },
                   )}
                 >
                   {badge}
@@ -110,18 +141,27 @@ const SingleMenuItem = ({
             {/* Curved indicators for active state */}
             {isActive && (
               <>
-                <div className="absolute -top-4 right-0 w-4 h-4 bg-transparent rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)]"></div>
-                <div className="absolute -bottom-4 right-0 w-4 h-4 bg-transparent rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)]"></div>
+                <div
+                  className={cn(
+                    "absolute -top-4 w-4 h-4 bg-transparent",
+                    isRTL
+                      ? "left-0 rounded-bl-full shadow-[-5px_5px_0_5px_rgba(238,241,249)]"
+                      : "right-0 rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)]",
+                  )}
+                ></div>
+                <div
+                  className={cn(
+                    "absolute -bottom-4 w-4 h-4 bg-transparent",
+                    isRTL
+                      ? "left-0 rounded-tl-full shadow-[-5px_-5px_0_5px_rgba(238,241,249)]"
+                      : "right-0 rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)]",
+                  )}
+                ></div>
               </>
             )}
           </div>
         )}
       </Link>
-
-      {/* Hover effects for non-active items */}
-      {!isActive && !collapsed && (
-        <div className="absolute inset-0 rounded-l-3xl hover:bg-[#eef1f9] transition-all duration-300"></div>
-      )}
     </li>
   );
 };

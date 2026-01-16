@@ -17,10 +17,9 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
   const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
   const menus = menusConfig?.sidebarNav?.classic || [];
   const { collapsed, setCollapsed } = useSidebar();
-  const { isRtl } = useThemeStore();
   const [hovered, setHovered] = useState<boolean>(false);
   const { lang } = useParams();
-
+  console.log(lang);
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {
       setActiveSubmenu(null);
@@ -69,12 +68,17 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        "fixed  z-[999] bg-[#25235F] top-0   h-full hover:!w-[210px]  border-r  ",
+        "fixed z-[999] top-0 h-full border-r transition-all duration-300 ease-in-out",
         {
-          "w-[210px]": !collapsed,
+          // 🎨 Improved background with gradient and slight transparency
+          "bg-gradient-to-t from-[#1E1B4B] via-[#2A2876] to-[#3F3CBB]":
+            !collapsed,
+          "bg-[#1E1B4B]/95": collapsed,
+          "hover:!w-[230px]": true,
+          "w-[230px]": !collapsed,
           "w-[72px]": collapsed,
-          "shadow-md": collapsed || hovered,
-        }
+          "shadow-lg": collapsed || hovered,
+        },
       )}
     >
       {sidebarBg !== "none" && (
@@ -108,6 +112,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
                   collapsed={collapsed}
                   hovered={hovered}
                   trans={trans}
+                  isRTL={isRTL}
                 />
               )}
 

@@ -774,4 +774,82 @@ html[dir="rtl"] .react-select .select__loading-indicator {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+}  
+@keyframes gradient {
+                    0%,
+                    100% {
+                      background-position: 0% 50%;
+                    }
+                    50% {
+                      background-position: 100% 50%;
+                    }
+                  }
+
+                  .animate-gradient {
+                    animation: gradient 3s ease infinite;
+                  }
+
+                  .bg-size-200 {
+                    background-size: 200% 200%;
+                  }
+
+                  .delay-100 {
+                    animation-delay: 100ms;
+                  }
+
+                  .delay-200 {
+                    animation-delay: 200ms;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar {
+                    width: 8px;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #f1f5f9;
+                    border-radius: 10px;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+                    border-radius: 10px;
+                    transition: background 0.3s;
+                  }
+
+                  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: linear-gradient(to bottom, #2563eb, #7c3aed);
+                  }
+
+                 @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient {
+    animation: gradient 3s ease infinite;
+  }
+  
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+  
+  /* Enhanced Switch Styles */
+  [role="switch"] {
+    position: relative;
+  }
+  
+  [role="switch"][data-state="checked"] span {
+    transform: translateX(100%) scale(1.1);
+  }
+  
+  [role="switch"]:hover {
+    transform: scale(1.05);
+  }
+  
+  [role="switch"]:active {
+    transform: scale(0.98);
+  }

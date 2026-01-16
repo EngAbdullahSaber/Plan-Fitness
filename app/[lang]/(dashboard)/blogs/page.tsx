@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
@@ -8,20 +8,24 @@ import Link from "next/link";
 
 import BlogTable from "./BlogTable";
 import { useTranslate } from "@/config/useTranslation";
-import { blogData } from ".";
+import { TableRefType } from "./types";
 
 const BlogsPage = () => {
   const { t } = useTranslate();
+  const tableRef = useRef<TableRefType | null>(null); // ✅ fixed typing
 
+  const handleRefresh = () => {
+    tableRef.current?.refetch(); // ✅ no more TypeScript error
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="  mx-auto space-y-8">
         {/* Header Section */}
         <div className="flex sm:flex-row xs:gap-6 xs:flex-col justify-between items-start sm:items-center">
           <div className="space-y-4">
             <div className="relative">
               <h1 className="text-4xl font-bold text-[#25235F] leading-tight">
-                Blog Management
+                {t("Blog Management")}
               </h1>
               <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full"></div>
             </div>
@@ -35,17 +39,6 @@ const BlogsPage = () => {
 
           {/* Action Buttons */}
           <div className="flex sm:flex-row xs:flex-col gap-4 justify-end items-center">
-            <Button
-              variant="outline"
-              className="group border-2 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 px-6 py-3 h-auto"
-            >
-              <Icon
-                icon="lets-icons:export"
-                className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300"
-              />
-              <span className="font-semibold">Export Blogs</span>
-            </Button>
-
             <Link href={"/blogs/add"}>
               <Button
                 variant="outline"
@@ -55,91 +48,10 @@ const BlogsPage = () => {
                   icon="heroicons:plus"
                   className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300"
                 />
-                <span className="font-semibold">New Blog Post</span>
+                <span className="font-semibold">{t("New Blog Post")}</span>
               </Button>
             </Link>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Total Posts */}
-          <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-[#25235F]">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#25235F]/10 flex items-center justify-center group-hover:bg-[#25235F]/20 transition-colors duration-300">
-                  <Icon
-                    icon="heroicons:document-text"
-                    className="h-6 w-6 text-[#25235F]"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#25235F]">
-                    {blogData.length}
-                  </p>
-                  <p className="text-sm text-gray-600">{t("Total Posts")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Categories */}
-          <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-green-500">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300">
-                  <Icon
-                    icon="heroicons:tag"
-                    className="h-6 w-6 text-green-600"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#25235F]">
-                    {new Set(blogData.map((blog) => blog.category)).size}
-                  </p>
-                  <p className="text-sm text-gray-600">{t("Categories")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Authors */}
-          <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-blue-500">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300">
-                  <Icon
-                    icon="heroicons:user-group"
-                    className="h-6 w-6 text-blue-600"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#25235F]">
-                    {new Set(blogData.map((blog) => blog.author)).size}
-                  </p>
-                  <p className="text-sm text-gray-600">{t("Authors")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Draft Posts */}
-          <Card className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-l-4 border-l-[#ED4135]">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#ED4135]/10 flex items-center justify-center group-hover:bg-[#ED4135]/20 transition-colors duration-300">
-                  <Icon
-                    icon="heroicons:clock"
-                    className="h-6 w-6 text-[#ED4135]"
-                  />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#25235F]">
-                    {blogData.filter((blog) => blog.status === "draft").length}
-                  </p>
-                  <p className="text-sm text-gray-600">{t("Draft Posts")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Main Content Card */}
@@ -171,20 +83,33 @@ const BlogsPage = () => {
               {/* Table Container */}
               <div className="relative z-10 bg-white rounded-xl border border-gray-100 shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-gray-50 to-white p-4 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-[#25235F] rounded-full"></div>
-                    <h3 className="text-lg font-semibold text-[#25235F]">
-                      {t("Blog Management")}
-                    </h3>
-                    <div className="ml-auto flex items-center gap-2">
-                      <div className="w-2 h-2 bg-[#ED4135] rounded-full animate-pulse"></div>
-                      <span className="text-sm text-gray-600">Live Data</span>
+                  <div className="flex justify-between items-center ">
+                    <div className="flex gap-1 items-center">
+                      <div className="w-1 h-6 bg-[#25235F] rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-[#25235F]">
+                        {t("Blog Management")}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="group border-2 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 px-6 py-3 h-auto"
+                        onClick={handleRefresh}
+                      >
+                        <Icon
+                          icon="heroicons:arrow-path"
+                          className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <span className="font-semibold">
+                          {t("Refresh Data")}
+                        </span>
+                      </Button>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-6">
-                  <BlogTable />
+                  <BlogTable t={t} />
                 </div>
               </div>
             </div>
@@ -196,12 +121,3 @@ const BlogsPage = () => {
 };
 
 export default BlogsPage;
-
-// Label component (if not already imported)
-const Label = ({ children, className, ...props }: any) => {
-  return (
-    <label className={`text-sm font-medium ${className}`} {...props}>
-      {children}
-    </label>
-  );
-};

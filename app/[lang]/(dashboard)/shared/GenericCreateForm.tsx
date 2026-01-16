@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,15 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { SearchablePaginatedSelectContent } from "./SearchablePaginatedSelectContent";
+import { useParams } from "next/navigation";
+
+interface MealItem {
+  description: {
+    english: string;
+    arabic: string;
+  };
+}
 
 interface FormField {
   name: string;
@@ -28,13 +37,35 @@ interface FormField {
     | "date"
     | "textarea"
     | "select"
+    | "selectPagination"
+    | "url"
     | "radio"
-    | "switch";
+    | "switch"
+    | "image"
+    | "mealItem";
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
   options?: string[] | { value: string; label: string }[];
   step?: number;
   cols?: number;
+  // Image specific props
+  accept?: string;
+  description?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  // Select Pagination specific props
+  paginationOptions?: {
+    data: any[];
+    isLoading: boolean;
+    hasMore?: boolean;
+    searchTerm: string;
+    onSearch: (search: string) => void;
+    onLoadMore?: () => void;
+    onOpen?: () => void;
+    getOptionLabel: (item: any) => string;
+    getOptionValue: (item: any) => string;
+    searchPlaceholder?: string;
+  };
   validation?: {
     pattern?: RegExp;
     min?: number;
@@ -43,6 +74,10 @@ interface FormField {
     maxLength?: number;
     custom?: (value: any) => string | null;
     patternMessage?: string;
+    englishOnly?: boolean;
+    arabicOnly?: boolean;
+    maxFileSize?: number;
+    allowedTypes?: string[];
   };
 }
 
@@ -57,14 +92,21 @@ interface GenericCreateFormProps {
   initialData: Record<string, any>;
   fields: FormField[][];
   onSubmit: (data: Record<string, any>) => void;
+  onFormDataChange?: (data: Record<string, any>) => void;
   onCancel?: () => void;
   submitButtonText?: string;
   cancelButtonText?: string;
   sections?: {
     title: string;
     icon: string;
+    description?: string;
   }[];
   validateForm?: (data: Record<string, any>) => ValidationError[];
+  isLoading?: boolean;
+  submitButtonProps?: any;
+  // New props for meal items management
+  mealItems?: MealItem[];
+  onMealItemsChange?: (items: MealItem[]) => void;
 }
 
 const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
@@ -73,28 +115,64 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   initialData,
   fields,
   onSubmit,
+  onFormDataChange,
   onCancel,
   submitButtonText = "Submit",
   cancelButtonText = "Cancel",
   sections = [],
   validateForm,
+  isLoading = false,
+  submitButtonProps = {},
+  // Meal items props
+  mealItems = [],
+  onMealItemsChange,
 }) => {
   const { t, loading, error } = useTranslate();
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showAllErrors, setShowAllErrors] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState<Record<string, string>>(
+    {}
+  );
+  const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
+  const { lang } = useParams();
+
+  // Validation functions
+  const validateEnglishCharacters = (value: string): boolean => {
+    const englishRegex = /^[a-zA-Z0-9\s\-_.,!?@#$%^&*()+=<>[\]{}|\\:;"'`~]*$/;
+    return englishRegex.test(value);
+  };
+
+  const validateArabicCharacters = (value: string): boolean => {
+    const arabicRegex =
+      /^[\u0600-\u06FF\s0-9\-_.,!?@#$%^&*()+=<>[\]{}|\\:;"'`~]*$/;
+    return arabicRegex.test(value);
+  };
 
   const validateField = (field: FormField, value: any): string | null => {
-    // Check if field is required and empty
+    if (field.disabled) return null;
+
     if (field.required && (!value || value.toString().trim() === "")) {
       return `${field.label} is required`;
     }
 
-    // Skip further validation if field is empty and not required
     if (!value && !field.required) return null;
 
-    // Type-specific validation
+    const stringValue = value.toString();
+
+    if (field.validation?.englishOnly && stringValue) {
+      if (!validateEnglishCharacters(stringValue)) {
+        return `${field.label} can only contain English characters, numbers, and common punctuation`;
+      }
+    }
+
+    if (field.validation?.arabicOnly && stringValue) {
+      if (!validateArabicCharacters(stringValue)) {
+        return `${field.label} يمكن أن يحتوي فقط على أحرف عربية وأرقام وعلامات ترقيم شائعة`;
+      }
+    }
+
     if (field.type === "email" && value) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
@@ -121,29 +199,26 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
       }
     }
 
-    // Pattern validation
     if (field.validation?.pattern && value) {
       if (!field.validation.pattern.test(value)) {
         return field.validation.patternMessage || "Invalid format";
       }
     }
 
-    // Length validation
     if (
       field.validation?.minLength &&
-      value.length < field.validation.minLength
+      stringValue.length < field.validation.minLength
     ) {
       return `Must be at least ${field.validation.minLength} characters`;
     }
 
     if (
       field.validation?.maxLength &&
-      value.length > field.validation.maxLength
+      stringValue.length > field.validation.maxLength
     ) {
       return `Must be at most ${field.validation.maxLength} characters`;
     }
 
-    // Custom validation
     if (field.validation?.custom) {
       return field.validation.custom(value);
     }
@@ -154,14 +229,48 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   const validateAllFields = (): ValidationError[] => {
     const validationErrors: ValidationError[] = [];
 
+    // Check if this form has meal item fields
+    const hasMealItemField = fields
+      .flat()
+      .some((field) => field.type === "mealItem");
+
     fields.flat().forEach((field) => {
+      if (field.disabled) return;
+
+      // Only skip validation for mealItem type if we're actually handling it separately
+      if (field.type === "mealItem") return;
+
       const error = validateField(field, formData[field.name]);
       if (error) {
         validationErrors.push({ field: field.name, message: error });
       }
     });
 
-    // Custom form validation if provided
+    // Validate meal items ONLY if the form has meal item fields
+    if (hasMealItemField) {
+      if (mealItems.length === 0) {
+        validationErrors.push({
+          field: "mealItems",
+          message: "At least one meal item is required",
+        });
+      } else {
+        mealItems.forEach((item, index) => {
+          if (!item.description.english.trim()) {
+            validationErrors.push({
+              field: `mealItem_${index}_english`,
+              message: `Meal item ${index + 1} English description is required`,
+            });
+          }
+          if (!item.description.arabic.trim()) {
+            validationErrors.push({
+              field: `mealItem_${index}_arabic`,
+              message: `Meal item ${index + 1} Arabic description is required`,
+            });
+          }
+        });
+      }
+    }
+
     if (validateForm) {
       const customErrors = validateForm(formData);
       validationErrors.push(...customErrors);
@@ -178,14 +287,46 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
 
-    // Validate field on change if it's been touched or we're showing all errors
+    const currentField = fields.flat().find((f) => f.name === name);
+    if (currentField?.disabled) return;
+
+    if (type === "file") {
+      const fileInput = e.target as HTMLInputElement;
+      const file = fileInput.files?.[0];
+
+      if (file) {
+        if (currentField?.type === "image") {
+          const validationError = validateImageFile(currentField, file);
+          if (validationError) {
+            setErrors((prev) => [
+              ...prev.filter((err) => err.field !== name),
+              { field: name, message: validationError },
+            ]);
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setImagePreviews((prev) => ({
+              ...prev,
+              [name]: e.target?.result as string,
+            }));
+          };
+          reader.readAsDataURL(file);
+        }
+
+        setFormData((prev) => ({ ...prev, [name]: file }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (touched[name] || showAllErrors) {
-      const field = fields.flat().find((f) => f.name === name);
-      if (field) {
-        const error = validateField(field, value);
+      if (currentField) {
+        const error =
+          type === "file" ? null : validateField(currentField, value);
         setErrors((prev) => {
           const newErrors = prev.filter((err) => err.field !== name);
           return error
@@ -194,15 +335,51 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
         });
       }
     }
+
+    if (onFormDataChange) {
+      const updatedData =
+        type === "file"
+          ? { ...formData, [name]: (e.target as HTMLInputElement).files?.[0] }
+          : { ...formData, [name]: value };
+      onFormDataChange(updatedData);
+    }
+
+    if (currentField?.onChange && type === "file") {
+      currentField.onChange(e as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
+  const validateImageFile = (field: FormField, file: File): string | null => {
+    if (
+      field.validation?.allowedTypes &&
+      !field.validation.allowedTypes.includes(file.type)
+    ) {
+      const allowedTypes = field.validation.allowedTypes
+        .map((type) => type.split("/")[1])
+        .join(", ");
+      return `Please select a valid image file (${allowedTypes})`;
+    }
+
+    if (
+      field.validation?.maxFileSize &&
+      file.size > field.validation.maxFileSize
+    ) {
+      const maxSizeMB = field.validation.maxFileSize / (1024 * 1024);
+      return `Image size should be less than ${maxSizeMB}MB`;
+    }
+
+    return null;
   };
 
   const handleSelectChange = (name: string, value: string) => {
+    const currentField = fields.flat().find((f) => f.name === name);
+    if (currentField?.disabled) return;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (touched[name] || showAllErrors) {
-      const field = fields.flat().find((f) => f.name === name);
-      if (field) {
-        const error = validateField(field, value);
+      if (currentField) {
+        const error = validateField(currentField, value);
         setErrors((prev) => {
           const newErrors = prev.filter((err) => err.field !== name);
           return error
@@ -210,20 +387,37 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             : newErrors;
         });
       }
+    }
+
+    if (onFormDataChange) {
+      onFormDataChange({ ...formData, [name]: value });
     }
   };
 
   const handleSwitchChange = (name: string, checked: boolean) => {
+    const currentField = fields.flat().find((f) => f.name === name);
+    if (currentField?.disabled) return;
+
     setFormData((prev) => ({ ...prev, [name]: checked }));
+
+    if (onFormDataChange) {
+      onFormDataChange({ ...formData, [name]: checked });
+    }
   };
 
   const handleRadioChange = (name: string, value: string) => {
+    const currentField = fields.flat().find((f) => f.name === name);
+    if (currentField?.disabled) return;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+    if (onFormDataChange) {
+      onFormDataChange({ ...formData, [name]: value });
+    }
+
     if (touched[name] || showAllErrors) {
-      const field = fields.flat().find((f) => f.name === name);
-      if (field) {
-        const error = validateField(field, value);
+      if (currentField) {
+        const error = validateField(currentField, value);
         setErrors((prev) => {
           const newErrors = prev.filter((err) => err.field !== name);
           return error
@@ -231,6 +425,79 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             : newErrors;
         });
       }
+    }
+  };
+
+  // Meal Items Handlers
+  const handleAddMealItem = () => {
+    const newItems = [
+      ...mealItems,
+      { description: { english: "", arabic: "" } },
+    ];
+    onMealItemsChange?.(newItems);
+  };
+
+  const handleRemoveMealItem = (index: number) => {
+    if (mealItems.length > 1) {
+      const newItems = mealItems.filter((_, i) => i !== index);
+      onMealItemsChange?.(newItems);
+
+      // Clear errors for removed meal item
+      setErrors((prev) =>
+        prev.filter(
+          (err) =>
+            !err.field.startsWith(`mealItem_${index}_`) &&
+            err.field !== `mealItem_${index}_english` &&
+            err.field !== `mealItem_${index}_arabic`
+        )
+      );
+    }
+  };
+
+  const handleUpdateMealItem = (
+    index: number,
+    field: "english" | "arabic",
+    value: string
+  ) => {
+    const newItems = [...mealItems];
+    newItems[index].description[field] = value;
+    onMealItemsChange?.(newItems);
+
+    // Clear error for this specific field when user starts typing
+    const fieldName = `mealItem_${index}_${field}`;
+    setErrors((prev) => prev.filter((err) => err.field !== fieldName));
+  };
+
+  const handleSearchChange = (fieldName: string, search: string) => {
+    setSearchTerms((prev) => ({ ...prev, [fieldName]: search }));
+
+    const field = fields.flat().find((f) => f.name === fieldName);
+    if (field?.paginationOptions?.onSearch) {
+      field.paginationOptions.onSearch(search);
+    }
+  };
+
+  const handleSelectOpen = (fieldName: string) => {
+    const field = fields.flat().find((f) => f.name === fieldName);
+    if (field?.paginationOptions?.onOpen) {
+      field.paginationOptions.onOpen();
+    }
+  };
+
+  const removeImage = (fieldName: string) => {
+    const currentField = fields.flat().find((f) => f.name === fieldName);
+    if (currentField?.disabled) return;
+
+    setFormData((prev) => ({ ...prev, [fieldName]: null }));
+    setImagePreviews((prev) => {
+      const newPreviews = { ...prev };
+      delete newPreviews[fieldName];
+      return newPreviews;
+    });
+
+    const fileInput = document.getElementById(fieldName) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
     }
   };
 
@@ -238,7 +505,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
     setTouched((prev) => ({ ...prev, [fieldName]: true }));
 
     const field = fields.flat().find((f) => f.name === fieldName);
-    if (field) {
+    if (field && field.type !== "image" && !field.disabled) {
       const error = validateField(field, formData[fieldName]);
       setErrors((prev) => {
         const newErrors = prev.filter((err) => err.field !== fieldName);
@@ -252,7 +519,6 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched and show all errors
     const allTouched: Record<string, boolean> = {};
     fields.flat().forEach((field) => {
       allTouched[field.name] = true;
@@ -268,81 +534,463 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
     }
   };
 
+  const renderMealItemField = (field: FormField) => {
+    return (
+      <div className="w-full space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-lg font-semibold text-[#25235F]">
+              {t(field.label)}
+            </Label>
+            {field.required && (
+              <p className="text-sm text-gray-500 mt-1">
+                {t(
+                  "Add at least one meal item with descriptions in both English and Arabic"
+                )}
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            onClick={handleAddMealItem}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Icon icon="heroicons:plus" className="h-4 w-4 mr-2" />
+            {t("Add Meal Item")}
+          </Button>
+        </div>
+
+        {/* Meal Items List */}
+        <div className="space-y-4">
+          {mealItems.map((item, index) => (
+            <Card
+              key={index}
+              className="border-2 border-gray-200 hover:border-blue-300 transition-colors relative overflow-hidden"
+            >
+              {/* Background gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20 pointer-events-none" />
+
+              <CardContent className="p-6 relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Icon
+                      icon="heroicons:list-bullet"
+                      className="h-5 w-5 text-blue-600"
+                    />
+                    {t("Meal Item")} {index + 1}
+                  </h4>
+                  {mealItems.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRemoveMealItem(index)}
+                      className="hover:scale-105 transition-transform"
+                    >
+                      <Icon icon="heroicons:trash" className="h-4 w-4 mr-1" />
+                      {t("Remove")}
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* English Description */}
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor={`mealItem_${index}_english`}
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      {t("English Description")} *
+                    </Label>
+                    <Textarea
+                      id={`mealItem_${index}_english`}
+                      value={item.description.english}
+                      onChange={(e) =>
+                        handleUpdateMealItem(index, "english", e.target.value)
+                      }
+                      placeholder="Enter meal item description in English"
+                      className="min-h-[100px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      dir="ltr"
+                    />
+                    {errors.some(
+                      (err) => err.field === `mealItem_${index}_english`
+                    ) && (
+                      <p className="text-red-500 text-sm flex items-center gap-1">
+                        <Icon
+                          icon="heroicons:exclamation-triangle"
+                          className="h-4 w-4"
+                        />
+                        {
+                          errors.find(
+                            (err) => err.field === `mealItem_${index}_english`
+                          )?.message
+                        }
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Arabic Description */}
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor={`mealItem_${index}_arabic`}
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      {t("Arabic Description")} *
+                    </Label>
+                    <Textarea
+                      id={`mealItem_${index}_arabic`}
+                      value={item.description.arabic}
+                      onChange={(e) =>
+                        handleUpdateMealItem(index, "arabic", e.target.value)
+                      }
+                      placeholder="أدخل وصف عنصر الوجبة بالعربية"
+                      className="min-h-[100px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-right"
+                      dir="rtl"
+                    />
+                    {errors.some(
+                      (err) => err.field === `mealItem_${index}_arabic`
+                    ) && (
+                      <p className="text-red-500 text-sm flex items-center gap-1">
+                        <Icon
+                          icon="heroicons:exclamation-triangle"
+                          className="h-4 w-4"
+                        />
+                        {
+                          errors.find(
+                            (err) => err.field === `mealItem_${index}_arabic`
+                          )?.message
+                        }
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Character counts */}
+                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>English: {item.description.english.length}/500</span>
+                  <span>العربية: {item.description.arabic.length}/500</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {mealItems.length === 0 && (
+          <Card className="border-2 border-dashed border-gray-300 bg-gray-50/50 text-center">
+            <CardContent className="p-8">
+              <Icon
+                icon="heroicons:clipboard-document-list"
+                className="h-16 w-16 text-gray-400 mx-auto mb-4"
+              />
+              <h4 className="text-lg font-semibold text-gray-600 mb-2">
+                {t("No Meal Items Added")}
+              </h4>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                {t(
+                  "Add meal items to describe the components of this meal. Each item should have descriptions in both English and Arabic languages"
+                )}
+              </p>
+              <Button
+                type="button"
+                onClick={handleAddMealItem}
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-3"
+              >
+                <Icon icon="heroicons:plus" className="h-5 w-5 mr-2" />
+                {t("Add Your First Meal Item")}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Validation error for empty meal items */}
+        {errors.some((err) => err.field === "mealItems") &&
+          mealItems.length === 0 && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm flex items-center gap-2">
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="h-4 w-4"
+                />
+                {errors.find((err) => err.field === "mealItems")?.message}
+              </p>
+            </div>
+          )}
+      </div>
+    );
+  };
+
   const renderField = (field: FormField) => {
+    // Handle mealItem type separately
+    if (field.type === "mealItem") {
+      return renderMealItemField(field);
+    }
+
     const error = getFieldError(field.name);
     const showError = (touched[field.name] || showAllErrors) && error;
+
+    // Determine input direction based on validation
+    const textAlignment = field.validation?.arabicOnly
+      ? "text-right"
+      : "text-left";
+
+    // Base disabled styles
+    const disabledStyles = field.disabled
+      ? "opacity-60 cursor-not-allowed bg-gray-100 border-gray-200"
+      : "";
+
+    // State hooks for individual fields
+    const [isFocused, setIsFocused] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const hasValue =
+      formData[field.name] && formData[field.name].toString().length > 0;
+    const isFloating = isFocused || hasValue;
+    const hasImage = imagePreviews[field.name];
+
+    // Drag handlers for image field
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+
+      const files = e.dataTransfer.files;
+      if (files && files[0]) {
+        const syntheticEvent = {
+          target: {
+            name: field.name,
+            files: files,
+          },
+        } as any;
+        handleInputChange(syntheticEvent);
+      }
+    };
 
     switch (field.type) {
       case "text":
       case "email":
       case "password":
+      case "url":
       case "number":
       case "date":
         return (
-          <div className="space-y-2">
-            <Label htmlFor={field.name} className="text-[#25235F] font-medium">
-              {t(field.label)} {field.required && "*"}
-            </Label>
-            <Input
-              id={field.name}
-              name={field.name}
-              type={field.type}
-              value={formData[field.name] || ""}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur(field.name)}
-              required={field.required}
-              placeholder={field.placeholder}
-              step={field.step}
-              className={`border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] ${
-                showError
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : ""
-              }`}
-            />
-            {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          <div className="w-full group">
+            <div className="relative">
+              <div className="relative">
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type={field.type}
+                  value={formData[field.name] || ""}
+                  onChange={handleInputChange}
+                  onFocus={() => !field.disabled && setIsFocused(true)}
+                  onBlur={(e) => {
+                    setIsFocused(false);
+                    handleBlur(field.name);
+                  }}
+                  required={field.required && !field.disabled}
+                  placeholder={isFloating ? field.placeholder : ""}
+                  step={field.step}
+                  disabled={field.disabled || isLoading}
+                  className={`peer w-full h-14 px-4 pt-6 pb-2 rounded-xl border-2 transition-all duration-300
+                    ${
+                      showError
+                        ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100 bg-red-50/30"
+                        : field.disabled
+                        ? "border-gray-200 bg-gray-100 text-gray-500"
+                        : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
+                    }
+                    ${disabledStyles}
+                    placeholder:text-gray-400 text-gray-700 font-medium
+                    ${
+                      lang === "ar"
+                        ? "text-right placeholder:text-right"
+                        : "text-left placeholder:text-left"
+                    }
+                    ${lang === "ar" ? "rtl" : "ltr"}
+                  `}
+                  dir={lang === "ar" ? "rtl" : "ltr"}
+                />
+
+                <Label
+                  htmlFor={field.name}
+                  className={`absolute transition-all duration-200 pointer-events-none ${
+                    field.disabled ? "text-gray-500" : "text-gray-700"
+                  } ${
+                    isFloating
+                      ? "top-1.5 text-xs font-semibold text-[#25235F]"
+                      : "top-1/2 -translate-y-1/2 text-base text-gray-500"
+                  }
+                    ${lang === "ar" ? "right-4 text-right" : "left-4 text-left"}
+                  `}
+                >
+                  {t(field.label)}{" "}
+                  {field.required && !field.disabled && (
+                    <span className="text-red-500">*</span>
+                  )}
+                  {field.disabled && (
+                    <span className="text-gray-400 ml-1">(Disabled)</span>
+                  )}
+                </Label>
+
+                <div
+                  className={`absolute top-1/2 -translate-y-1/2 transition-all duration-300 ${
+                    field.disabled
+                      ? "text-gray-400"
+                      : hasValue && !showError
+                      ? "text-emerald-500"
+                      : showError
+                      ? "text-red-500"
+                      : "text-gray-400"
+                  }
+                    ${lang === "ar" ? "left-4" : "right-4"}
+                  `}
+                >
+                  {field.disabled ? (
+                    <Icon icon="heroicons:lock-closed" className="h-5 w-5" />
+                  ) : hasValue && !showError ? (
+                    <Icon icon="heroicons:check-circle" className="h-5 w-5" />
+                  ) : showError ? (
+                    <Icon
+                      icon="heroicons:exclamation-circle"
+                      className="h-5 w-5 text-red-500"
+                    />
+                  ) : null}
+                </div>
+              </div>
+
+              {showError && (
+                <p
+                  className={`mt-2 text-red-500 text-sm flex items-center gap-1.5
+                    ${
+                      lang === "ar"
+                        ? "flex-row-reverse justify-end"
+                        : "flex-row"
+                    }
+                  `}
+                >
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="h-4 w-4"
+                  />
+                  {t(error)}
+                </p>
+              )}
+            </div>
           </div>
         );
 
       case "textarea":
+        const charCount = formData[field.name]?.length || 0;
+        const maxLength = field.validation?.maxLength || 500;
+
         return (
-          <div className="space-y-2">
-            <Label htmlFor={field.name} className="text-[#25235F] font-medium">
-              {t(field.label)} {field.required && "*"}
-            </Label>
-            <Textarea
-              id={field.name}
-              name={field.name}
-              value={formData[field.name] || ""}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur(field.name)}
-              placeholder={field.placeholder}
-              className={`border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] min-h-[80px] ${
-                showError
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : ""
-              }`}
-            />
-            {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          <div className="w-full space-y-2">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor={field.name}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+              >
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+                {t(field.label)}
+                {field.required && !field.disabled && (
+                  <span className="text-red-500">*</span>
+                )}
+                {field.disabled && (
+                  <span className="text-gray-400 text-xs ml-1">(Disabled)</span>
+                )}
+              </Label>
+
+              <span className="text-xs text-gray-500 font-medium">
+                {charCount}/{maxLength}
+              </span>
+            </div>
+
+            <div className="relative group">
+              <Textarea
+                id={field.name}
+                name={field.name}
+                value={formData[field.name] || ""}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur(field.name)}
+                placeholder={field.placeholder}
+                dir={lang === "ar" ? "rtl" : "ltr"}
+                maxLength={maxLength}
+                disabled={field.disabled || isLoading}
+                className={`w-full min-h-[100px] px-4 py-3 rounded-xl border-2 transition-all duration-300 resize-none
+                  ${
+                    showError
+                      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-red-50/30"
+                      : field.disabled
+                      ? "border-gray-200 bg-gray-100 text-gray-500"
+                      : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400 bg-white"
+                  }
+                  ${disabledStyles}
+                  placeholder:text-gray-400
+                  focus:shadow-lg focus:shadow-blue-100/50
+                  ${
+                    lang === "ar"
+                      ? "text-right placeholder:text-right"
+                      : "text-left placeholder:text-left"
+                  }
+                `}
+              />
+
+              {!field.disabled && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300" />
+              )}
+            </div>
+
+            {showError && (
+              <p
+                className={`text-red-500 text-sm flex items-center gap-1.5
+                  ${lang === "ar" ? "flex-row-reverse justify-end" : "flex-row"}
+                `}
+              >
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="h-4 w-4"
+                />
+                {t(error)}
+              </p>
+            )}
           </div>
         );
 
       case "select":
         return (
-          <div className="space-y-2">
+          <div className="w-full">
             <Label htmlFor={field.name} className="text-[#25235F] font-medium">
-              {t(field.label)} {field.required && "*"}
+              {t(field.label)} {field.required && !field.disabled && "*"}
+              {field.disabled && (
+                <span className="text-gray-400 text-sm ml-1">(Disabled)</span>
+              )}
             </Label>
             <Select
               value={formData[field.name] || ""}
               onValueChange={(value) => handleSelectChange(field.name, value)}
               onBlur={() => handleBlur(field.name)}
+              disabled={field.disabled || isLoading}
             >
               <SelectTrigger
-                className={`border-gray-300 focus:border-[#25235F] focus:ring-[#25235F] ${
+                className={`border-2 transition-all duration-300 ${textAlignment} ${
                   showError
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : ""
-                }`}
+                    : field.disabled
+                    ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
+                } ${disabledStyles}`}
               >
                 <SelectValue
                   placeholder={
@@ -364,13 +1012,368 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 })}
               </SelectContent>
             </Select>
+            {showError && (
+              <p className="text-red-500 text-sm mt-1">{t(error)}</p>
+            )}
+          </div>
+        );
+
+      case "selectPagination":
+        return (
+          <div className="w-full">
+            <Label htmlFor={field.name} className="text-[#25235F] font-medium">
+              {t(field.label)} {field.required && "*"}
+            </Label>
+
+            <Select
+              value={formData[field.name] || ""}
+              onValueChange={(value) => handleSelectChange(field.name, value)}
+              onOpenChange={(open) => {
+                if (open) {
+                  handleSelectOpen(field.name);
+                }
+              }}
+            >
+              <SelectTrigger className="group relative border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 bg-gradient-to-br from-white via-purple-50/30 to-white backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-0.5 py-3 px-4 rounded-xl font-medium">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse delay-100" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse delay-200" />
+                  </div>
+                  <SelectValue
+                    placeholder={
+                      <span className="text-gray-500 font-normal flex items-center gap-2">
+                        <span className="text-lg">🔍</span>
+                        {field.placeholder ||
+                          `Select ${field.label.toLowerCase()}`}
+                      </span>
+                    }
+                  />
+                </div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-blue-400/0 to-purple-400/0 group-hover:from-purple-400/5 group-hover:via-blue-400/5 group-hover:to-purple-400/5 transition-all duration-500 pointer-events-none" />
+              </SelectTrigger>
+
+              <SearchablePaginatedSelectContent
+                onLoadMore={field.paginationOptions?.onLoadMore}
+                onSearch={(search) => handleSearchChange(field.name, search)}
+                isLoading={field.paginationOptions?.isLoading || false}
+                hasMore={field.paginationOptions?.hasMore}
+                placeholder={
+                  field.paginationOptions?.searchPlaceholder || "Search..."
+                }
+              >
+                <div className="sticky top-0 z-10 px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-size-200 animate-gradient">
+                  <p className="text-xs font-semibold text-white/90 uppercase tracking-wider">
+                    {field.label}
+                  </p>
+                </div>
+
+                <SelectItem
+                  value=""
+                  className="mx-2 my-2 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200 border-b-2 border-gray-100 pb-3 font-semibold text-gray-700 hover:text-purple-600 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                    {t("All")} {field.label}
+                  </div>
+                </SelectItem>
+
+                <div className="px-2 space-y-1">
+                  {field.paginationOptions?.data?.map((item, index) => (
+                    <SelectItem
+                      key={`${field.paginationOptions?.getOptionValue(
+                        item
+                      )}-${index}`}
+                      value={field.paginationOptions?.getOptionValue(item)}
+                      className="rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:via-blue-50/50 hover:to-purple-50 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] py-3 px-3 cursor-pointer group border border-transparent hover:border-purple-100"
+                      style={{
+                        animationDelay: `${index * 30}ms`,
+                      }}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-gray-700 group-hover:text-purple-700 transition-colors">
+                          {field.paginationOptions?.getOptionLabel(item)}
+                        </span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </SelectItem>
+                  ))}
+                </div>
+              </SearchablePaginatedSelectContent>
+            </Select>
+
             {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+        );
+
+      case "image":
+        return (
+          <div className="w-full group">
+            <Label
+              htmlFor={field.name}
+              className="flex items-center gap-2 mb-3 text-sm font-semibold text-[#25235F] group-hover:text-blue-700 transition-colors"
+            >
+              <Icon icon="heroicons:photo" className="h-5 w-5 text-blue-600" />
+              <span>{t(field.label)}</span>
+            </Label>
+
+            {hasImage && (
+              <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 border-2 border-blue-200 shadow-lg animate-in slide-in-from-top-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    <Icon
+                      icon="heroicons:check-circle"
+                      className="h-4 w-4 text-emerald-600"
+                    />
+                    {t("Image Uploaded")}
+                  </h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeImage(field.name)}
+                    className="text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-500 border-red-300 hover:border-red-500 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                  >
+                    <Icon icon="heroicons:trash" className="h-4 w-4 mr-1" />
+                    {t("Remove")}
+                  </Button>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="relative group/img">
+                    <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-xl transition-shadow">
+                      <img
+                        src={imagePreviews[field.name]}
+                        alt="Preview"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 rounded-xl flex items-end justify-center pb-4">
+                      <span className="text-white text-sm font-medium">
+                        {t("Click to view full size")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {formData[field.name] && (
+                    <div className="flex-1 space-y-3">
+                      <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-colors">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Icon
+                            icon="heroicons:document-text"
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <span className="text-xs font-semibold text-gray-500 uppercase">
+                            {t("File Name")}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {(formData[field.name] as File)?.name}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-purple-300 transition-colors">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Icon
+                              icon="heroicons:archive-box"
+                              className="w-4 h-4 text-purple-600"
+                            />
+                            <span className="text-xs font-semibold text-gray-500 uppercase">
+                              {t("Size")}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {(
+                              ((formData[field.name] as File)?.size || 0) /
+                              1024 /
+                              1024
+                            ).toFixed(2)}{" "}
+                            {t("MB")}
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Icon
+                              icon="heroicons:photo"
+                              className="w-4 h-4 text-emerald-600"
+                            />
+                            <span className="text-xs font-semibold text-gray-500 uppercase">
+                              {t("Type")}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {(formData[field.name] as File)?.type
+                              .split("/")[1]
+                              .toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative cursor-pointer transition-all duration-300 ${
+                hasImage ? "opacity-50 hover:opacity-100" : ""
+              }`}
+            >
+              <div
+                className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl opacity-0 blur transition-all duration-500 ${
+                  isDragging ? "opacity-50" : "group-hover:opacity-20"
+                }`}
+              />
+
+              <div
+                className={`relative p-8 rounded-2xl border-2 border-dashed transition-all duration-300 ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-50 scale-105"
+                    : showError
+                    ? "border-red-400 bg-red-50/30"
+                    : "border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
+                }`}
+              >
+                <div className="flex flex-col items-center gap-4">
+                  <div
+                    className={`relative transition-all duration-500 ${
+                      isDragging
+                        ? "scale-110 rotate-6"
+                        : "group-hover:scale-110"
+                    }`}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-pulse" />
+                    </div>
+
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Icon
+                        icon="heroicons:cloud-arrow-up"
+                        className="w-8 h-8 text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-base font-semibold text-gray-800 mb-2">
+                      {isDragging ? (
+                        <span className="text-blue-600 flex items-center gap-2">
+                          <Icon
+                            icon="heroicons:arrow-down-tray"
+                            className="w-5 h-5 animate-bounce"
+                          />
+                          {t("Drop your image here")}
+                        </span>
+                      ) : hasImage ? (
+                        t("Upload a different image")
+                      ) : (
+                        t("Drop your image here, or browse")
+                      )}
+                    </p>
+
+                    {/* Dynamic format display */}
+                    <p className="text-sm text-gray-500">
+                      {field.validation?.allowedTypes ? (
+                        <>
+                          {t("Supports:")}{" "}
+                          {field.validation.allowedTypes
+                            .map((type) => {
+                              const ext = type.split("/")[1].toUpperCase();
+                              // Handle jpeg/jpg
+                              if (ext === "JPEG" || ext === "JPG") {
+                                return "JPEG/JPG";
+                              }
+                              return ext;
+                            })
+                            .filter(
+                              (value, index, self) =>
+                                self.indexOf(value) === index
+                            ) // Remove duplicates
+                            .join(", ")}{" "}
+                          {t("(Max")}{" "}
+                          {field.validation.maxFileSize
+                            ? `${
+                                field.validation.maxFileSize / (1024 * 1024)
+                              }MB`
+                            : "10MB"}
+                          {t(")")}
+                        </>
+                      ) : (
+                        // Fallback to default if no allowedTypes specified
+                        t("Supports: JPEG, PNG, GIF (Max 10MB)")
+                      )}
+                    </p>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 px-6 py-2 bg-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white border-2 border-gray-300 hover:border-transparent transition-all duration-300 font-semibold shadow-sm hover:shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <Icon
+                      icon="heroicons:folder-open"
+                      className="w-4 h-4 mr-2"
+                    />
+                    {t("Browse Files")}
+                  </Button>
+                </div>
+
+                {/* Dynamic accept attribute */}
+                <Input
+                  ref={fileInputRef}
+                  id={field.name}
+                  name={field.name}
+                  type="file"
+                  accept={
+                    field.accept ||
+                    (field.validation?.allowedTypes
+                      ? field.validation.allowedTypes.join(",")
+                      : "image/*")
+                  }
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur(field.name)}
+                  required={field.required && !formData[field.name]}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {field.description && !showError && (
+              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <Icon
+                  icon="heroicons:information-circle"
+                  className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"
+                />
+                <span>{field.description}</span>
+              </div>
+            )}
+
+            {showError && (
+              <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg animate-in slide-in-from-top-2">
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+                />
+                <p className="text-red-600 text-sm font-medium">{error}</p>
+              </div>
+            )}
           </div>
         );
 
       case "radio":
         return (
-          <div className="space-y-2">
+          <div className="w-full">
             <Label className="text-[#25235F] font-medium">
               {t(field.label)} {field.required && "*"}
             </Label>
@@ -407,18 +1410,47 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
       case "switch":
         return (
-          <div className="flex items-center space-x-2">
-            <Switch
-              id={field.name}
-              checked={formData[field.name] || false}
-              onCheckedChange={(checked) =>
-                handleSwitchChange(field.name, checked)
-              }
-              required={field.required}
-            />
-            <Label htmlFor={field.name} className="cursor-pointer">
-              {t(field.label)} {field.required && "*"}
-            </Label>
+          <div className="group relative w-full p-2 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all duration-300 hover:bg-blue-50/30">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor={field.name}
+                className="cursor-pointer flex items-center gap-3 text-base font-medium text-gray-700 group-hover:text-blue-700 transition-colors"
+              >
+                <div
+                  className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${
+                    formData[field.name]
+                      ? "border-blue-600 bg-gradient-to-br from-blue-600 to-purple-600 rotate-6 scale-110"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {formData[field.name] && (
+                    <Icon
+                      icon="heroicons:check"
+                      className="w-4 h-4 text-white animate-in zoom-in-50"
+                    />
+                  )}
+                </div>
+
+                <span className="flex items-center gap-2">
+                  {t(field.label)}
+                  {field.required && (
+                    <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded">
+                      !
+                    </span>
+                  )}
+                </span>
+              </Label>
+
+              <Switch
+                id={field.name}
+                checked={formData[field.name] || false}
+                onCheckedChange={(checked) =>
+                  handleSwitchChange(field.name, checked)
+                }
+                required={field.required}
+                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-600 data-[state=checked]:to-purple-600 shadow-md hover:shadow-lg transition-all duration-300"
+              />
+            </div>
           </div>
         );
 
@@ -430,9 +1462,8 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 overflow-y-auto">
       <div className="">
-        {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
-          <div className="space-y-2">
+          <div className="w-full">
             <h1 className="text-3xl font-bold text-[#25235F]">{t(title)}</h1>
             {description && <p className="text-gray-600">{t(description)}</p>}
           </div>
@@ -448,9 +1479,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
           )}
         </div>
 
-        {/* Main Form Card */}
         <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          {/* Card Header with Gradient */}
           <CardHeader className="bg-gradient-to-r from-[#25235F] to-[#25235F]/90 text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
             <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
@@ -475,11 +1504,11 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     icon="heroicons:exclamation-triangle"
                     className="h-5 w-5 mr-2"
                   />
-                  Please fix the following errors:
+                  {t("Please fix the following errors")}:
                 </h3>
                 <ul className="list-disc list-inside text-red-700 space-y-1">
                   {errors.map((error, index) => (
-                    <li key={index}>{error.message}</li>
+                    <li key={index}>{t(error.message)}</li>
                   ))}
                 </ul>
               </div>
@@ -488,18 +1517,23 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             <form onSubmit={handleSubmit} className="space-y-8">
               {fields.map((row, rowIndex) => (
                 <div key={rowIndex} className="space-y-6">
-                  {/* Section Header */}
                   {sections[rowIndex] && (
-                    <h3 className="text-xl font-semibold text-[#25235F] border-b pb-2">
-                      <Icon
-                        icon={sections[rowIndex].icon}
-                        className="h-5 w-5 inline mr-2"
-                      />
-                      {t(sections[rowIndex].title)}
-                    </h3>
+                    <div className="border-b pb-2">
+                      <h3 className="text-xl font-semibold text-[#25235F]">
+                        <Icon
+                          icon={sections[rowIndex].icon}
+                          className="h-5 w-5 inline mr-2"
+                        />
+                        {t(sections[rowIndex].title)}
+                      </h3>
+                      {sections[rowIndex].description && (
+                        <p className="text-gray-600 text-sm mt-1">
+                          {t(sections[rowIndex].description)}
+                        </p>
+                      )}
+                    </div>
                   )}
 
-                  {/* Fields Grid */}
                   <div
                     className={`grid grid-cols-1 md:grid-cols-${
                       row[0]?.cols || 2
@@ -508,11 +1542,11 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     {row.map((field) => (
                       <div
                         key={field.name}
-                        className={
-                          field.type === "textarea" || field.type === "radio"
-                            ? `md:col-span-${row[0]?.cols || 2}`
+                        className={`flex flex-col justify-end items-end w-full ${
+                          field.type === "image" || field.type === "mealItem"
+                            ? `md:col-span-full` // Changed from md:col-span-${row[0]?.cols || 2}
                             : ""
-                        }
+                        }`}
                       >
                         {renderField(field)}
                       </div>
@@ -521,7 +1555,6 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 </div>
               ))}
 
-              {/* Form Actions */}
               <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
                 {onCancel && (
                   <Button
@@ -529,6 +1562,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     variant="outline"
                     onClick={onCancel}
                     className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-3"
+                    disabled={isLoading}
                   >
                     {cancelButtonText}
                   </Button>
@@ -536,12 +1570,26 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 <Button
                   type="submit"
                   className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/90 hover:from-[#ED4135]/90 hover:to-[#ED4135] text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isLoading}
+                  {...submitButtonProps}
                 >
-                  <Icon
-                    icon="heroicons:document-plus"
-                    className="h-5 w-5 mr-2"
-                  />
-                  {submitButtonText}
+                  {isLoading ? (
+                    <>
+                      <Icon
+                        icon="heroicons:arrow-path"
+                        className="h-5 w-5 mr-2 animate-spin"
+                      />
+                      {t("Creating")}...
+                    </>
+                  ) : (
+                    <>
+                      <Icon
+                        icon="heroicons:document-plus"
+                        className="h-5 w-5 mr-2"
+                      />
+                      {submitButtonText}
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

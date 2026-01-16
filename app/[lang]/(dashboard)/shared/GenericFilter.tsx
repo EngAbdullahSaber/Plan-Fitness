@@ -11,13 +11,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Icon } from "@iconify/react";
+import { useTranslate } from "@/config/useTranslation";
+import { SearchablePaginatedSelectContent } from "./SearchablePaginatedSelectContent";
 
-export interface FilterOption {
+// Update your FilterOption interface to include search
+interface FilterOption {
   key: string;
   label: string;
-  type: "text" | "select" | "date" | "number";
+  type: "text" | "select" | "selectPagination" | "date" | "number";
   placeholder?: string;
-  options?: { value: string; label: string }[];
+  searchPlaceholder?: string; // Add this
+  options?: Array<{ value: string; label: string }>;
+  // For paginated select
+  isLoading?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  onSearch?: (search: string) => void; // Add this
+  onOpen?: () => void;
 }
 
 export interface FilterConfig {
@@ -36,6 +46,7 @@ const GenericFilter = ({
   const [isOpen, setIsOpen] = useState(false);
   const [currentFilters, setCurrentFilters] =
     useState<Record<string, string>>(initialFilters);
+  const { t } = useTranslate();
 
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...currentFilters, [key]: value };
@@ -65,12 +76,14 @@ const GenericFilter = ({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t("Filters")}
+          </h3>
           {hasActiveFilters && (
             <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-blue-700">
-                {activeFilterCount} active
+                {activeFilterCount} {t("active")}
               </span>
             </div>
           )}
@@ -79,20 +92,35 @@ const GenericFilter = ({
         <Button
           onClick={() => setIsOpen(!isOpen)}
           variant="outline"
-          className="group relative overflow-hidden border-2 border-gray-200 hover:border-blue-400 bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 shadow-sm hover:shadow-md"
+          className="group relative overflow-hidden border border-gray-300/80 bg-white/95 backdrop-blur-sm hover:bg-transparent transition-all duration-500 shadow-sm hover:shadow-xl"
         >
           <div className="flex items-center gap-2 relative z-10">
             <Icon
               icon="heroicons:funnel"
-              className={`h-4 w-4 transition-transform duration-300 ${
-                isOpen ? "rotate-180" : ""
+              className={`h-4 w-4 transition-all duration-500 ${
+                isOpen
+                  ? "rotate-180 text-white"
+                  : "text-gray-600 group-hover:text-white"
               }`}
             />
-            <span className="font-medium">
-              {isOpen ? "Hide Filters" : "Show Filters"}
+            <span
+              className={`font-medium transition-colors duration-500 ${
+                isOpen ? "text-white" : "text-gray-700 group-hover:text-white"
+              }`}
+            >
+              {isOpen ? t("Hide Filters") : t("Show Filters")}
             </span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+          {/* Animated gradient background */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500 ${
+              isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            }`}
+          ></div>
+
+          {/* Shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
         </Button>
       </div>
 
@@ -104,7 +132,7 @@ const GenericFilter = ({
       >
         <div className="bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 backdrop-blur-sm border border-gray-200/60 rounded-2xl shadow-lg shadow-gray-200/20 p-8">
           {/* Filters Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
             {filters.map((filter, index) => (
               <div
                 key={filter.key}
@@ -148,26 +176,141 @@ const GenericFilter = ({
                       handleFilterChange(filter.key, value)
                     }
                   >
-                    <SelectTrigger className="border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:shadow-sm py-2.5 rounded-lg">
-                      <SelectValue placeholder={filter.placeholder} />
+                    <SelectTrigger className="group relative border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 bg-gradient-to-br from-white via-blue-50/30 to-white backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-0.5 py-3 px-4 rounded-xl font-medium">
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 group-hover:scale-125 transition-transform duration-300" />
+                        <SelectValue
+                          placeholder={
+                            <span className="text-gray-500 font-normal flex items-center gap-2">
+                              <span className="text-lg">✨</span>
+                              {filter.placeholder}
+                            </span>
+                          }
+                        />
+                      </div>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/0 via-purple-400/0 to-blue-400/0 group-hover:from-blue-400/5 group-hover:via-purple-400/5 group-hover:to-blue-400/5 transition-all duration-500 pointer-events-none" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/95 backdrop-blur-sm border-gray-200 rounded-lg shadow-xl">
+
+                    <SelectContent className="bg-white/98 backdrop-blur-xl border-2 border-gray-200 rounded-2xl shadow-2xl shadow-blue-200/30 overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200">
+                      {/* Header with gradient */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-size-200 animate-gradient">
+                        <p className="text-xs font-semibold text-white/90 uppercase tracking-wider">
+                          {filter.label}
+                        </p>
+                      </div>
+
+                      {/* All option with special styling */}
                       <SelectItem
                         value=""
-                        className="hover:bg-blue-50 transition-colors duration-150"
+                        className="mx-2 my-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 border-b-2 border-gray-100 pb-3 font-semibold text-gray-700 hover:text-blue-600 hover:shadow-sm"
                       >
-                        All {filter.label}
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+                          {t("All")} {filter.label}
+                        </div>
                       </SelectItem>
-                      {filter.options.map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="hover:bg-blue-50 transition-colors duration-150"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
+
+                      {/* Options with enhanced styling */}
+                      <div className="px-2 py-2 space-y-1 max-h-80 overflow-y-auto custom-scrollbar">
+                        {filter.options.map((option, index) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-purple-50/50 hover:to-blue-50 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] py-3 px-3 cursor-pointer group border border-transparent hover:border-blue-100"
+                            style={{
+                              animationDelay: `${index * 30}ms`,
+                            }}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span className="font-medium text-gray-700 group-hover:text-blue-700 transition-colors">
+                                {option.label}
+                              </span>
+                              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </div>
                     </SelectContent>
+                  </Select>
+                )}
+
+                {filter.type === "selectPagination" && (
+                  <Select
+                    value={currentFilters[filter.key] || ""}
+                    onValueChange={(value) =>
+                      handleFilterChange(filter.key, value)
+                    }
+                    onOpenChange={(open) => {
+                      if (open && filter.onOpen) {
+                        filter.onOpen();
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="group relative border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 bg-gradient-to-br from-white via-purple-50/30 to-white backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-0.5 py-3 px-4 rounded-xl font-medium">
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="flex gap-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse delay-100" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse delay-200" />
+                        </div>
+                        <SelectValue
+                          placeholder={
+                            <span className="text-gray-500 font-normal flex items-center gap-2">
+                              <span className="text-lg">🔍</span>
+                              {filter.placeholder}
+                            </span>
+                          }
+                        />
+                      </div>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-blue-400/0 to-purple-400/0 group-hover:from-purple-400/5 group-hover:via-blue-400/5 group-hover:to-purple-400/5 transition-all duration-500 pointer-events-none" />
+                    </SelectTrigger>
+
+                    <SearchablePaginatedSelectContent
+                      onLoadMore={filter.onLoadMore}
+                      onSearch={filter.onSearch}
+                      isLoading={filter.isLoading}
+                      hasMore={filter.hasMore}
+                      placeholder={filter.searchPlaceholder || "Search..."}
+                    >
+                      {/* Header with gradient */}
+                      <div className="sticky top-0 z-10 px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-size-200 animate-gradient">
+                        <p className="text-xs font-semibold text-white/90 uppercase tracking-wider">
+                          {filter.label}
+                        </p>
+                      </div>
+
+                      {/* All option */}
+                      <SelectItem
+                        value=""
+                        className="mx-2 my-2 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200 border-b-2 border-gray-100 pb-3 font-semibold text-gray-700 hover:text-purple-600 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                          {t("All")} {filter.label}
+                        </div>
+                      </SelectItem>
+
+                      {/* Options with enhanced styling */}
+                      <div className="px-2 space-y-1">
+                        {filter.options.map((option, index) => (
+                          <SelectItem
+                            key={`${option.value}-${index}`}
+                            value={option.value}
+                            className="rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:via-blue-50/50 hover:to-purple-50 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] py-3 px-3 cursor-pointer group border border-transparent hover:border-purple-100"
+                            style={{
+                              animationDelay: `${index * 30}ms`,
+                            }}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span className="font-medium text-gray-700 group-hover:text-purple-700 transition-colors">
+                                {option.label}
+                              </span>
+                              <div className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </div>
+                    </SearchablePaginatedSelectContent>
                   </Select>
                 )}
               </div>

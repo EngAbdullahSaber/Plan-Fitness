@@ -5,300 +5,940 @@ import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "../tables/advanced/components/data-table-column-header";
 import { DataTable } from "../tables/advanced/components/data-table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import DeleteConfirmationDialog from "../shared/DeleteConfirmationDialog";
 import Link from "next/link";
-import { mealData } from ".";
-import { useState } from "react";
-import MealDetailsModal from "./MealDetailsModal";
+import { useState, useMemo, useEffect, useRef } from "react";
+import {
+  GetPanigationMethod,
+  DeleteMethod,
+  GetPanigationMethodWithFilter,
+  PostMethod,
+  PatchMethod,
+} from "@/app/services/apis/ApiMethod";
+import { useParams } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import React, { forwardRef, useImperativeHandle } from "react";
+import GenericFilter from "../shared/GenericFilter";
+import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { ImageCell } from "../shared/ImageCell";
+import { DescriptionCell } from "../shared/EnhancedReadMoreCell";
+import { baseUrl } from "@/app/services/app.config";
+import ActivationConfirmationDialog from "../shared/DeActiviateConfirmationDialog";
+import { EnhancedReadMoreItems } from "../shared/EnhancedReadMoreItems";
 
-interface Meal {
-  id: string;
-  name: string;
-  category: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  status: string;
-  price: number;
-  featured: boolean;
-  ingredients: string[];
+// Interfaces based on your API response
+interface MealItem {
+  id: number;
+  description: string;
+  mealId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const MealTable = ({
-  searchTerm,
-  statusFilter,
-  categoryFilter,
-}: {
-  searchTerm: string;
-  statusFilter: string;
-  categoryFilter: string;
-}) => {
-  // Filter data based on search and filters
-  const filteredData = mealData.filter((meal) => {
-    const matchesSearch =
-      meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      meal.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || meal.status === statusFilter;
-    const matchesCategory =
-      categoryFilter === "all" || meal.category === categoryFilter;
+interface Meal {
+  id: number;
+  image: string;
+  type: string;
+  totalCalory: number;
+  proteins: number;
+  fat: number;
+  carp: number;
+  status: string;
+  isRequest: boolean;
+  createdAt: string;
+  updatedAt: string;
+  mealItem: MealItem[];
+}
 
-    return matchesSearch && matchesStatus && matchesCategory;
+interface MealStatistics {
+  active: number;
+  inActive: number;
+  requests: number;
+}
+
+interface MealApiResponse {
+  code: number;
+  message: string | { arabic: string; english: string };
+  data: {
+    meals: Meal[];
+    statistics: MealStatistics;
+  };
+  totalPages?: number;
+  totalItems?: number;
+  currentPage?: number;
+}
+
+const MealTable = forwardRef(({ t }: { t: any }, ref) => {
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [processingRequest, setProcessingRequest] = useState<number | null>(
+    null,
+  );
+  const { lang } = useParams();
+  const queryClient = useQueryClient();
+
+  // React Query for meals data fetching
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<MealApiResponse, Error>({
+    queryKey: ["meals", page, pageSize, searchTerm, lang, filters],
+    queryFn: async () => {
+      try {
+        // Build query parameters based on filters
+        const queryParams: any = {
+          page: page.toString(),
+          pageSize: pageSize.toString(),
+        };
+
+        // Add search term if provided
+        if (searchTerm) {
+          queryParams.search = searchTerm;
+        }
+
+        // Add meal type filter
+        if (filters.type) {
+          queryParams.type = filters.type;
+        }
+
+        // Add calorie range filter
+        if (filters.calorieRange) {
+          queryParams.calorieRange = filters.calorieRange;
+        }
+
+        // Add request status filter
+        if (filters.isRequest) {
+          queryParams.isRequest = filters.isRequest === "true";
+        }
+
+        const response = await GetPanigationMethodWithFilter(
+          "meals",
+          page,
+          pageSize,
+          lang,
+          searchTerm,
+          queryParams,
+        );
+
+        console.log("API Response:", response);
+
+        // Handle the response structure based on your API
+        if (response && typeof response === "object") {
+          // If the response already has the correct structure with nested meals
+          if (response.code && response.data?.meals !== undefined) {
+            return response;
+          }
+          // If data is nested under a data property
+          else if (response.data && response.data.code) {
+            return response.data;
+          }
+          // If the response has meals array directly in data
+          else if (response.data && Array.isArray(response.data)) {
+            return {
+              code: 200,
+              message: "Meals found successfully",
+              data: {
+                meals: response.data,
+                statistics: {
+                  active: 0,
+                  inActive: 0,
+                  requests: 0,
+                },
+              },
+              totalPages: response.totalPages,
+              totalItems: response.totalItems,
+            };
+          }
+          // If response has a different structure
+          else if (response.response && response.response.data) {
+            return response.response.data;
+          }
+        }
+
+        throw new Error("Invalid API response structure");
+      } catch (error: any) {
+        console.error("Error fetching meals:", error);
+        throw error;
+      }
+    },
   });
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Listen for refresh events from parent component
+  useEffect(() => {
+    const handleRefresh = () => {
+      refetch();
+    };
+
+    window.addEventListener("refreshTableData", handleRefresh);
+
+    return () => {
+      window.removeEventListener("refreshTableData", handleRefresh);
+    };
+  }, [refetch]);
+
+  // Accept meal request function
+  const handleAcceptRequest = async (mealId: number) => {
+    try {
+      setProcessingRequest(mealId);
+
+      const response = await PatchMethod(`meals/accept`, mealId, lang);
+
+      if (response?.code === 200) {
+        toast.success(
+          typeof response.message === "string"
+            ? response.message
+            : response.message?.english ||
+                t("meal_request_accepted_successfully"),
+        );
+
+        // Invalidate and refetch meals to update the table
+        queryClient.invalidateQueries({ queryKey: ["meals"] });
+      } else {
+        toast.error(
+          typeof response?.message === "string"
+            ? response.message
+            : response?.message?.english || t("failed_to_accept_meal_request"),
+        );
+      }
+    } catch (error: any) {
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(
+          typeof error.response.data.message === "string"
+            ? error.response.data.message
+            : error.response.data.message.english,
+        );
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error(t("failed_to_accept_meal_request"));
+      }
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
+
+  // Reject meal request function
+  const handleRejectRequest = async (mealId: number) => {
+    try {
+      setProcessingRequest(mealId);
+
+      const response = await DeleteMethod(`/meals/refuse`, mealId, lang);
+
+      if (response?.code === 200) {
+        toast.success(
+          typeof response.message === "string"
+            ? response.message
+            : response.message?.english ||
+                t("meal_request_rejected_successfully"),
+        );
+
+        // Invalidate and refetch meals to update the table
+        queryClient.invalidateQueries({ queryKey: ["meals"] });
+      } else {
+        toast.error(
+          typeof response?.message === "string"
+            ? response.message
+            : response?.message?.english || t("failed_to_reject_meal_request"),
+        );
+      }
+    } catch (error: any) {
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(
+          typeof error.response.data.message === "string"
+            ? error.response.data.message
+            : error.response.data.message.english,
+        );
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error(t("failed_to_reject_meal_request"));
+      }
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
+
+  // Deactivate meal function
+  const handleDeactivateMeal = async (mealId: number) => {
+    try {
+      const response = await DeleteMethod("meals/deActivate", mealId, lang);
+
+      if (response?.code === 200) {
+        toast.success(
+          typeof response.message === "string"
+            ? response.message
+            : response.message?.english || t("meal_deactivated_successfully"),
+        );
+
+        // Invalidate and refetch meals to update the table
+        queryClient.invalidateQueries({ queryKey: ["meals"] });
+      } else {
+        toast.error(
+          typeof response?.message === "string"
+            ? response.message
+            : response?.message?.english || t("failed_to_deactivate_meal"),
+        );
+      }
+    } catch (error: any) {
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(
+          typeof error.response.data.message === "string"
+            ? error.response.data.message
+            : error.response.data.message.english,
+        );
+      } else if (error.message) {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  // Activate meal function
+  const handleActivateMeal = async (mealId: number) => {
+    try {
+      const response = await PatchMethod("meals/activate", mealId, lang);
+
+      if (response?.code === 200) {
+        toast.success(
+          typeof response.message === "string"
+            ? response.message
+            : response.message?.english || t("meal_activated_successfully"),
+        );
+
+        // Invalidate and refetch meals to update the table
+        queryClient.invalidateQueries({ queryKey: ["meals"] });
+      } else {
+        toast.error(
+          typeof response?.message === "string"
+            ? response.message
+            : response?.message?.english || t("failed_to_activate_meal"),
+        );
+      }
+    } catch (error: any) {
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(
+          typeof error.response.data.message === "string"
+            ? error.response.data.message
+            : error.response.data.message.english,
+        );
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error(t("failed_to_activate_meal"));
+      }
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    refetch,
+  }));
+
+  const handleFilterChange = (newFilters: Record<string, string>) => {
+    setFilters(newFilters);
+    setPage(1); // Reset to first page when filtering
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setPage(1);
+  };
+
+  // Define filter configuration for meals
+  const filterConfig = [
+    {
+      key: "type",
+      label: t("Meal Type"),
+      type: "select",
+      placeholder: t("All Types"),
+      options: [
+        { value: "BREAKFAST", label: t("Breakfast") },
+        { value: "LAUNCH", label: t("Lunch") },
+        { value: "DINNER", label: t("Dinner") },
+        { value: "SNACK", label: t("Snack") },
+        { value: "OTHER", label: t("Other") },
+      ],
+    },
+    {
+      key: "calorieRange",
+      label: t("Calorie Range"),
+      type: "select",
+      placeholder: t("Any Calories"),
+      options: [
+        { value: "LOW", label: t("Low (0-300)") },
+        { value: "MEDIUM", label: t("Medium (301-600)") },
+        { value: "HIGH", label: t("High (601+)") },
+      ],
+    },
+    {
+      key: "isRequest",
+      label: t("Request Status"),
+      type: "select",
+      placeholder: t("All Statuses"),
+      options: [
+        { value: "true", label: t("Requested") },
+        { value: "false", label: t("Standard") },
+      ],
+    },
+  ];
 
   const columns: ColumnDef<Meal>[] = [
     {
       id: "actions",
-      cell: ({ row }) => (
-        <div className="flex flex-row gap-3 items-center justify-center">
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-            onClick={() => {
-              setSelectedMeal(row.original);
-              setIsModalOpen(true);
-            }}
-          >
-            <Icon icon="heroicons:eye" className="h-4 w-4" />
-          </Button>{" "}
-          <Link href={`/meals/${row.original.id}/edit`}>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-              <Icon icon="heroicons:pencil" className="h-4 w-4" />
-            </Button>
-          </Link>
-          <DeleteConfirmationDialog
-            onConfirm={() => console.log(`Deleting meal: ${row.original.name}`)}
-            title="Delete Meal"
-            description="Are you sure you want to delete this meal? This action cannot be undone."
-            confirmText="Delete"
-            itemName="meal"
-            destructive={true}
-            icon="fluent:delete-48-filled"
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "id",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"ID"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => (
-        <div className="w-[80px]">
-          <span className="inline-flex items-center justify-center w-8 h-8 text-xs font-bold text-white bg-gradient-to-r from-[#25235F] to-[#25235F]/80 rounded-full">
-            {row.original.id.slice(0, 3)}
-          </span>
-        </div>
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "name",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Meal Name"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
       cell: ({ row }) => {
+        const meal = row.original;
+        const isProcessing = processingRequest === meal.id;
+
         return (
-          <div className="flex items-center justify-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 flex items-center justify-center">
-              <Icon icon="heroicons:heart" className="h-5 w-5 text-[#25235F]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="max-w-[200px] truncate font-semibold text-gray-800 hover:text-[#25235F] transition-colors duration-200">
-                {row.original.name}
-              </span>
-              <span className="text-xs text-gray-500">
-                {row.original.ingredients.slice(0, 2).join(", ")}...
-              </span>
-            </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            {/* Action buttons for requested meals */}
+            {meal.isRequest && (
+              <>
+                <Button
+                  onClick={() => handleAcceptRequest(meal.id)}
+                  disabled={isProcessing}
+                  size="sm"
+                  className={`
+                    bg-green-500 hover:bg-green-600 text-white
+                    border-0 font-medium px-3 py-1.5 h-auto
+                    transition-all duration-300
+                    ${isProcessing ? "opacity-70 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs">{t("Processing")}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Icon icon="heroicons:check" className="h-3.5 w-3.5" />
+                      <span className="text-xs">{t("Accept")}</span>
+                    </div>
+                  )}
+                </Button>
+
+                <Button
+                  onClick={() => handleRejectRequest(meal.id)}
+                  disabled={isProcessing}
+                  size="sm"
+                  variant="destructive"
+                  className={`
+                    px-3 py-1.5 h-auto font-medium
+                    transition-all duration-300
+                    ${isProcessing ? "opacity-70 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs">{t("Processing")}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
+                      <span className="text-xs">{t("Reject")}</span>
+                    </div>
+                  )}
+                </Button>
+              </>
+            )}
+
+            {/* Standard action buttons for non-request meals */}
+            {!meal.isRequest && (
+              <>
+                <Link href={`/meals/${meal.id}/edit`}>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    <Icon icon="heroicons:pencil" className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+                <ActivationConfirmationDialog
+                  onConfirm={() =>
+                    meal.status === "active"
+                      ? handleDeactivateMeal(meal.id)
+                      : handleActivateMeal(meal.id)
+                  }
+                  currentStatus={meal.status === "active"}
+                  title={
+                    meal.status === "active"
+                      ? t("Deactivate Meal")
+                      : t("Activate Meal")
+                  }
+                  description={
+                    meal.status === "active"
+                      ? t(
+                          "Are you sure you want to deactivate this meal? It will be hidden from users",
+                        )
+                      : t(
+                          "Are you sure you want to activate this meal? It will be visible to users",
+                        )
+                  }
+                  confirmText={
+                    meal.status === "active" ? t("Deactivate") : t("Activate")
+                  }
+                  itemName={t("meal")}
+                  destructive={meal.status === "active"}
+                  icon={
+                    meal.status === "active"
+                      ? "heroicons:power"
+                      : "heroicons:check-circle"
+                  }
+                />
+              </>
+            )}
           </div>
         );
       },
     },
     {
-      accessorKey: "category",
+      accessorKey: "image",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Category"}
+          title={t("Meal Image")}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
-        const categoryColors = {
-          breakfast:
-            "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
-          lunch: "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
-          dinner: "bg-gradient-to-r from-purple-500 to-purple-600 text-white",
-          snacks: "bg-gradient-to-r from-green-500 to-green-600 text-white",
+        // Handle both full URLs and relative paths
+        const imageUrl = row.original.image.startsWith("http")
+          ? row.original.image
+          : baseUrl + row.original.image;
+
+        return (
+          <ImageCell
+            image={imageUrl}
+            alt={row.original.type}
+            size="md"
+            shape="square"
+            baseUrl=""
+            showZoom={true}
+          />
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("Meal Type")}
+          className="text-[#25235F] font-bold"
+        />
+      ),
+      cell: ({ row }) => {
+        const mealTypeColors = {
+          BREAKFAST:
+            "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200",
+          LUNCH:
+            "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
+          DINNER:
+            "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-200",
+          SNACK:
+            "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-200",
+          OTHER:
+            "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200",
         };
+
+        const defaultStyle =
+          "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200";
 
         return (
           <div className="flex items-center justify-center">
             <Badge
-              className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${
-                categoryColors[
-                  row.original.category as keyof typeof categoryColors
-                ] || "bg-gray-500 text-white"
-              }`}
+              className={`
+                relative
+                text-center font-semibold px-4 py-2 rounded-full 
+                border-0 min-w-[100px] transition-all duration-300
+                hover:scale-105 hover:shadow-xl
+                group cursor-pointer
+                ${
+                  mealTypeColors[
+                    row.original.type as keyof typeof mealTypeColors
+                  ] || defaultStyle
+                }
+              `}
             >
-              {row.original.category}
+              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
+                {row.original.type}
+              </span>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </Badge>
           </div>
         );
       },
     },
     {
-      accessorKey: "calories",
+      accessorKey: "mealItems",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Calories"}
+          title={t("Meal Items")}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:fire" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
-              {row.original.calories}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "protein",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Protein (g)"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:muscle" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
-              {row.original.protein}g
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "carbs",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title={"Carbs (g)"}
-          className="text-[#25235F] font-bold"
-        />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center gap-2">
-            <Icon
-              icon="heroicons:academic-cap"
-              className="h-4 w-4 text-[#25235F]"
+        const mealItems = row.original.mealItem || [];
+
+        if (mealItems.length === 0) {
+          return (
+            <EnhancedReadMoreItems
+              description={t("No meal items available")}
+              icon="heroicons:clipboard-document-list"
+              maxLength={50}
+              maxWidth="250px"
+              variant="compact"
             />
-            <span className="text-sm font-medium text-gray-700">
-              {row.original.carbs}g
-            </span>
+          );
+        }
+
+        return (
+          <div className="space-y-1 max-w-[250px]">
+            {mealItems.map((item, index) => (
+              <div key={item.id || index} className="flex items-start gap-2">
+                <Icon
+                  icon="heroicons:check-badge"
+                  className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0"
+                />
+                <span className="text-sm text-gray-700 leading-relaxed">
+                  {lang == "en"
+                    ? item.description.english
+                    : item.description.arabic}
+                </span>
+              </div>
+            ))}
           </div>
         );
       },
     },
     {
-      accessorKey: "fat",
+      accessorKey: "totalCalory",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Fat (g)"}
+          title={t("Total Calories")}
+          className="text-[#25235F] font-bold"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-start gap-2">
+          <Icon icon="heroicons:fire" className="h-4 w-4 text-red-500" />
+          <span className="font-semibold text-gray-800">
+            {row.original.totalCalory} kcal
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "nutrition",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("Nutrition")}
+          className="text-[#25235F] font-bold"
+        />
+      ),
+      cell: ({ row }) => (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex flex-col gap-1 text-xs">
+                <div className="flex justify-between gap-2">
+                  <span className="text-blue-600 font-medium">Protein:</span>
+                  <span>{row.original.proteins}g</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-orange-600 font-medium">Fat:</span>
+                  <span>{row.original.fat}g</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-green-600 font-medium">Carbs:</span>
+                  <span>{row.original.carp}g</span>
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <div className="space-y-2">
+                <p className="font-semibold">{t("Nutritional Information")}</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <span className="text-blue-600">Protein:</span>
+                  <span>{row.original.proteins}g</span>
+                  <span className="text-orange-600">Fat:</span>
+                  <span>{row.original.fat}g</span>
+                  <span className="text-green-600">Carbs:</span>
+                  <span>{row.original.carp}g</span>
+                  <span className="text-red-600">Total Calories:</span>
+                  <span>{row.original.totalCalory} kcal</span>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ),
+    },
+    {
+      accessorKey: "isRequest",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("Request Status")}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
+        const isRequest = row.original.isRequest;
+
+        const statusConfig = {
+          true: {
+            gradient: "bg-gradient-to-r from-purple-500 to-indigo-600",
+            shadow: "shadow-lg shadow-purple-200",
+            icon: "heroicons:clock",
+            label: t("Requested"),
+            badgeClass: "animate-pulse",
+          },
+          false: {
+            gradient: "bg-gradient-to-r from-gray-500 to-slate-600",
+            shadow: "shadow-lg shadow-gray-200",
+            icon: "heroicons:check",
+            label: t("Standard"),
+            badgeClass: "",
+          },
+        };
+
+        const config = isRequest ? statusConfig.true : statusConfig.false;
+
         return (
-          <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:cube" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
-              {row.original.fat}g
-            </span>
-          </div>
+          <>
+            <div className="flex items-center justify-center">
+              <Badge
+                className={`
+                group relative
+                flex items-center gap-2
+                text-center font-semibold px-4 py-2 rounded-full 
+                border-0 min-w-[100px] transition-all duration-300
+                hover:scale-105 hover:shadow-xl
+                ${config.gradient} ${config.shadow} ${config.badgeClass}
+                text-white
+              `}
+              >
+                <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                <Icon
+                  icon={config.icon}
+                  className="h-3 w-3 transition-transform group-hover:scale-110"
+                />
+                <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
+                  {config.label}
+                </span>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              </Badge>
+            </div>
+            {isRequest && (
+              <div className="relative block z-10 text-sm tracking-wide drop-shadow-sm">
+                by {row.original.requestedBy.name}
+              </div>
+            )}
+          </>
         );
       },
     },
-    
     {
       accessorKey: "status",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title={"Status"}
+          title={t("Status")}
           className="text-[#25235F] font-bold"
         />
       ),
       cell: ({ row }) => {
-        const statusColors = {
-          active: "bg-gradient-to-r from-green-500 to-green-600 text-white",
-          inactive: "bg-gradient-to-r from-gray-500 to-gray-600 text-white",
+        const status = row.original.status;
+
+        const statusConfig = {
+          active: {
+            gradient: "bg-gradient-to-r from-green-500 to-emerald-600",
+            shadow: "shadow-lg shadow-green-200",
+            icon: "heroicons:check-circle",
+            label: t("Active"),
+          },
+          in_active: {
+            gradient: "bg-gradient-to-r from-red-500 to-rose-600",
+            shadow: "shadow-lg shadow-red-200",
+            icon: "heroicons:minus-circle",
+            label: t("Inactive"),
+          },
         };
+
+        const config =
+          statusConfig[status as keyof typeof statusConfig] ||
+          statusConfig.in_active;
 
         return (
           <div className="flex items-center justify-center">
             <Badge
-              className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${
-                statusColors[
-                  row.original.status as keyof typeof statusColors
-                ] || "bg-gray-500 text-white"
-              }`}
+              className={`
+            group relative
+            flex items-center gap-2
+            text-center font-semibold px-4 py-2 rounded-full 
+            border-0 min-w-[100px] transition-all duration-300
+            hover:scale-105 hover:shadow-xl
+            ${config.gradient} ${config.shadow}
+            text-white
+          `}
             >
-              {row.original.status}
+              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <Icon
+                icon={config.icon}
+                className="h-3 w-3 transition-transform group-hover:scale-110"
+              />
+              <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
+                {config.label}
+              </span>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </Badge>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("Created Date")}
+          className="text-[#25235F] font-bold"
+        />
+      ),
+      cell: ({ row }) => {
+        const date = new Date(row.original.createdAt);
+        const formattedDate = date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+
+        return (
+          <div className="flex items-center justify-start gap-2">
+            <Icon
+              icon="heroicons:calendar"
+              className="h-4 w-4 text-[#25235F]"
+            />
+            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
+              {formattedDate}
+            </span>
           </div>
         );
       },
     },
   ];
 
+  // Memoized data for the table - fixed to use apiResponse.data.meals
+  const tableData = useMemo(() => {
+    return apiResponse?.data?.meals || [];
+  }, [apiResponse]);
+
+  // Calculate total items - use the totalItems from API response
+  const totalItems = useMemo(() => {
+    return apiResponse?.totalItems || apiResponse?.data?.meals?.length || 0;
+  }, [apiResponse]);
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="rounded-xl overflow-hidden bg-white">
-        <DataTable data={filteredData} columns={columns} />
+      {/* Statistics Banner */}
+      {apiResponse?.data?.statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Active Meals</p>
+                <p className="text-2xl font-bold">
+                  {apiResponse.data.statistics.active}
+                </p>
+              </div>
+              <Icon
+                icon="heroicons:check-circle"
+                className="h-8 w-8 opacity-80"
+              />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-gray-500 to-slate-600 rounded-xl p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Inactive Meals</p>
+                <p className="text-2xl font-bold">
+                  {apiResponse.data.statistics.inActive}
+                </p>
+              </div>
+              <Icon
+                icon="heroicons:minus-circle"
+                className="h-8 w-8 opacity-80"
+              />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Meal Requests</p>
+                <p className="text-2xl font-bold">
+                  {apiResponse.data.statistics.requests}
+                </p>
+              </div>
+              <Icon icon="heroicons:clock" className="h-8 w-8 opacity-80" />
+            </div>
+          </div>
+        </div>
+      )}
 
-        {selectedMeal && (
-          <MealDetailsModal
-            meal={selectedMeal}
-            isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false);
-              setSelectedMeal(null);
-            }}
-          />
-        )}
+      {/* Generic Filter Component */}
+      <GenericFilter
+        filters={filterConfig}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        initialFilters={filters}
+      />
+
+      <div className="rounded-xl overflow-hidden bg-white">
+        <DataTable
+          data={tableData}
+          columns={columns}
+          isLoading={isLoading}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearch}
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
     </div>
   );
-};
+});
+
+MealTable.displayName = "MealTable";
 
 export default MealTable;

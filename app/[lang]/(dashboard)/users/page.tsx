@@ -153,9 +153,7 @@ const GymMembersPage = () => {
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <TableData t={t} />
-                </div>
+                <div className="p-6">{/* <TableData t={t} /> */}</div>
               </div>
             </div>
           </CardContent>

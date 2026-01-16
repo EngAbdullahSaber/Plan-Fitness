@@ -3,7 +3,6 @@ import React from "react";
 import {
   Utensils,
   Heart,
-  flame,
   Egg,
   Carrot,
   Scale,
@@ -47,7 +46,7 @@ interface MealDetailsModalProps {
   onClose: () => void;
 }
 
-const MealDetailsModal: React.FC<MealDetailsModalProps> = ({
+const MealDetailsModals: React.FC<MealDetailsModalProps> = ({
   meal,
   isOpen,
   onClose,
@@ -146,7 +145,7 @@ const MealDetailsModal: React.FC<MealDetailsModalProps> = ({
         {
           label: "Calories",
           value: record.calories,
-          icon: flame,
+          icon: Egg,
           format: (val: number) => `${val} kcal`,
         },
         {
@@ -286,4 +285,4 @@ const MealDetailsModal: React.FC<MealDetailsModalProps> = ({
   );
 };
 
-export default MealDetailsModal;
+export default MealDetailsModals;

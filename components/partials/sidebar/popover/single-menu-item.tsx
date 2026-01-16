@@ -22,8 +22,14 @@ const SingleMenuItem = ({
   const { Navigate, t } = useTranslate();
   const isActive = isLocationMatch(href, locationName);
 
+  // Detect if we're in RTL mode (Arabic)
+  const isRTL =
+    document.documentElement.dir === "rtl" ||
+    document.body.dir === "rtl" ||
+    window.getComputedStyle(document.documentElement).direction === "rtl";
+
   return (
-    <li className="relative w-full">
+    <li className="relative w-full group">
       <Link href={Navigate(href)} className="block">
         {collapsed ? (
           <div className="relative flex items-center justify-center h-16">
@@ -35,8 +41,9 @@ const SingleMenuItem = ({
                       "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 relative z-10",
                       {
                         "bg-[#eef1f9] text-blue-600": isActive,
-                        "text-white hover:bg-[#eef1f9]": !isActive,
-                      }
+                        "text-white hover:bg-[#eef1f9] hover:text-blue-600":
+                          !isActive,
+                      },
                     )}
                   >
                     <item.icon className="w-6 h-6" />
@@ -44,7 +51,7 @@ const SingleMenuItem = ({
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                   <Tooltip.Content
-                    side="right"
+                    side={isRTL ? "left" : "right"}
                     className="bg-gray-800 text-white rounded-md px-3 py-2 text-sm shadow-lg z-50"
                     sideOffset={10}
                   >
@@ -59,7 +66,14 @@ const SingleMenuItem = ({
           <div className="relative flex items-center h-16 px-4">
             {/* Active background with curved edges */}
             {isActive && (
-              <div className="absolute inset-0 bg-[#eef1f9] rounded-l-3xl"></div>
+              <div
+                className={cn(
+                  "absolute inset-0 bg-[#eef1f9]",
+                  isRTL
+                    ? "rounded-r-3xl rounded-l-none"
+                    : "rounded-l-3xl rounded-r-none",
+                )}
+              ></div>
             )}
 
             <div className="relative z-10 flex items-center w-full">
@@ -69,8 +83,8 @@ const SingleMenuItem = ({
                   "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
                   {
                     "bg-blue-100 text-blue-600": isActive,
-                    "text-white": !isActive,
-                  }
+                    "text-white group-hover:text-blue-600": !isActive,
+                  },
                 )}
               >
                 <item.icon className="w-5 h-5" />
@@ -80,11 +94,12 @@ const SingleMenuItem = ({
               {!collapsed && (
                 <span
                   className={cn(
-                    "ml-4 font-medium transition-all duration-300 whitespace-nowrap",
+                    "font-medium transition-all duration-300 whitespace-nowrap",
+                    isRTL ? "mr-4 ml-0" : "ml-4 mr-0",
                     {
                       "text-blue-600": isActive,
-                      "text-white": !isActive,
-                    }
+                      "text-white group-hover:text-blue-600": !isActive,
+                    },
                   )}
                 >
                   {t(title)}
@@ -95,11 +110,13 @@ const SingleMenuItem = ({
               {badge && !collapsed && (
                 <Badge
                   className={cn(
-                    "ml-auto px-2 py-1 text-xs font-medium rounded-full",
+                    "px-2 py-1 text-xs font-medium rounded-full",
+                    isRTL ? "mr-auto ml-0" : "ml-auto mr-0",
                     {
                       "bg-blue-100 text-blue-600": isActive,
-                      "bg-[#eef1f9] text-white": !isActive,
-                    }
+                      "bg-[#eef1f9]/20 text-white group-hover:text-blue-600":
+                        !isActive,
+                    },
                   )}
                 >
                   {badge}
@@ -110,8 +127,24 @@ const SingleMenuItem = ({
             {/* Curved indicators for active state */}
             {isActive && (
               <>
-                <div className="absolute -top-4 right-0 w-4 h-4 bg-transparent rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)]"></div>
-                <div className="absolute -bottom-4 right-0 w-4 h-4 bg-transparent rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)]"></div>
+                {/* Top curve */}
+                <div
+                  className={cn(
+                    "absolute -top-4 w-4 h-4 bg-transparent",
+                    isRTL
+                      ? "left-0 rounded-bl-full shadow-[-5px_5px_0_5px_rgba(238,241,249)]"
+                      : "right-0 rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)]",
+                  )}
+                ></div>
+                {/* Bottom curve */}
+                <div
+                  className={cn(
+                    "absolute -bottom-4 w-4 h-4 bg-transparent",
+                    isRTL
+                      ? "left-0 rounded-tl-full shadow-[-5px_-5px_0_5px_rgba(238,241,249)]"
+                      : "right-0 rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)]",
+                  )}
+                ></div>
               </>
             )}
           </div>
@@ -120,7 +153,14 @@ const SingleMenuItem = ({
 
       {/* Hover effects for non-active items */}
       {!isActive && !collapsed && (
-        <div className="absolute inset-0 rounded-l-3xl hover:bg-[#eef1f9] transition-all duration-300"></div>
+        <div
+          className={cn(
+            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-[#eef1f9]",
+            isRTL
+              ? "rounded-r-3xl rounded-l-none"
+              : "rounded-l-3xl rounded-r-none",
+          )}
+        ></div>
       )}
     </li>
   );

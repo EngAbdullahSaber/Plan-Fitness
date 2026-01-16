@@ -132,11 +132,7 @@ const LoginPage = () => {
                   <Heart className="w-6 h-6 text-pink-400 fill-current animate-pulse" />
                 </div>
                 <blockquote className="text-white text-lg font-semibold italic">
-                  "
-                  {t(
-                    "Your body can stand almost anything. It's your mind you have to convince"
-                  )}
-                  "
+                  "{t("LoginParagraph")}"
                 </blockquote>
                 <cite className="text-pink-400 text-sm mt-2 block">
                   - {t("Fitness Motivation")}

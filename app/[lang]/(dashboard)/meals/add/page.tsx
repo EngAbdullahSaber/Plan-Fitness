@@ -1,140 +1,247 @@
 "use client";
-import React from "react";
-import GenericCreateForm from "../../shared/GenericCreateForm";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import {
+  CreateMethod,
+  CreateMethodFormData,
+} from "@/app/services/apis/ApiMethod";
+import { toast } from "../../shared/toast";
+import { useTranslate } from "@/config/useTranslation";
+import GenericCreateForm from "../../shared/GenericCreateForm";
 
-const MealCreateForm = ({ onClose }: { onClose?: () => void }) => {
+interface MealItem {
+  description: {
+    english: string;
+    arabic: string;
+  };
+}
+
+interface MealFormData {
+  image: string;
+  type: string;
+  totalCalory: number;
+  proteins: number;
+  fat: number;
+  carp: number;
+  mealItems: MealItem[];
+}
+
+const MealsCreateForm = () => {
   const router = useRouter();
+  const { lang } = useParams();
+  const { t } = useTranslate();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mealItems, setMealItems] = useState<MealItem[]>([
+    { description: { english: "", arabic: "" } },
+  ]);
 
-  const handleSubmit = (data: Record<string, any>) => {
-    console.log("Form submitted:", data);
-    // Here you would typically send the data to your API
-    if (onClose) onClose();
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast.error(
+          "Error",
+          "Please select a valid image file (JPEG, PNG, WebP)"
+        );
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error("Error", "Image size should be less than 5MB");
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const initialData = {
-    id: `MEAL-${Math.floor(1000 + Math.random() * 9000)}`,
-    name: "",
-    category: "",
-    calories: "",
-    protein: "",
-    carbs: "",
-    fat: "",
-    status: "active",
-    price: "",
-    featured: false,
-    ingredients: "",
+  // Upload image first and get the URL
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const imageFormData = new FormData();
+      imageFormData.append("file", file);
+
+      const uploadResponse = await CreateMethodFormData(
+        "upload",
+        imageFormData,
+        lang
+      );
+
+      if (
+        uploadResponse?.data?.code === 200 &&
+        uploadResponse?.data?.data?.url
+      ) {
+        return uploadResponse.data.data.url;
+      } else {
+        toast.error(
+          "Error",
+          uploadResponse?.data?.message || "Failed to upload image"
+        );
+        return null;
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(
+        "Error",
+        error.response?.data?.message || "Failed to upload image"
+      );
+      return null;
+    }
   };
 
-  const categories = ["breakfast", "lunch", "dinner", "snacks"];
-  const statusOptions = ["active", "inactive"];
+  const handleSubmit = async (data: Record<string, any>) => {
+    try {
+      setIsSubmitting(true);
+
+      // Validate meal items
+      const validMealItems = mealItems.filter(
+        (item) =>
+          item.description.english.trim() !== "" &&
+          item.description.arabic.trim() !== ""
+      );
+
+      if (validMealItems.length === 0) {
+        toast.error(
+          "Error",
+          "Please add at least one meal item with both English and Arabic descriptions"
+        );
+        return;
+      }
+
+      let imageUrl = "";
+
+      // Upload image first if selected
+      if (selectedImage) {
+        const uploadedUrl = await uploadImage(selectedImage);
+        if (!uploadedUrl) {
+          // Stop submission if image upload failed
+          return;
+        }
+        imageUrl = uploadedUrl;
+      }
+
+      // Create meal data object
+      const mealData = {
+        type: data.type,
+        totalCalory: Number(data.totalCalory),
+        proteins: Number(data.proteins),
+        fat: Number(data.fat),
+        carp: Number(data.carp),
+        mealItems: validMealItems,
+        ...(imageUrl && { image: imageUrl }), // Only include image if URL exists
+      };
+
+      console.log("Meal data to create:", mealData);
+
+      // Call the API to create Meal (without FormData since image is now a URL)
+      const response = await CreateMethod("meals", mealData, lang);
+
+      console.log("Create meal API Response:", response);
+
+      // Handle response based on your API structure
+      if (
+        response?.data?.code === 200 ||
+        response?.code === 200 ||
+        response?.status === 201
+      ) {
+        toast.success(
+          "Success!",
+          response.data?.message ||
+            response.message ||
+            "Meal created successfully"
+        );
+
+        // Redirect to meals list page
+        router.push("/meals");
+      } else {
+        toast.error(
+          "Error",
+          response?.data?.message ||
+            response?.message ||
+            "Failed to create meal"
+        );
+      }
+    } catch (error: any) {
+      console.error("Error creating meal:", error);
+      toast.error(
+        "Error",
+        error.response?.data?.message || "Failed to create meal"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fields = [
-    // Basic Information Section
     [
       {
-        name: "name",
-        label: "Meal Name",
-        type: "text",
-        placeholder: "Enter meal name",
-        required: true,
-        validation: {
-          minLength: 2,
-          maxLength: 100,
-          custom: (value) => {
-            if (!value || value.trim() === "") return "Meal name is required";
-            if (value.length < 2)
-              return "Meal name must be at least 2 characters";
-            return null;
-          },
-        },
-      },
-      {
-        name: "category",
-        label: "Category",
+        name: "type",
+        label: "Meal Type",
         type: "select",
-        options: categories,
         required: true,
+        placeholder: "Select meal type...",
+        options: [
+          { value: "BREAKFAST", label: "Breakfast" },
+          { value: "LAUNCH", label: "Lunch" },
+          { value: "DINNER", label: "Dinner" },
+          { value: "SNACK", label: "Snack" },
+          { value: "OTHER", label: "Other" },
+        ],
         validation: {
           custom: (value) => {
-            if (!value) return "Please select a category";
+            if (!value) return "Meal type is required";
             return null;
           },
         },
       },
       {
-        name: "ingredients",
-        label: "Ingredients",
-        type: "textarea",
-        placeholder: "Enter ingredients separated by commas",
+        name: "totalCalory",
+        label: "Total Calories",
+        type: "number",
+        placeholder: "Enter total calories",
         required: true,
+        step: "0.1",
         validation: {
-          minLength: 3,
+          min: 0,
+          max: 5000,
           custom: (value) => {
-            if (!value) return "Ingredients are required";
-            if (value.length < 3) return "Please enter at least one ingredient";
+            if (!value || value === "") return "Total calories are required";
+            if (value < 0) return "Calories cannot be negative";
+            if (value > 5000) return "Calories seem too high";
             return null;
           },
         },
       },
     ],
-
-    // Nutritional Information Section
     [
       {
-        name: "calories",
-        label: "Calories",
+        name: "proteins",
+        label: "Proteins (g)",
         type: "number",
-        placeholder: "e.g., 380",
+        placeholder: "Enter protein amount in grams",
         required: true,
-        validation: {
-          min: 0,
-          max: 2000,
-          custom: (value) => {
-            if (!value) return "Calories are required";
-            const numValue = Number(value);
-            if (isNaN(numValue)) return "Please enter a valid number";
-            if (numValue < 0) return "Calories must be positive";
-            if (numValue > 2000) return "Calories must be less than 2000";
-            return null;
-          },
-        },
-      },
-      {
-        name: "protein",
-        label: "Protein (g)",
-        type: "number",
-        placeholder: "e.g., 22",
-        required: true,
-        validation: {
-          min: 0,
-          max: 100,
-          custom: (value) => {
-            if (!value) return "Protein is required";
-            const numValue = Number(value);
-            if (isNaN(numValue)) return "Please enter a valid number";
-            if (numValue < 0) return "Protein must be positive";
-            if (numValue > 100) return "Protein must be less than 100g";
-            return null;
-          },
-        },
-      },
-      {
-        name: "carbs",
-        label: "Carbs (g)",
-        type: "number",
-        placeholder: "e.g., 55",
-        required: true,
+        step: "0.1",
         validation: {
           min: 0,
           max: 200,
           custom: (value) => {
-            if (!value) return "Carbs are required";
-            const numValue = Number(value);
-            if (isNaN(numValue)) return "Please enter a valid number";
-            if (numValue < 0) return "Carbs must be positive";
-            if (numValue > 200) return "Carbs must be less than 200g";
+            if (!value || value === "") return "Protein amount is required";
+            if (value < 0) return "Protein cannot be negative";
+            if (value > 200) return "Protein amount seems too high";
             return null;
           },
         },
@@ -143,78 +250,113 @@ const MealCreateForm = ({ onClose }: { onClose?: () => void }) => {
         name: "fat",
         label: "Fat (g)",
         type: "number",
-        placeholder: "e.g., 10",
+        placeholder: "Enter fat amount in grams",
         required: true,
+        step: "0.1",
         validation: {
           min: 0,
-          max: 100,
+          max: 200,
           custom: (value) => {
-            if (!value) return "Fat is required";
-            const numValue = Number(value);
-            if (isNaN(numValue)) return "Please enter a valid number";
-            if (numValue < 0) return "Fat must be positive";
-            if (numValue > 100) return "Fat must be less than 100g";
+            if (!value || value === "") return "Fat amount is required";
+            if (value < 0) return "Fat cannot be negative";
+            if (value > 200) return "Fat amount seems too high";
             return null;
           },
         },
+      },
+      {
+        name: "carp",
+        label: "Carbohydrates (g)",
+        type: "number",
+        placeholder: "Enter carbohydrate amount in grams",
+        required: true,
+        step: "0.1",
+        validation: {
+          min: 0,
+          max: 500,
+          custom: (value) => {
+            if (!value || value === "")
+              return "Carbohydrate amount is required";
+            if (value < 0) return "Carbohydrates cannot be negative";
+            if (value > 500) return "Carbohydrate amount seems too high";
+            return null;
+          },
+        },
+        cols: 1, // Full width
       },
     ],
 
-    // Pricing & Status Section
     [
       {
-        name: "price",
-        label: "Price ($)",
-        type: "number",
-        step: 0.01,
-        placeholder: "e.g., 12.99",
-        required: true,
+        name: "image",
+        label: "Meal Image",
+        type: "image",
+        required: false,
+        accept: "image/*",
+        description: "Supported formats: JPEG, PNG, WebP. Max size: 5MB",
+        onChange: handleImageChange,
         validation: {
-          min: 0,
-          max: 100,
+          maxFileSize: 5 * 1024 * 1024, // 5MB
+          allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
           custom: (value) => {
-            if (!value) return "Price is required";
-            const numValue = Number(value);
-            if (isNaN(numValue)) return "Please enter a valid price";
-            if (numValue < 0) return "Price must be positive";
-            if (numValue > 100) return "Price must be less than $100";
             return null;
           },
         },
+        cols: 1, // Full width
       },
+    ],
+    [
       {
-        name: "status",
-        label: "Status",
-        type: "select",
-        options: statusOptions,
+        name: "mealItems",
+        label: "Meal Items",
+        type: "mealItem",
         required: true,
-        validation: {
-          custom: (value) => {
-            if (!value) return "Please select a status";
-            return null;
-          },
-        },
-      },
-      {
-        name: "featured",
-        label: "Featured Meal",
-        type: "switch",
+        cols: 1, // Full width
       },
     ],
   ];
 
   const sections = [
-    { title: "Basic Information", icon: "heroicons:clipboard-document-list" },
-    { title: "Nutritional Information", icon: "heroicons:chart-bar" },
-    { title: "Pricing & Status", icon: "heroicons:currency-dollar" },
+    {
+      title: "Basic Information",
+      icon: "heroicons:document-text",
+      description: "Enter the meal type and total calories",
+    },
+    {
+      title: "Nutrition Facts",
+      icon: "heroicons:chart-bar",
+      description: "Enter the protein and fat content",
+    },
+    {
+      title: "Additional Information",
+      icon: "heroicons:information-circle",
+      description: "Enter carbohydrates and upload meal image",
+    },
+    {
+      title: "Meal Items",
+      icon: "heroicons:list-bullet",
+      description: "Add descriptions for each component of the meal",
+    },
   ];
+
+  const handleCancel = () => {
+    router.back();
+  };
+
+  const initialData = {
+    type: "",
+    totalCalory: "",
+    proteins: "",
+    fat: "",
+    carp: "",
+  };
 
   return (
     <div className="space-y-4">
-      {/* Back button */}
+      {/* Back Button */}
       <div className="space-y-2">
         <Button
-          onClick={() => router.back()}
+          onClick={handleCancel}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
         >
           <svg
@@ -230,22 +372,31 @@ const MealCreateForm = ({ onClose }: { onClose?: () => void }) => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Back
+          {t("Back")}
         </Button>
       </div>
+
       <GenericCreateForm
-        title="Add New Meal"
-        description="Fill in the details below to add a new meal"
+        title="Create New Meal"
+        description="Add a new meal to the system"
         initialData={initialData}
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
-        onCancel={onClose}
-        submitButtonText="Create Meal"
-        cancelButtonText="Cancel"
+        onCancel={handleCancel}
+        showIdField={false}
+        submitButtonText={t("Create Meal")}
+        cancelButtonText={"Cancel"}
+        isLoading={isSubmitting}
+        submitButtonProps={{
+          disabled: isSubmitting,
+        }}
+        // Pass meal items state and handlers
+        mealItems={mealItems}
+        onMealItemsChange={setMealItems}
       />
     </div>
   );
 };
 
-export default MealCreateForm;
+export default MealsCreateForm;
