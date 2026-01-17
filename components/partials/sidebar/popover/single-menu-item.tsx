@@ -40,8 +40,9 @@ const SingleMenuItem = ({
                     className={cn(
                       "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 relative z-10",
                       {
-                        "bg-[#eef1f9] text-blue-600": isActive,
-                        "text-white hover:bg-[#eef1f9] hover:text-blue-600":
+                        "bg-[#eef1f9] dark:bg-gray-700 text-blue-600 dark:text-blue-400":
+                          isActive,
+                        "text-white dark:text-gray-300 hover:bg-[#eef1f9] dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400":
                           !isActive,
                       },
                     )}
@@ -52,11 +53,11 @@ const SingleMenuItem = ({
                 <Tooltip.Portal>
                   <Tooltip.Content
                     side={isRTL ? "left" : "right"}
-                    className="bg-gray-800 text-white rounded-md px-3 py-2 text-sm shadow-lg z-50"
+                    className="bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 rounded-md px-3 py-2 text-sm shadow-lg z-50 border border-gray-700 dark:border-gray-700"
                     sideOffset={10}
                   >
                     {t(title)}
-                    <Tooltip.Arrow className="fill-gray-800" />
+                    <Tooltip.Arrow className="fill-gray-800 dark:fill-gray-900" />
                   </Tooltip.Content>
                 </Tooltip.Portal>
               </Tooltip.Root>
@@ -68,7 +69,7 @@ const SingleMenuItem = ({
             {isActive && (
               <div
                 className={cn(
-                  "absolute inset-0 bg-[#eef1f9]",
+                  "absolute inset-0 bg-[#eef1f9] dark:bg-gray-800",
                   isRTL
                     ? "rounded-r-3xl rounded-l-none"
                     : "rounded-l-3xl rounded-r-none",
@@ -82,8 +83,10 @@ const SingleMenuItem = ({
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
                   {
-                    "bg-blue-100 text-blue-600": isActive,
-                    "text-white group-hover:text-blue-600": !isActive,
+                    "bg-blue-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400":
+                      isActive,
+                    "text-white dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400":
+                      !isActive,
                   },
                 )}
               >
@@ -97,8 +100,9 @@ const SingleMenuItem = ({
                     "font-medium transition-all duration-300 whitespace-nowrap",
                     isRTL ? "mr-4 ml-0" : "ml-4 mr-0",
                     {
-                      "text-blue-600": isActive,
-                      "text-white group-hover:text-blue-600": !isActive,
+                      "text-blue-600 dark:text-blue-400": isActive,
+                      "text-white dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400":
+                        !isActive,
                     },
                   )}
                 >
@@ -113,8 +117,9 @@ const SingleMenuItem = ({
                     "px-2 py-1 text-xs font-medium rounded-full",
                     isRTL ? "mr-auto ml-0" : "ml-auto mr-0",
                     {
-                      "bg-blue-100 text-blue-600": isActive,
-                      "bg-[#eef1f9]/20 text-white group-hover:text-blue-600":
+                      "bg-blue-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400":
+                        isActive,
+                      "bg-[#eef1f9]/20 dark:bg-gray-700/30 text-white dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400":
                         !isActive,
                     },
                   )}
@@ -132,8 +137,8 @@ const SingleMenuItem = ({
                   className={cn(
                     "absolute -top-4 w-4 h-4 bg-transparent",
                     isRTL
-                      ? "left-0 rounded-bl-full shadow-[-5px_5px_0_5px_rgba(238,241,249)]"
-                      : "right-0 rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)]",
+                      ? "left-0 rounded-bl-full shadow-[-5px_5px_0_5px_rgba(238,241,249)] dark:shadow-[-5px_5px_0_5px_rgba(31,41,55)]"
+                      : "right-0 rounded-br-full shadow-[5px_5px_0_5px_rgba(238,241,249)] dark:shadow-[5px_5px_0_5px_rgba(31,41,55)]",
                   )}
                 ></div>
                 {/* Bottom curve */}
@@ -141,8 +146,8 @@ const SingleMenuItem = ({
                   className={cn(
                     "absolute -bottom-4 w-4 h-4 bg-transparent",
                     isRTL
-                      ? "left-0 rounded-tl-full shadow-[-5px_-5px_0_5px_rgba(238,241,249)]"
-                      : "right-0 rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)]",
+                      ? "left-0 rounded-tl-full shadow-[-5px_-5px_0_5px_rgba(238,241,249)] dark:shadow-[-5px_-5px_0_5px_rgba(31,41,55)]"
+                      : "right-0 rounded-tr-full shadow-[5px_-5px_0_5px_rgba(238,241,249)] dark:shadow-[5px_-5px_0_5px_rgba(31,41,55)]",
                   )}
                 ></div>
               </>
@@ -155,7 +160,7 @@ const SingleMenuItem = ({
       {!isActive && !collapsed && (
         <div
           className={cn(
-            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-[#eef1f9]",
+            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-[#eef1f9] dark:bg-gray-700/50",
             isRTL
               ? "rounded-r-3xl rounded-l-none"
               : "rounded-l-3xl rounded-r-none",

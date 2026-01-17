@@ -133,7 +133,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<Record<string, string>>(
-    {}
+    {},
   );
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
   const { lang } = useParams();
@@ -285,7 +285,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
 
@@ -448,8 +448,8 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
           (err) =>
             !err.field.startsWith(`mealItem_${index}_`) &&
             err.field !== `mealItem_${index}_english` &&
-            err.field !== `mealItem_${index}_arabic`
-        )
+            err.field !== `mealItem_${index}_arabic`,
+        ),
       );
     }
   };
@@ -457,7 +457,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   const handleUpdateMealItem = (
     index: number,
     field: "english" | "arabic",
-    value: string
+    value: string,
   ) => {
     const newItems = [...mealItems];
     newItems[index].description[field] = value;
@@ -540,13 +540,13 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <Label className="text-lg font-semibold text-[#25235F]">
+            <Label className="text-lg font-semibold text-[#25235F] dark:text-blue-300">
               {t(field.label)}
             </Label>
             {field.required && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {t(
-                  "Add at least one meal item with descriptions in both English and Arabic"
+                  "Add at least one meal item with descriptions in both English and Arabic",
                 )}
               </p>
             )}
@@ -554,7 +554,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
           <Button
             type="button"
             onClick={handleAddMealItem}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 text-white"
           >
             <Icon icon="heroicons:plus" className="h-4 w-4 mr-2" />
             {t("Add Meal Item")}
@@ -566,17 +566,17 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
           {mealItems.map((item, index) => (
             <Card
               key={index}
-              className="border-2 border-gray-200 hover:border-blue-300 transition-colors relative overflow-hidden"
+              className="border-2 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-colors relative overflow-hidden bg-white dark:bg-gray-800"
             >
               {/* Background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20 dark:from-blue-900/10 dark:to-purple-900/10 pointer-events-none" />
 
               <CardContent className="p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <Icon
                       icon="heroicons:list-bullet"
-                      className="h-5 w-5 text-blue-600"
+                      className="h-5 w-5 text-blue-600 dark:text-blue-400"
                     />
                     {t("Meal Item")} {index + 1}
                   </h4>
@@ -599,7 +599,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   <div className="space-y-3">
                     <Label
                       htmlFor={`mealItem_${index}_english`}
-                      className="text-sm font-medium text-gray-700"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {t("English Description")} *
                     </Label>
@@ -610,20 +610,20 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                         handleUpdateMealItem(index, "english", e.target.value)
                       }
                       placeholder="Enter meal item description in English"
-                      className="min-h-[100px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      className="min-h-[100px] resize-none border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-900/30 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       dir="ltr"
                     />
                     {errors.some(
-                      (err) => err.field === `mealItem_${index}_english`
+                      (err) => err.field === `mealItem_${index}_english`,
                     ) && (
-                      <p className="text-red-500 text-sm flex items-center gap-1">
+                      <p className="text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
                         <Icon
                           icon="heroicons:exclamation-triangle"
                           className="h-4 w-4"
                         />
                         {
                           errors.find(
-                            (err) => err.field === `mealItem_${index}_english`
+                            (err) => err.field === `mealItem_${index}_english`,
                           )?.message
                         }
                       </p>
@@ -634,7 +634,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   <div className="space-y-3">
                     <Label
                       htmlFor={`mealItem_${index}_arabic`}
-                      className="text-sm font-medium text-gray-700"
+                      className="text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {t("Arabic Description")} *
                     </Label>
@@ -645,20 +645,20 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                         handleUpdateMealItem(index, "arabic", e.target.value)
                       }
                       placeholder="أدخل وصف عنصر الوجبة بالعربية"
-                      className="min-h-[100px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-right"
+                      className="min-h-[100px] resize-none border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-900/30 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-right"
                       dir="rtl"
                     />
                     {errors.some(
-                      (err) => err.field === `mealItem_${index}_arabic`
+                      (err) => err.field === `mealItem_${index}_arabic`,
                     ) && (
-                      <p className="text-red-500 text-sm flex items-center gap-1">
+                      <p className="text-red-500 dark:text-red-400 text-sm flex items-center gap-1">
                         <Icon
                           icon="heroicons:exclamation-triangle"
                           className="h-4 w-4"
                         />
                         {
                           errors.find(
-                            (err) => err.field === `mealItem_${index}_arabic`
+                            (err) => err.field === `mealItem_${index}_arabic`,
                           )?.message
                         }
                       </p>
@@ -667,7 +667,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 </div>
 
                 {/* Character counts */}
-                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                   <span>English: {item.description.english.length}/500</span>
                   <span>العربية: {item.description.arabic.length}/500</span>
                 </div>
@@ -678,24 +678,24 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
         {/* Empty State */}
         {mealItems.length === 0 && (
-          <Card className="border-2 border-dashed border-gray-300 bg-gray-50/50 text-center">
+          <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 text-center">
             <CardContent className="p-8">
               <Icon
                 icon="heroicons:clipboard-document-list"
-                className="h-16 w-16 text-gray-400 mx-auto mb-4"
+                className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4"
               />
-              <h4 className="text-lg font-semibold text-gray-600 mb-2">
+              <h4 className="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">
                 {t("No Meal Items Added")}
               </h4>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 {t(
-                  "Add meal items to describe the components of this meal. Each item should have descriptions in both English and Arabic languages"
+                  "Add meal items to describe the components of this meal. Each item should have descriptions in both English and Arabic languages",
                 )}
               </p>
               <Button
                 type="button"
                 onClick={handleAddMealItem}
-                className="bg-blue-600 hover:bg-blue-700 px-6 py-3"
+                className="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 px-6 py-3"
               >
                 <Icon icon="heroicons:plus" className="h-5 w-5 mr-2" />
                 {t("Add Your First Meal Item")}
@@ -707,8 +707,8 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
         {/* Validation error for empty meal items */}
         {errors.some((err) => err.field === "mealItems") &&
           mealItems.length === 0 && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm flex items-center gap-2">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
                 <Icon
                   icon="heroicons:exclamation-triangle"
                   className="h-4 w-4"
@@ -737,7 +737,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
     // Base disabled styles
     const disabledStyles = field.disabled
-      ? "opacity-60 cursor-not-allowed bg-gray-100 border-gray-200"
+      ? "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
       : "";
 
     // State hooks for individual fields
@@ -803,16 +803,18 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   placeholder={isFloating ? field.placeholder : ""}
                   step={field.step}
                   disabled={field.disabled || isLoading}
-                  className={`peer w-full h-14 px-4 pt-6 pb-2 rounded-xl border-2 transition-all duration-300
+                  className={`
+                    peer w-full h-14 px-4 pt-6 pb-2 rounded-xl border-2 transition-all duration-300
                     ${
                       showError
-                        ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100 bg-red-50/30"
+                        ? "border-red-400 dark:border-red-500 focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-100 dark:focus:ring-red-900/30 bg-red-50/30 dark:bg-red-900/20"
                         : field.disabled
-                        ? "border-gray-200 bg-gray-100 text-gray-500"
-                        : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
+                          ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                          : "border-gray-300 dark:border-gray-600 focus:border-[#25235F] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#25235F]/20 dark:focus:ring-blue-900/30 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
                     }
                     ${disabledStyles}
-                    placeholder:text-gray-400 text-gray-700 font-medium
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    text-gray-700 dark:text-gray-200 font-medium
                     ${
                       lang === "ar"
                         ? "text-right placeholder:text-right"
@@ -825,35 +827,44 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
                 <Label
                   htmlFor={field.name}
-                  className={`absolute transition-all duration-200 pointer-events-none ${
-                    field.disabled ? "text-gray-500" : "text-gray-700"
-                  } ${
-                    isFloating
-                      ? "top-1.5 text-xs font-semibold text-[#25235F]"
-                      : "top-1/2 -translate-y-1/2 text-base text-gray-500"
-                  }
+                  className={`
+                    absolute transition-all duration-200 pointer-events-none 
+                    ${
+                      field.disabled
+                        ? "text-gray-500 dark:text-gray-400"
+                        : "text-gray-700 dark:text-gray-300"
+                    } 
+                    ${
+                      isFloating
+                        ? "top-1.5 text-xs font-semibold text-[#25235F] dark:text-blue-400"
+                        : "top-1/2 -translate-y-1/2 text-base text-gray-500 dark:text-gray-400"
+                    }
                     ${lang === "ar" ? "right-4 text-right" : "left-4 text-left"}
                   `}
                 >
                   {t(field.label)}{" "}
                   {field.required && !field.disabled && (
-                    <span className="text-red-500">*</span>
+                    <span className="text-red-500 dark:text-red-400">*</span>
                   )}
                   {field.disabled && (
-                    <span className="text-gray-400 ml-1">(Disabled)</span>
+                    <span className="text-gray-400 dark:text-gray-500 ml-1">
+                      (Disabled)
+                    </span>
                   )}
                 </Label>
 
                 <div
-                  className={`absolute top-1/2 -translate-y-1/2 transition-all duration-300 ${
-                    field.disabled
-                      ? "text-gray-400"
-                      : hasValue && !showError
-                      ? "text-emerald-500"
-                      : showError
-                      ? "text-red-500"
-                      : "text-gray-400"
-                  }
+                  className={`
+                    absolute top-1/2 -translate-y-1/2 transition-all duration-300 
+                    ${
+                      field.disabled
+                        ? "text-gray-400 dark:text-gray-500"
+                        : hasValue && !showError
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : showError
+                            ? "text-red-500 dark:text-red-400"
+                            : "text-gray-400 dark:text-gray-500"
+                    }
                     ${lang === "ar" ? "left-4" : "right-4"}
                   `}
                 >
@@ -864,7 +875,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   ) : showError ? (
                     <Icon
                       icon="heroicons:exclamation-circle"
-                      className="h-5 w-5 text-red-500"
+                      className="h-5 w-5"
                     />
                   ) : null}
                 </div>
@@ -872,7 +883,8 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
               {showError && (
                 <p
-                  className={`mt-2 text-red-500 text-sm flex items-center gap-1.5
+                  className={`
+                    mt-2 text-red-500 dark:text-red-400 text-sm flex items-center gap-1.5
                     ${
                       lang === "ar"
                         ? "flex-row-reverse justify-end"
@@ -900,19 +912,21 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             <div className="flex items-center justify-between">
               <Label
                 htmlFor={field.name}
-                className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
                 {t(field.label)}
                 {field.required && !field.disabled && (
-                  <span className="text-red-500">*</span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 )}
                 {field.disabled && (
-                  <span className="text-gray-400 text-xs ml-1">(Disabled)</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-xs ml-1">
+                    (Disabled)
+                  </span>
                 )}
               </Label>
 
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                 {charCount}/{maxLength}
               </span>
             </div>
@@ -928,17 +942,19 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 dir={lang === "ar" ? "rtl" : "ltr"}
                 maxLength={maxLength}
                 disabled={field.disabled || isLoading}
-                className={`w-full min-h-[100px] px-4 py-3 rounded-xl border-2 transition-all duration-300 resize-none
+                className={`
+                  w-full min-h-[100px] px-4 py-3 rounded-xl border-2 transition-all duration-300 resize-none
                   ${
                     showError
-                      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-red-50/30"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 dark:focus:border-red-400 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/30 bg-red-50/30 dark:bg-red-900/20"
                       : field.disabled
-                      ? "border-gray-200 bg-gray-100 text-gray-500"
-                      : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400 bg-white"
+                        ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        : "border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/30 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
                   }
                   ${disabledStyles}
-                  placeholder:text-gray-400
-                  focus:shadow-lg focus:shadow-blue-100/50
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  focus:shadow-lg focus:shadow-blue-100/50 dark:focus:shadow-blue-900/20
+                  text-gray-700 dark:text-gray-200
                   ${
                     lang === "ar"
                       ? "text-right placeholder:text-right"
@@ -954,7 +970,8 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
             {showError && (
               <p
-                className={`text-red-500 text-sm flex items-center gap-1.5
+                className={`
+                  text-red-500 dark:text-red-400 text-sm flex items-center gap-1.5
                   ${lang === "ar" ? "flex-row-reverse justify-end" : "flex-row"}
                 `}
               >
@@ -971,10 +988,15 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
       case "select":
         return (
           <div className="w-full">
-            <Label htmlFor={field.name} className="text-[#25235F] font-medium">
+            <Label
+              htmlFor={field.name}
+              className="text-[#25235F] dark:text-blue-300 font-medium"
+            >
               {t(field.label)} {field.required && !field.disabled && "*"}
               {field.disabled && (
-                <span className="text-gray-400 text-sm ml-1">(Disabled)</span>
+                <span className="text-gray-400 dark:text-gray-500 text-sm ml-1">
+                  (Disabled)
+                </span>
               )}
             </Label>
             <Select
@@ -984,13 +1006,18 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
               disabled={field.disabled || isLoading}
             >
               <SelectTrigger
-                className={`border-2 transition-all duration-300 ${textAlignment} ${
-                  showError
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : field.disabled
-                    ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
-                } ${disabledStyles}`}
+                className={`
+                  h-14 border-2 transition-all duration-300 ${textAlignment}
+                  ${
+                    showError
+                      ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-900/30"
+                      : field.disabled
+                        ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                        : "border-gray-300 dark:border-gray-600 focus:border-[#25235F] dark:focus:border-blue-500 focus:ring-[#25235F] dark:focus:ring-blue-900/30"
+                  }
+                  ${disabledStyles}
+                  bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                `}
               >
                 <SelectValue
                   placeholder={
@@ -1013,7 +1040,9 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
               </SelectContent>
             </Select>
             {showError && (
-              <p className="text-red-500 text-sm mt-1">{t(error)}</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {t(error)}
+              </p>
             )}
           </div>
         );
@@ -1021,7 +1050,10 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
       case "selectPagination":
         return (
           <div className="w-full">
-            <Label htmlFor={field.name} className="text-[#25235F] font-medium">
+            <Label
+              htmlFor={field.name}
+              className="text-[#25235F] dark:text-blue-300 font-medium"
+            >
               {t(field.label)} {field.required && "*"}
             </Label>
 
@@ -1034,7 +1066,17 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 }
               }}
             >
-              <SelectTrigger className="group relative border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 bg-gradient-to-br from-white via-purple-50/30 to-white backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-0.5 py-3 px-4 rounded-xl font-medium">
+              <SelectTrigger
+                className="
+                h-14 group relative border-2 border-gray-200 dark:border-gray-700 
+                focus:border-purple-500 dark:focus:border-purple-400 
+                focus:ring-4 focus:ring-purple-100 dark:focus:ring-purple-900/30 
+                bg-gradient-to-br from-white dark:from-gray-900 via-purple-50/30 dark:via-purple-900/10 to-white dark:to-gray-900 
+                backdrop-blur-sm transition-all duration-300 
+                hover:shadow-lg hover:shadow-purple-100/50 dark:hover:shadow-purple-900/30 
+                hover:-translate-y-0.5 py-3 px-4 rounded-xl font-medium
+              "
+              >
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
@@ -1043,7 +1085,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   </div>
                   <SelectValue
                     placeholder={
-                      <span className="text-gray-500 font-normal flex items-center gap-2">
+                      <span className="text-gray-500 dark:text-gray-400 font-normal flex items-center gap-2">
                         <span className="text-lg">🔍</span>
                         {field.placeholder ||
                           `Select ${field.label.toLowerCase()}`}
@@ -1051,7 +1093,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     }
                   />
                 </div>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-blue-400/0 to-purple-400/0 group-hover:from-purple-400/5 group-hover:via-blue-400/5 group-hover:to-purple-400/5 transition-all duration-500 pointer-events-none" />
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-blue-400/0 to-purple-400/0 group-hover:from-purple-400/5 group-hover:via-blue-400/5 group-hover:to-purple-400/5 dark:group-hover:from-purple-500/10 dark:group-hover:via-blue-500/10 dark:group-hover:to-purple-500/10 transition-all duration-500 pointer-events-none" />
               </SelectTrigger>
 
               <SearchablePaginatedSelectContent
@@ -1071,7 +1113,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
                 <SelectItem
                   value=""
-                  className="mx-2 my-2 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200 border-b-2 border-gray-100 pb-3 font-semibold text-gray-700 hover:text-purple-600 hover:shadow-sm"
+                  className="mx-2 my-2 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 dark:hover:from-purple-900/30 hover:to-blue-50 dark:hover:to-blue-900/30 transition-all duration-200 border-b-2 border-gray-100 dark:border-gray-800 pb-3 font-semibold text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:shadow-sm dark:hover:shadow-gray-900/50"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
@@ -1083,16 +1125,28 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   {field.paginationOptions?.data?.map((item, index) => (
                     <SelectItem
                       key={`${field.paginationOptions?.getOptionValue(
-                        item
+                        item,
                       )}-${index}`}
                       value={field.paginationOptions?.getOptionValue(item)}
-                      className="rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:via-blue-50/50 hover:to-purple-50 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] py-3 px-3 cursor-pointer group border border-transparent hover:border-purple-100"
+                      className="
+                        rounded-xl 
+                        hover:bg-gradient-to-r 
+                        hover:from-purple-50 dark:hover:from-purple-900/30 
+                        hover:via-blue-50/50 dark:hover:via-blue-900/20 
+                        hover:to-purple-50 dark:hover:to-purple-900/30 
+                        transition-all duration-200 
+                        hover:shadow-sm dark:hover:shadow-gray-900/50 
+                        hover:scale-[1.02] 
+                        py-3 px-3 cursor-pointer 
+                        group border border-transparent hover:border-purple-100 dark:hover:border-purple-800
+                        bg-white dark:bg-gray-900
+                      "
                       style={{
                         animationDelay: `${index * 30}ms`,
                       }}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-medium text-gray-700 group-hover:text-purple-700 transition-colors">
+                        <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
                           {field.paginationOptions?.getOptionLabel(item)}
                         </span>
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1103,7 +1157,11 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
               </SearchablePaginatedSelectContent>
             </Select>
 
-            {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {showError && (
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {error}
+              </p>
+            )}
           </div>
         );
 
@@ -1112,19 +1170,22 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
           <div className="w-full group">
             <Label
               htmlFor={field.name}
-              className="flex items-center gap-2 mb-3 text-sm font-semibold text-[#25235F] group-hover:text-blue-700 transition-colors"
+              className="flex items-center gap-2 mb-3 text-sm font-semibold text-[#25235F] dark:text-blue-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors"
             >
-              <Icon icon="heroicons:photo" className="h-5 w-5 text-blue-600" />
+              <Icon
+                icon="heroicons:photo"
+                className="h-5 w-5 text-blue-600 dark:text-blue-400"
+              />
               <span>{t(field.label)}</span>
             </Label>
 
             {hasImage && (
-              <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 border-2 border-blue-200 shadow-lg animate-in slide-in-from-top-2">
+              <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-white dark:from-gray-900 via-blue-50/30 dark:via-blue-900/10 to-purple-50/30 dark:to-purple-900/10 border-2 border-blue-200 dark:border-blue-800 shadow-lg dark:shadow-gray-900/50 animate-in slide-in-from-top-2">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <Icon
                       icon="heroicons:check-circle"
-                      className="h-4 w-4 text-emerald-600"
+                      className="h-4 w-4 text-emerald-600 dark:text-emerald-500"
                     />
                     {t("Image Uploaded")}
                   </h4>
@@ -1133,7 +1194,16 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => removeImage(field.name)}
-                    className="text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-500 border-red-300 hover:border-red-500 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
+                    className="
+                      text-red-600 dark:text-red-400 
+                      hover:text-white hover:bg-gradient-to-r 
+                      hover:from-red-500 hover:to-pink-500 
+                      border-red-300 dark:border-red-700 
+                      hover:border-red-500 
+                      transition-all duration-300 
+                      font-semibold shadow-sm hover:shadow-md
+                      bg-white dark:bg-gray-800
+                    "
                   >
                     <Icon icon="heroicons:trash" className="h-4 w-4 mr-1" />
                     {t("Remove")}
@@ -1142,7 +1212,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="relative group/img">
-                    <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-xl transition-shadow">
+                    <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-md dark:shadow-gray-900/50 hover:shadow-xl transition-shadow">
                       <img
                         src={imagePreviews[field.name]}
                         alt="Preview"
@@ -1158,33 +1228,33 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
                   {formData[field.name] && (
                     <div className="flex-1 space-y-3">
-                      <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-colors">
+                      <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
                         <div className="flex items-center gap-2 mb-1">
                           <Icon
                             icon="heroicons:document-text"
-                            className="w-4 h-4 text-blue-600"
+                            className="w-4 h-4 text-blue-600 dark:text-blue-400"
                           />
-                          <span className="text-xs font-semibold text-gray-500 uppercase">
+                          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                             {t("File Name")}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-gray-800 truncate">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                           {(formData[field.name] as File)?.name}
                         </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-purple-300 transition-colors">
+                        <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 transition-colors">
                           <div className="flex items-center gap-2 mb-1">
                             <Icon
                               icon="heroicons:archive-box"
-                              className="w-4 h-4 text-purple-600"
+                              className="w-4 h-4 text-purple-600 dark:text-purple-400"
                             />
-                            <span className="text-xs font-semibold text-gray-500 uppercase">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                               {t("Size")}
                             </span>
                           </div>
-                          <p className="text-sm font-medium text-gray-800">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                             {(
                               ((formData[field.name] as File)?.size || 0) /
                               1024 /
@@ -1194,17 +1264,17 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                           </p>
                         </div>
 
-                        <div className="p-3 bg-white rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
+                        <div className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors">
                           <div className="flex items-center gap-2 mb-1">
                             <Icon
                               icon="heroicons:photo"
-                              className="w-4 h-4 text-emerald-600"
+                              className="w-4 h-4 text-emerald-600 dark:text-emerald-400"
                             />
-                            <span className="text-xs font-semibold text-gray-500 uppercase">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                               {t("Type")}
                             </span>
                           </div>
-                          <p className="text-sm font-medium text-gray-800">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                             {(formData[field.name] as File)?.type
                               .split("/")[1]
                               .toUpperCase()}
@@ -1228,18 +1298,23 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             >
               <div
                 className={`absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl opacity-0 blur transition-all duration-500 ${
-                  isDragging ? "opacity-50" : "group-hover:opacity-20"
+                  isDragging
+                    ? "opacity-50"
+                    : "group-hover:opacity-20 dark:group-hover:opacity-10"
                 }`}
               />
 
               <div
-                className={`relative p-8 rounded-2xl border-2 border-dashed transition-all duration-300 ${
-                  isDragging
-                    ? "border-blue-500 bg-blue-50 scale-105"
-                    : showError
-                    ? "border-red-400 bg-red-50/30"
-                    : "border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
-                }`}
+                className={`
+                  relative p-8 rounded-2xl border-2 border-dashed transition-all duration-300 
+                  ${
+                    isDragging
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105"
+                      : showError
+                        ? "border-red-400 dark:border-red-500 bg-red-50/30 dark:bg-red-900/20"
+                        : "border-gray-300 dark:border-gray-600 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20"
+                  }
+                `}
               >
                 <div className="flex flex-col items-center gap-4">
                   <div
@@ -1250,7 +1325,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     }`}
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-20 h-20 bg-blue-400/20 rounded-full blur-xl animate-pulse" />
+                      <div className="w-20 h-20 bg-blue-400/20 dark:bg-blue-500/20 rounded-full blur-xl animate-pulse" />
                     </div>
 
                     <div className="relative w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -1262,9 +1337,9 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   </div>
 
                   <div className="text-center">
-                    <p className="text-base font-semibold text-gray-800 mb-2">
+                    <p className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-2">
                       {isDragging ? (
-                        <span className="text-blue-600 flex items-center gap-2">
+                        <span className="text-blue-600 dark:text-blue-400 flex items-center gap-2">
                           <Icon
                             icon="heroicons:arrow-down-tray"
                             className="w-5 h-5 animate-bounce"
@@ -1279,7 +1354,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     </p>
 
                     {/* Dynamic format display */}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {field.validation?.allowedTypes ? (
                         <>
                           {t("Supports:")}{" "}
@@ -1294,7 +1369,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                             })
                             .filter(
                               (value, index, self) =>
-                                self.indexOf(value) === index
+                                self.indexOf(value) === index,
                             ) // Remove duplicates
                             .join(", ")}{" "}
                           {t("(Max")}{" "}
@@ -1315,7 +1390,17 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   <Button
                     type="button"
                     variant="outline"
-                    className="mt-2 px-6 py-2 bg-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white border-2 border-gray-300 hover:border-transparent transition-all duration-300 font-semibold shadow-sm hover:shadow-lg"
+                    className="
+                      mt-2 px-6 py-2 
+                      bg-white dark:bg-gray-800 
+                      hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 
+                      hover:text-white 
+                      border-2 border-gray-300 dark:border-gray-600 
+                      hover:border-transparent 
+                      transition-all duration-300 
+                      font-semibold shadow-sm hover:shadow-lg
+                      text-gray-800 dark:text-gray-200
+                    "
                     onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
@@ -1350,22 +1435,24 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
             </div>
 
             {field.description && !showError && (
-              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
+              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
                 <Icon
                   icon="heroicons:information-circle"
-                  className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"
+                  className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
                 />
                 <span>{field.description}</span>
               </div>
             )}
 
             {showError && (
-              <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg animate-in slide-in-from-top-2">
+              <div className="mt-3 flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-in slide-in-from-top-2">
                 <Icon
                   icon="heroicons:exclamation-triangle"
-                  className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5"
                 />
-                <p className="text-red-600 text-sm font-medium">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm font-medium">
+                  {error}
+                </p>
               </div>
             )}
           </div>
@@ -1374,7 +1461,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
       case "radio":
         return (
           <div className="w-full">
-            <Label className="text-[#25235F] font-medium">
+            <Label className="text-[#25235F] dark:text-blue-300 font-medium">
               {t(field.label)} {field.required && "*"}
             </Label>
             <RadioGroup
@@ -1396,7 +1483,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                     />
                     <Label
                       htmlFor={`${field.name}-${value}`}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-gray-700 dark:text-gray-300"
                     >
                       {label}
                     </Label>
@@ -1404,24 +1491,31 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 );
               })}
             </RadioGroup>
-            {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {showError && (
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                {error}
+              </p>
+            )}
           </div>
         );
 
       case "switch":
         return (
-          <div className="group relative w-full p-2 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all duration-300 hover:bg-blue-50/30">
-            <div className="flex items-center justify-between">
+          <div className=" h-14 group relative w-full p-2 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 hover:bg-blue-50/30 dark:hover:bg-blue-900/20">
+            <div className="flex h-[2.3rem] items-center justify-between">
               <Label
                 htmlFor={field.name}
-                className="cursor-pointer flex items-center gap-3 text-base font-medium text-gray-700 group-hover:text-blue-700 transition-colors"
+                className="cursor-pointer flex items-center gap-3 text-base font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors"
               >
                 <div
-                  className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${
-                    formData[field.name]
-                      ? "border-blue-600 bg-gradient-to-br from-blue-600 to-purple-600 rotate-6 scale-110"
-                      : "border-gray-300 bg-white"
-                  }`}
+                  className={`
+                    w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 
+                    ${
+                      formData[field.name]
+                        ? "border-blue-600 dark:border-blue-500 bg-gradient-to-br from-blue-600 to-purple-600 rotate-6 scale-110"
+                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    }
+                  `}
                 >
                   {formData[field.name] && (
                     <Icon
@@ -1434,7 +1528,7 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 <span className="flex items-center gap-2">
                   {t(field.label)}
                   {field.required && (
-                    <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded">
+                    <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 text-xs font-bold rounded">
                       !
                     </span>
                   )}
@@ -1448,7 +1542,14 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                   handleSwitchChange(field.name, checked)
                 }
                 required={field.required}
-                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-600 data-[state=checked]:to-purple-600 shadow-md hover:shadow-lg transition-all duration-300"
+                className="
+                  data-[state=checked]:bg-gradient-to-r 
+                  data-[state=checked]:from-blue-600 
+                  data-[state=checked]:to-purple-600 
+                  shadow-md hover:shadow-lg 
+                  transition-all duration-300
+                  bg-gray-200 dark:bg-gray-700
+                "
               />
             </div>
           </div>
@@ -1460,27 +1561,10 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 overflow-y-auto">
+    <div className="min-h-screen p-6 overflow-y-auto">
       <div className="">
-        <div className="flex justify-between items-center mb-8">
-          <div className="w-full">
-            <h1 className="text-3xl font-bold text-[#25235F]">{t(title)}</h1>
-            {description && <p className="text-gray-600">{t(description)}</p>}
-          </div>
-          {onCancel && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onCancel}
-              className="h-10 w-10 rounded-full hover:bg-gray-200"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-[#25235F] to-[#25235F]/90 text-white relative overflow-hidden">
+        <Card className="shadow-2xl dark:shadow-gray-950/50 border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-[#25235F] to-[#25235F]/90 dark:from-gray-800 dark:to-gray-900 text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
             <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
               <div className="w-2 h-8 bg-[#ED4135] rounded-full"></div>
@@ -1498,15 +1582,15 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
 
           <CardContent className="p-8">
             {errors.length > 0 && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h3 className="text-red-800 font-semibold mb-2 flex items-center">
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <h3 className="text-red-800 dark:text-red-300 font-semibold mb-2 flex items-center">
                   <Icon
                     icon="heroicons:exclamation-triangle"
                     className="h-5 w-5 mr-2"
                   />
                   {t("Please fix the following errors")}:
                 </h3>
-                <ul className="list-disc list-inside text-red-700 space-y-1">
+                <ul className="list-disc list-inside text-red-700 dark:text-red-300 space-y-1">
                   {errors.map((error, index) => (
                     <li key={index}>{t(error.message)}</li>
                   ))}
@@ -1518,16 +1602,16 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
               {fields.map((row, rowIndex) => (
                 <div key={rowIndex} className="space-y-6">
                   {sections[rowIndex] && (
-                    <div className="border-b pb-2">
-                      <h3 className="text-xl font-semibold text-[#25235F]">
+                    <div className="border-b pb-2 border-gray-200 dark:border-gray-700">
+                      <h3 className="text-xl font-semibold text-[#25235F] dark:text-white">
                         <Icon
                           icon={sections[rowIndex].icon}
-                          className="h-5 w-5 inline mr-2"
+                          className="h-5 w-5 inline mr-2 text-[#25235F] dark:text-blue-400"
                         />
                         {t(sections[rowIndex].title)}
                       </h3>
                       {sections[rowIndex].description && (
-                        <p className="text-gray-600 text-sm mt-1">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
                           {t(sections[rowIndex].description)}
                         </p>
                       )}
@@ -1555,13 +1639,19 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 </div>
               ))}
 
-              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200 dark:border-gray-700">
                 {onCancel && (
                   <Button
                     type="button"
                     variant="outline"
                     onClick={onCancel}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-3"
+                    className="
+                      border-gray-300 dark:border-gray-600 
+                      text-gray-700 dark:text-gray-300 
+                      hover:bg-gray-100 dark:hover:bg-gray-800 
+                      px-6 py-3
+                      bg-white dark:bg-gray-900
+                    "
                     disabled={isLoading}
                   >
                     {cancelButtonText}
@@ -1569,7 +1659,16 @@ const GenericCreateForm: React.FC<GenericCreateFormProps> = ({
                 )}
                 <Button
                   type="submit"
-                  className="bg-gradient-to-r from-[#ED4135] to-[#ED4135]/90 hover:from-[#ED4135]/90 hover:to-[#ED4135] text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="
+                    bg-gradient-to-r 
+                    from-[#ED4135] to-[#ED4135]/90 
+                    dark:from-red-600 dark:to-red-700
+                    hover:from-[#ED4135]/90 hover:to-[#ED4135]
+                    dark:hover:from-red-700 dark:hover:to-red-600
+                    text-white px-6 py-3 
+                    shadow-lg hover:shadow-xl 
+                    transition-all duration-300
+                  "
                   disabled={isLoading}
                   {...submitButtonProps}
                 >

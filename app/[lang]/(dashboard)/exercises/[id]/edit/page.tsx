@@ -88,11 +88,11 @@ const ExerciseUpdateForm = () => {
           setInputType("count");
         }
       } else {
-        toast.error("Exercise not found");
+        toast.error(t("EXERCISE_NOT_FOUND"));
       }
     } catch (error: any) {
       console.error("Error fetching exercise:", error);
-      toast.error("Failed to load exercise data");
+      toast.error(t("FAILED_TO_LOAD_EXERCISE_DATA"));
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +143,7 @@ const ExerciseUpdateForm = () => {
         toast.success(
           response.data?.message ||
             response.message ||
-            "Exercise updated successfully",
+            t("EXERCISE_UPDATED_SUCCESSFULLY"),
         );
 
         // Redirect to exercises list page
@@ -152,60 +152,59 @@ const ExerciseUpdateForm = () => {
         toast.error(
           response?.data?.message ||
             response?.message ||
-            "Failed to update exercise",
+            t("FAILED_TO_UPDATE_EXERCISE"),
         );
       }
     } catch (error: any) {
       console.error("Error updating exercise:", error);
-      toast.error(error.response?.data?.message || "Failed to update exercise");
+      toast.error(
+        error.response?.data?.message || t("FAILED_TO_UPDATE_EXERCISE"),
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const difficultyOptions = [
-    { value: "BEGINNER", label: "Beginner" },
-    { value: "INTERMEDIATE", label: "Intermediate" },
-    { value: "ADVANCED", label: "Advanced" },
+    { value: "BEGINNER", label: t("BEGINNER") },
+    { value: "INTERMEDIATE", label: t("INTERMEDIATE") },
+    { value: "ADVANCED", label: t("ADVANCED") },
   ];
+
   const fields = [
     [
       {
         name: "englishTitle",
-        label: "Exercise Title (English)",
+        label: t("EXERCISE_TITLE_ENGLISH"),
         type: "text",
-        placeholder: "Enter exercise title in English",
+        placeholder: t("ENTER_EXERCISE_TITLE_ENGLISH"),
         required: true,
         validation: {
           minLength: 2,
           maxLength: 100,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Exercise title is required";
-            if (value.length < 2)
-              return "Exercise title must be at least 2 characters";
-            if (value.length > 100)
-              return "Exercise title must be less than 100 characters";
+              return t("EXERCISE_TITLE_REQUIRED");
+            if (value.length < 2) return t("EXERCISE_TITLE_MIN_LENGTH");
+            if (value.length > 100) return t("EXERCISE_TITLE_MAX_LENGTH");
             return null;
           },
         },
       },
       {
         name: "arabicTitle",
-        label: "Exercise Title (Arabic)",
+        label: t("EXERCISE_TITLE_ARABIC"),
         type: "text",
-        placeholder: "أدخل عنوان التمرين بالعربية",
+        placeholder: t("ENTER_EXERCISE_TITLE_ARABIC"),
         required: true,
         validation: {
           minLength: 2,
           maxLength: 100,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Exercise title in Arabic is required";
-            if (value.length < 2)
-              return "Exercise title must be at least 2 characters";
-            if (value.length > 100)
-              return "Exercise title must be less than 100 characters";
+              return t("EXERCISE_TITLE_ARABIC_REQUIRED");
+            if (value.length < 2) return t("EXERCISE_TITLE_MIN_LENGTH");
+            if (value.length > 100) return t("EXERCISE_TITLE_MAX_LENGTH");
             return null;
           },
         },
@@ -214,9 +213,9 @@ const ExerciseUpdateForm = () => {
     [
       {
         name: "englishDescription",
-        label: "Exercise Description (English)",
+        label: t("EXERCISE_DESCRIPTION_ENGLISH"),
         type: "textarea",
-        placeholder: "Enter exercise description in English",
+        placeholder: t("ENTER_EXERCISE_DESCRIPTION_ENGLISH"),
         required: true,
         rows: 3,
         validation: {
@@ -224,20 +223,18 @@ const ExerciseUpdateForm = () => {
           maxLength: 500,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Exercise description is required";
-            if (value.length < 10)
-              return "Exercise description must be at least 10 characters";
-            if (value.length > 500)
-              return "Exercise description must be less than 500 characters";
+              return t("EXERCISE_DESCRIPTION_REQUIRED");
+            if (value.length < 10) return t("EXERCISE_DESCRIPTION_MIN_LENGTH");
+            if (value.length > 500) return t("EXERCISE_DESCRIPTION_MAX_LENGTH");
             return null;
           },
         },
       },
       {
         name: "arabicDescription",
-        label: "Exercise Description (Arabic)",
+        label: t("EXERCISE_DESCRIPTION_ARABIC"),
         type: "textarea",
-        placeholder: "أدخل وصف التمرين بالعربية",
+        placeholder: t("ENTER_EXERCISE_DESCRIPTION_ARABIC"),
         required: true,
         rows: 3,
         validation: {
@@ -245,11 +242,9 @@ const ExerciseUpdateForm = () => {
           maxLength: 500,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Exercise description in Arabic is required";
-            if (value.length < 10)
-              return "Exercise description must be at least 10 characters";
-            if (value.length > 500)
-              return "Exercise description must be less than 500 characters";
+              return t("EXERCISE_DESCRIPTION_ARABIC_REQUIRED");
+            if (value.length < 10) return t("EXERCISE_DESCRIPTION_MIN_LENGTH");
+            if (value.length > 500) return t("EXERCISE_DESCRIPTION_MAX_LENGTH");
             return null;
           },
         },
@@ -258,10 +253,10 @@ const ExerciseUpdateForm = () => {
     [
       {
         name: "categoryId",
-        label: "Category",
+        label: t("CATEGORY"),
         type: "selectPagination",
         required: true,
-        placeholder: "Select category...",
+        placeholder: t("SELECT_CATEGORY"),
         paginationOptions: {
           data: categoriesPaginated.options || [],
           isLoading: categoriesPaginated.isLoading,
@@ -272,51 +267,51 @@ const ExerciseUpdateForm = () => {
           onOpen: categoriesPaginated.loadInitial,
           getOptionLabel: (category: any) => category.label,
           getOptionValue: (category: any) => category.value,
-          searchPlaceholder: "Search categories...",
+          searchPlaceholder: t("SEARCH_CATEGORIES"),
         },
       },
       {
         name: "difficulty",
-        label: "Difficulty Level",
+        label: t("DIFFICULTY_LEVEL"),
         type: "select",
         required: true,
         options: difficultyOptions,
-        placeholder: "Select difficulty level...",
+        placeholder: t("SELECT_DIFFICULTY"),
       },
     ],
     [
       {
         name: "videoUrl",
-        label: "Video URL",
+        label: t("VIDEO_URL"),
         type: "url",
-        placeholder: "https://example.com/training-video",
+        placeholder: t("VIDEO_URL_PLACEHOLDER"),
         required: true,
         validation: {
           custom: (value) => {
-            if (!value || value.trim() === "") return "Video URL is required";
+            if (!value || value.trim() === "") return t("VIDEO_URL_REQUIRED");
             try {
               new URL(value);
               return null;
             } catch {
-              return "Please enter a valid URL";
+              return t("VIDEO_URL_INVALID");
             }
           },
         },
       },
       {
         name: "url",
-        label: "Image URL",
+        label: t("IMAGE_URL"),
         type: "url",
-        placeholder: "https://example.com/training-Image",
+        placeholder: t("IMAGE_URL_PLACEHOLDER"),
         required: true,
         validation: {
           custom: (value) => {
-            if (!value || value.trim() === "") return "Image URL is required";
+            if (!value || value.trim() === "") return t("IMAGE_URL_REQUIRED");
             try {
               new URL(value);
               return null;
             } catch {
-              return "Please enter a valid URL";
+              return t("IMAGE_URL_INVALID");
             }
           },
         },
@@ -325,30 +320,30 @@ const ExerciseUpdateForm = () => {
     [
       {
         name: "calories",
-        label: "Calories Burned",
+        label: t("CALORIES_BURNED"),
         type: "number",
-        placeholder: "300",
+        placeholder: t("CALORIES_PLACEHOLDER"),
         required: true,
         validation: {
           custom: (value) => {
-            if (!value || value === "") return "Calories is required";
+            if (!value || value === "") return t("CALORIES_REQUIRED");
             const num = parseInt(value);
-            if (isNaN(num) || num < 1) return "Calories must be at least 1";
-            if (num > 2000) return "Calories must be less than 2000";
+            if (isNaN(num) || num < 1) return t("CALORIES_MIN_VALUE");
+            if (num > 2000) return t("CALORIES_MAX_VALUE");
             return null;
           },
         },
       },
       {
         name: "inputType",
-        label: "Exercise Type",
+        label: t("EXERCISE_TYPE"),
         type: "select",
         required: true,
         options: [
-          { value: "duration", label: "Duration-based (seconds)" },
-          { value: "count", label: "Count-based (repetitions)" },
+          { value: "duration", label: t("DURATION_BASED") },
+          { value: "count", label: t("COUNT_BASED") },
         ],
-        placeholder: "Select exercise type...",
+        placeholder: t("SELECT_EXERCISE_TYPE"),
         defaultValue: "duration",
         onChange: (value: string) => {
           console.log("Input type changed to:", value);
@@ -360,46 +355,42 @@ const ExerciseUpdateForm = () => {
       // Duration and Count fields - both shown but one disabled
       {
         name: "duration",
-        label: "Duration (seconds)",
+        label: t("DURATION_SECONDS"),
         type: "number",
-        placeholder: "60",
+        placeholder: t("DURATION_PLACEHOLDER"),
         required: inputType === "duration", // Only required if duration-based
         disabled: inputType === "count", // Disabled if count-based
         description:
-          inputType === "count"
-            ? "Disabled for count-based exercises"
-            : undefined,
+          inputType === "count" ? t("DISABLED_FOR_COUNT_BASED") : undefined,
         validation: {
           custom: (value) => {
             if (inputType === "count") return null; // Skip validation if disabled
-            if (!value || value === "") return "Duration is required";
+            if (!value || value === "") return t("DURATION_REQUIRED");
             const num = parseInt(value);
-            if (isNaN(num) || num < 1)
-              return "Duration must be at least 1 second";
-            if (num > 3600)
-              return "Duration must be less than 3600 seconds (1 hour)";
+            if (isNaN(num) || num < 1) return t("DURATION_MIN_VALUE");
+            if (num > 3600) return t("DURATION_MAX_VALUE");
             return null;
           },
         },
       },
       {
         name: "count",
-        label: "Repetition Count",
+        label: t("REPETITION_COUNT"),
         type: "number",
-        placeholder: "10",
+        placeholder: t("REPETITION_PLACEHOLDER"),
         required: inputType === "count", // Only required if count-based
         disabled: inputType === "duration", // Disabled if duration-based
         description:
           inputType === "duration"
-            ? "Disabled for duration-based exercises"
+            ? t("DISABLED_FOR_DURATION_BASED")
             : undefined,
         validation: {
           custom: (value) => {
             if (inputType === "duration") return null; // Skip validation if disabled
-            if (!value || value === "") return "Repetition count is required";
+            if (!value || value === "") return t("COUNT_REQUIRED");
             const num = parseInt(value);
-            if (isNaN(num) || num < 1) return "Count must be at least 1";
-            if (num > 1000) return "Count must be less than 1000";
+            if (isNaN(num) || num < 1) return t("COUNT_MIN_VALUE");
+            if (num > 1000) return t("COUNT_MAX_VALUE");
             return null;
           },
         },
@@ -409,7 +400,7 @@ const ExerciseUpdateForm = () => {
     [
       {
         name: "status",
-        label: "Status",
+        label: t("STATUS"),
         type: "switch",
         required: false,
         validation: {
@@ -423,49 +414,50 @@ const ExerciseUpdateForm = () => {
 
   const sections = [
     {
-      title: "Basic Information",
+      title: t("BASIC_INFORMATION"),
       icon: "heroicons:document-text",
-      description: "Enter exercise title in both English and Arabic",
+      description: t("EXERCISE_TITLE_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // englishTitle, arabicTitle
     },
     {
-      title: "Description",
+      title: t("DESCRIPTION"),
       icon: "heroicons:pencil-square",
-      description: "Enter exercise description in both English and Arabic",
+      description: t("EXERCISE_DESCRIPTION_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // englishDescription, arabicDescription
     },
     {
-      title: "Category & Difficulty",
+      title: t("CATEGORY_DIFFICULTY"),
       icon: "heroicons:tag",
-      description: "Select category and difficulty level for the exercise",
+      description: t("CATEGORY_DIFFICULTY_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // categoryId, difficulty
     },
     {
-      title: "Media URLs",
+      title: t("MEDIA_URLS"),
       icon: "heroicons:video-camera",
-      description: "Add video and image URLs for the exercise",
+      description: t("MEDIA_URLS_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // videoUrl, url (image)
     },
     {
-      title: "Exercise Metrics",
+      title: t("EXERCISE_METRICS"),
       icon: "heroicons:fire",
-      description: "Set calories burned and select exercise type",
+      description: t("EXERCISE_METRICS_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // calories, inputType
     },
     {
-      title: inputType === "duration" ? "Duration Settings" : "Count Settings",
+      title:
+        inputType === "duration" ? t("DURATION_SETTINGS") : t("COUNT_SETTINGS"),
       icon:
         inputType === "duration" ? "heroicons:clock" : "heroicons:arrow-path",
       description:
         inputType === "duration"
-          ? "Set duration in seconds (repetition count is disabled)"
-          : "Set repetition count (duration is disabled)",
+          ? t("DURATION_SETTINGS_UPDATE_DESCRIPTION")
+          : t("COUNT_SETTINGS_UPDATE_DESCRIPTION"),
       fieldsCount: 2, // duration, count
     },
     {
-      title: "Status",
+      title: t("STATUS"),
       icon: "heroicons:check-circle",
-      description: "Enable or disable this exercise",
+      description: t("STATUS_UPDATE_DESCRIPTION"),
       fieldsCount: 1, // status
     },
   ];
@@ -473,19 +465,21 @@ const ExerciseUpdateForm = () => {
   const handleCancel = () => {
     router.back();
   };
+
   const handleFormDataChange = (data: Record<string, any>) => {
     // Update inputType when exercise type changes
     if (data.inputType && data.inputType !== inputType) {
       setInputType(data.inputType as "duration" | "count");
     }
   };
+
   // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#25235F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading exercise data...</p>
+          <p className="text-gray-600">{t("LOADING_EXERCISE_DATA")}</p>
         </div>
       </div>
     );
@@ -511,8 +505,10 @@ const ExerciseUpdateForm = () => {
               />
             </svg>
           </div>
-          <p className="text-gray-600 mb-4">Failed to load exercise data</p>
-          <Button onClick={handleCancel}>Go Back</Button>
+          <p className="text-gray-600 mb-4">
+            {t("FAILED_TO_LOAD_EXERCISE_DATA")}
+          </p>
+          <Button onClick={handleCancel}>{t("GO_BACK")}</Button>
         </div>
       </div>
     );
@@ -530,7 +526,7 @@ const ExerciseUpdateForm = () => {
     url: exerciseData.url || "",
     duration: exerciseData.duration || "",
     count: exerciseData.count || "",
-    difficulty: exerciseData.difficulty || "Beginner",
+    difficulty: exerciseData.difficulty || "BEGINNER",
     calories: exerciseData.calory || "",
     status: exerciseData.status === "Active", // Convert string to boolean for switch
     inputType: inputType, // Set the initial input type
@@ -542,7 +538,17 @@ const ExerciseUpdateForm = () => {
       <div className="space-y-2">
         <Button
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+          className="
+            inline-flex items-center gap-2 px-5 py-2.5 
+            bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 
+            border border-gray-300 dark:border-gray-700 
+            rounded-xl 
+            text-gray-800 dark:text-gray-200 
+            font-semibold 
+            hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-800 
+            hover:shadow-md dark:hover:shadow-gray-800/50 
+            transition-all duration-200 mb-4
+          "
         >
           <svg
             className="w-4 h-4"
@@ -557,23 +563,23 @@ const ExerciseUpdateForm = () => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          {t("Back")}
+          {t("BACK")}
         </Button>
       </div>
 
       <GenericUpdateForm
-        title="Update Exercise"
-        description="Update the exercise information"
+        title={t("UPDATE_EXERCISE")}
+        description={t("UPDATE_EXERCISE_DESCRIPTION")}
         initialData={initialData}
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
-        onFormDataChange={handleFormDataChange} // Add this line
+        onFormDataChange={handleFormDataChange}
         onCancel={handleCancel}
         showIdField={true}
-        idFieldLabel="Exercise ID"
-        submitButtonText="Update Exercise"
-        cancelButtonText="Cancel"
+        idFieldLabel={t("EXERCISE_ID")}
+        submitButtonText={t("UPDATE_EXERCISE_BUTTON")}
+        cancelButtonText={t("CANCEL")}
         isLoading={categoriesPaginated.isLoading || isSubmitting}
         submitButtonProps={{
           disabled: isSubmitting,

@@ -226,11 +226,15 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
       id: "actions",
       cell: ({ row }) => (
         <div className="flex flex-row gap-3 items-center justify-center">
-          <Link href={`/blogs/${row.original.id}/edit`}>
+          <Link href={`/${lang}/blogs/${row.original.id}/edit`}>
             <Button
               size="icon"
               variant="outline"
-              className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              className="h-10 w-10 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white 
+                         dark:border-gray-600 dark:hover:border-blue-500 dark:hover:bg-blue-600 
+                         transition-all duration-300 shadow-md hover:shadow-lg 
+                         dark:shadow-gray-800 dark:hover:shadow-blue-900/30 
+                         transform hover:scale-105"
             >
               <Icon icon="heroicons:pencil" className="h-4 w-4" />
             </Button>
@@ -255,7 +259,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Blog Title")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => {
@@ -264,25 +268,41 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 flex items-center justify-center">
+                  <div
+                    className="w-10 h-10 rounded-full 
+                                 bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 
+                                 dark:from-blue-500/20 dark:to-purple-500/20 
+                                 flex items-center justify-center transition-colors duration-300"
+                  >
                     <Icon
                       icon="heroicons:document-text"
-                      className="h-5 w-5 text-[#25235F]"
+                      className="h-5 w-5 text-[#25235F] dark:text-blue-400 transition-colors duration-300"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <span className="max-w-[200px] truncate font-semibold text-gray-800 hover:text-[#25235F] transition-colors duration-200">
+                    <span
+                      className="max-w-[200px] truncate font-semibold 
+                                     text-gray-800 dark:text-gray-200 
+                                     hover:text-[#25235F] dark:hover:text-blue-400 
+                                     transition-colors duration-200"
+                    >
                       {lang == "en"
                         ? row.original.title.english
                         : row.original.title.arabic}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">
                       {t("by")} {row.original.CreatedUser.name}
                     </span>
                   </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-md">
+              <TooltipContent
+                className="max-w-md 
+                                         bg-white dark:bg-gray-800 
+                                         border-gray-200 dark:border-gray-700 
+                                         text-gray-900 dark:text-gray-100 
+                                         transition-colors duration-300"
+              >
                 <p className="font-medium">
                   {" "}
                   {lang == "en"
@@ -301,7 +321,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Blog Description")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => (
@@ -314,7 +334,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
           icon="heroicons:document-text"
           maxLength={60}
           maxWidth="250px"
-          variant="default" // or "compact" or "card"
+          variant="default"
         />
       ),
     },
@@ -324,7 +344,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Image")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => (
@@ -344,53 +364,105 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Category")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => {
         const categoryColors = {
-          // Your existing categories
-          "name 1":
-            "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
-          fitness:
-            "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
-          nutrition:
-            "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-200",
-          lifestyle:
-            "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-200",
-          training:
-            "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200",
+          // Your existing categories with dark mode variants
+          "name 1": {
+            light:
+              "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
+            dark: "bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg shadow-green-900/50",
+          },
+          fitness: {
+            light:
+              "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
+            dark: "bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg shadow-green-900/50",
+          },
+          nutrition: {
+            light:
+              "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-200",
+            dark: "bg-gradient-to-r from-blue-600 to-cyan-700 text-white shadow-lg shadow-blue-900/50",
+          },
+          lifestyle: {
+            light:
+              "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-200",
+            dark: "bg-gradient-to-r from-purple-600 to-violet-700 text-white shadow-lg shadow-purple-900/50",
+          },
+          training: {
+            light:
+              "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-200",
+            dark: "bg-gradient-to-r from-amber-600 to-orange-700 text-white shadow-lg shadow-amber-900/50",
+          },
 
-          // Additional common categories with beautiful gradients
-          technology:
-            "bg-gradient-to-r from-slate-600 to-slate-800 text-white shadow-lg shadow-slate-200",
-          business:
-            "bg-gradient-to-r from-indigo-500 to-blue-700 text-white shadow-lg shadow-indigo-200",
-          education:
-            "bg-gradient-to-r from-teal-500 to-teal-700 text-white shadow-lg shadow-teal-200",
-          health:
-            "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-200",
-          travel:
-            "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-200",
-          food: "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200",
-          fashion:
-            "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-200",
-          sports:
-            "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-200",
-          art: "bg-gradient-to-r from-violet-500 to-purple-700 text-white shadow-lg shadow-violet-200",
-          music:
-            "bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-200",
+          // Additional common categories with beautiful gradients for both modes
+          technology: {
+            light:
+              "bg-gradient-to-r from-slate-600 to-slate-800 text-white shadow-lg shadow-slate-200",
+            dark: "bg-gradient-to-r from-slate-700 to-slate-900 text-white shadow-lg shadow-slate-900/50",
+          },
+          business: {
+            light:
+              "bg-gradient-to-r from-indigo-500 to-blue-700 text-white shadow-lg shadow-indigo-200",
+            dark: "bg-gradient-to-r from-indigo-600 to-blue-800 text-white shadow-lg shadow-indigo-900/50",
+          },
+          education: {
+            light:
+              "bg-gradient-to-r from-teal-500 to-teal-700 text-white shadow-lg shadow-teal-200",
+            dark: "bg-gradient-to-r from-teal-600 to-teal-800 text-white shadow-lg shadow-teal-900/50",
+          },
+          health: {
+            light:
+              "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-200",
+            dark: "bg-gradient-to-r from-rose-600 to-pink-700 text-white shadow-lg shadow-rose-900/50",
+          },
+          travel: {
+            light:
+              "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-200",
+            dark: "bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-lg shadow-sky-900/50",
+          },
+          food: {
+            light:
+              "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200",
+            dark: "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-900/50",
+          },
+          fashion: {
+            light:
+              "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-200",
+            dark: "bg-gradient-to-r from-fuchsia-600 to-purple-700 text-white shadow-lg shadow-fuchsia-900/50",
+          },
+          sports: {
+            light:
+              "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-200",
+            dark: "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-900/50",
+          },
+          art: {
+            light:
+              "bg-gradient-to-r from-violet-500 to-purple-700 text-white shadow-lg shadow-violet-200",
+            dark: "bg-gradient-to-r from-violet-600 to-purple-800 text-white shadow-lg shadow-violet-900/50",
+          },
+          music: {
+            light:
+              "bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-200",
+            dark: "bg-gradient-to-r from-pink-600 to-rose-700 text-white shadow-lg shadow-pink-900/50",
+          },
         };
 
         const categoryName =
           lang == "en"
             ? row.original.Category?.name?.english
             : row.original.Category?.name?.arabic;
-        const defaultStyle =
-          "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200";
+        const categoryConfig =
+          categoryColors[categoryName as keyof typeof categoryColors];
+        const defaultStyle = {
+          light:
+            "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200",
+          dark: "bg-gradient-to-r from-gray-600 to-gray-800 text-white shadow-lg shadow-gray-900/50",
+        };
 
         return (
-          <div className="flex items-center justify-center">
+          <div className="flex  overflow-hidden items-center justify-center">
             <Badge
               className={`
             relative
@@ -398,14 +470,15 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
             border-0 min-w-[80px] transition-all duration-300
             hover:scale-105 hover:shadow-xl
             group cursor-pointer
-            ${
-              categoryColors[categoryName as keyof typeof categoryColors] ||
-              defaultStyle
-            }
+            ${categoryConfig?.light || defaultStyle.light}
+            dark:${categoryConfig?.dark || defaultStyle.dark}
           `}
             >
               {/* Animated background effect */}
-              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <div
+                className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 
+                            dark:bg-gray-900 dark:group-hover:opacity-30 transition-opacity duration-300"
+              />
 
               {/* Text with smooth transition */}
               <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
@@ -413,7 +486,12 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
               </span>
 
               {/* Shine effect on hover */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <div
+                className="absolute inset-0 rounded-full 
+                            bg-gradient-to-r from-transparent via-white/30 to-transparent 
+                            dark:via-white/20 -skew-x-12 transform translate-x-[-100%] 
+                            group-hover:translate-x-[100%] transition-transform duration-1000"
+              />
             </Badge>
           </div>
         );
@@ -425,7 +503,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Status")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => {
@@ -434,52 +512,100 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
 
         const statusConfig = {
           ACTIVE: {
-            gradient: "bg-gradient-to-r from-emerald-500 to-green-600",
-            shadow: "shadow-lg shadow-emerald-200",
+            light: {
+              gradient: "bg-gradient-to-r from-emerald-500 to-green-600",
+              shadow: "shadow-lg shadow-emerald-200",
+              pulse: "bg-emerald-400",
+              glow: "ring-2 ring-emerald-200",
+            },
+            dark: {
+              gradient: "bg-gradient-to-r from-emerald-600 to-green-700",
+              shadow: "shadow-lg shadow-emerald-900/50",
+              pulse: "bg-emerald-500",
+              glow: "ring-2 ring-emerald-800",
+            },
             icon: "heroicons:check-circle",
-            pulse: "bg-emerald-400",
-            glow: "ring-2 ring-emerald-200",
           },
           ARCHIVED: {
-            gradient: "bg-gradient-to-r from-rose-500 to-red-600",
-            shadow: "shadow-lg shadow-rose-200",
+            light: {
+              gradient: "bg-gradient-to-r from-rose-500 to-red-600",
+              shadow: "shadow-lg shadow-rose-200",
+              pulse: "bg-rose-400",
+              glow: "ring-2 ring-rose-200",
+            },
+            dark: {
+              gradient: "bg-gradient-to-r from-rose-600 to-red-700",
+              shadow: "shadow-lg shadow-rose-900/50",
+              pulse: "bg-rose-500",
+              glow: "ring-2 ring-rose-800",
+            },
             icon: "heroicons:archive-box",
-            pulse: "bg-rose-400",
-            glow: "ring-2 ring-rose-200",
           },
           PENDING: {
-            gradient: "bg-gradient-to-r from-amber-500 to-orange-600",
-            shadow: "shadow-lg shadow-amber-200",
+            light: {
+              gradient: "bg-gradient-to-r from-amber-500 to-orange-600",
+              shadow: "shadow-lg shadow-amber-200",
+              pulse: "bg-amber-400",
+              glow: "ring-2 ring-amber-200",
+            },
+            dark: {
+              gradient: "bg-gradient-to-r from-amber-600 to-orange-700",
+              shadow: "shadow-lg shadow-amber-900/50",
+              pulse: "bg-amber-500",
+              glow: "ring-2 ring-amber-800",
+            },
             icon: "heroicons:clock",
-            pulse: "bg-amber-400",
-            glow: "ring-2 ring-amber-200",
           },
           DRAFT: {
-            gradient: "bg-gradient-to-r from-slate-500 to-gray-600",
-            shadow: "shadow-lg shadow-slate-200",
+            light: {
+              gradient: "bg-gradient-to-r from-slate-500 to-gray-600",
+              shadow: "shadow-lg shadow-slate-200",
+              pulse: "bg-slate-400",
+              glow: "ring-2 ring-slate-200",
+            },
+            dark: {
+              gradient: "bg-gradient-to-r from-slate-600 to-gray-700",
+              shadow: "shadow-lg shadow-slate-900/50",
+              pulse: "bg-slate-500",
+              glow: "ring-2 ring-slate-800",
+            },
             icon: "heroicons:document",
-            pulse: "bg-slate-400",
-            glow: "ring-2 ring-slate-200",
           },
           INACTIVE: {
-            gradient: "bg-gradient-to-r from-gray-500 to-slate-600",
-            shadow: "shadow-lg shadow-gray-200",
+            light: {
+              gradient: "bg-gradient-to-r from-gray-500 to-slate-600",
+              shadow: "shadow-lg shadow-gray-200",
+              pulse: "bg-gray-400",
+              glow: "ring-2 ring-gray-200",
+            },
+            dark: {
+              gradient: "bg-gradient-to-r from-gray-600 to-slate-700",
+              shadow: "shadow-lg shadow-gray-900/50",
+              pulse: "bg-gray-500",
+              glow: "ring-2 ring-gray-800",
+            },
             icon: "heroicons:pause-circle",
-            pulse: "bg-gray-400",
-            glow: "ring-2 ring-gray-200",
           },
         };
 
         const config = statusConfig[status as keyof typeof statusConfig] || {
-          gradient: "bg-gradient-to-r from-gray-500 to-gray-600",
-          shadow: "shadow-lg shadow-gray-200",
+          light: {
+            gradient: "bg-gradient-to-r from-gray-500 to-gray-600",
+            shadow: "shadow-lg shadow-gray-200",
+            pulse: "bg-gray-400",
+            glow: "ring-2 ring-gray-200",
+          },
+          dark: {
+            gradient: "bg-gradient-to-r from-gray-600 to-gray-700",
+            shadow: "shadow-lg shadow-gray-900/50",
+            pulse: "bg-gray-500",
+            glow: "ring-2 ring-gray-800",
+          },
           icon: "heroicons:question-mark-circle",
-          pulse: "bg-gray-400",
-          glow: "ring-2 ring-gray-200",
         };
 
         return (
-          <div className="flex items-center justify-center">
+          <div className="flex  overflow-hidden items-center justify-center">
             <Badge
               className={`
             group relative
@@ -487,12 +613,16 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
             text-center font-semibold px-4 py-2 rounded-full 
             border-0 min-w-[100px] transition-all duration-300
             hover:scale-105 hover:shadow-xl
-            ${config.gradient} ${config.shadow} ${config.glow}
+            ${config.light.gradient} ${config.light.shadow} ${config.light.glow}
+            dark:${config.dark.gradient} dark:${config.dark.shadow} dark:${config.dark.glow}
             text-white
           `}
             >
               {/* Animated background effect */}
-              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <div
+                className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 
+                            dark:bg-gray-900 dark:group-hover:opacity-30 transition-opacity duration-300"
+              />
 
               {/* Status icon */}
               <Icon
@@ -508,17 +638,24 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
               {/* Pulse animation for active status */}
               {status === "ACTIVE" && (
                 <div
-                  className={`absolute -top-0.5 -right-0.5 w-2 h-2 ${config.pulse} rounded-full animate-ping`}
+                  className={`absolute -top-0.5 -right-0.5 w-2 h-2 ${config.light.pulse} 
+                           dark:${config.dark.pulse} rounded-full animate-ping`}
                 />
               )}
 
               {/* Static indicator dot */}
               <div
-                className={`absolute -top-0.5 -right-0.5 w-2 h-2 ${config.pulse} rounded-full border border-white`}
+                className={`absolute -top-0.5 -right-0.5 w-2 h-2 ${config.light.pulse} 
+                         dark:${config.dark.pulse} rounded-full border border-white`}
               />
 
               {/* Shine effect on hover */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <div
+                className="absolute inset-0 rounded-full 
+                            bg-gradient-to-r from-transparent via-white/30 to-transparent 
+                            dark:via-white/20 -skew-x-12 transform translate-x-[-100%] 
+                            group-hover:translate-x-[100%] transition-transform duration-1000"
+              />
             </Badge>
           </div>
         );
@@ -530,7 +667,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Created Date")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-gray-200 font-bold transition-colors duration-300"
         />
       ),
       cell: ({ row }) => {
@@ -545,9 +682,12 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="flex items-center justify-start gap-2">
             <Icon
               icon="heroicons:calendar"
-              className="h-4 w-4 text-[#25235F]"
+              className="h-4 w-4 text-[#25235F] dark:text-blue-400 transition-colors duration-300"
             />
-            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
+            <span
+              className="max-w-[120px] truncate text-sm font-medium 
+                           text-gray-700 dark:text-gray-300 transition-colors duration-300"
+            >
               {formattedDate}
             </span>
           </div>
@@ -579,7 +719,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
         initialFilters={filters}
       />
 
-      <div className="rounded-xl overflow-hidden bg-white">
+      <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 transition-colors duration-300">
         <DataTable
           data={tableData}
           columns={columns}

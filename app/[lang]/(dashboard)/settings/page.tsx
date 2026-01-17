@@ -39,7 +39,7 @@ const SettingsPage = () => {
       // Fetch privacy policy
       const privacyRes = await GetSpecifiedMethod(
         "/static-content/privacy-policy",
-        lang
+        lang,
       );
       if (privacyRes?.data) {
         setPrivacyPolicyData(privacyRes.data);
@@ -48,7 +48,7 @@ const SettingsPage = () => {
       // Fetch terms and conditions
       const termsRes = await GetSpecifiedMethod(
         "/static-content/terms-and-conditions",
-        lang
+        lang,
       );
       if (termsRes?.data) {
         setTermsData(termsRes.data);
@@ -116,7 +116,7 @@ const SettingsPage = () => {
           "/static-content",
           formData,
           existingData.id,
-          lang
+          lang,
         );
         const successMessage =
           type === "privacy"
@@ -130,7 +130,7 @@ const SettingsPage = () => {
         response = await CreateMethodFormData(
           "/static-content",
           formData,
-          lang
+          lang,
         );
         const successMessage =
           type === "privacy"
@@ -148,13 +148,13 @@ const SettingsPage = () => {
       if (type === "privacy") {
         setPrivacyPolicyFile(null);
         const fileInput = document.getElementById(
-          "privacy-file"
+          "privacy-file",
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
       } else {
         setTermsFile(null);
         const fileInput = document.getElementById(
-          "terms-file"
+          "terms-file",
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
       }
@@ -320,16 +320,6 @@ const SettingsPage = () => {
                                 {privacyPolicyData.originalName ||
                                   "privacy-policy.pdf"}
                               </h4>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 mt-1">
-                                <Icon
-                                  icon="mdi:clock-outline"
-                                  className="h-4 w-4"
-                                />
-                                {t("Updated:") || "Updated:"}{" "}
-                                {new Date(
-                                  privacyPolicyData.updatedAt
-                                ).toLocaleDateString()}
-                              </p>
                             </div>
                           </div>
                           <Button
@@ -340,7 +330,7 @@ const SettingsPage = () => {
                                 privacyPolicyData.fileUrl,
                                 `privacy-policy-${
                                   new Date().toISOString().split("T")[0]
-                                }.pdf`
+                                }.pdf`,
                               )
                             }
                             className="bg-white dark:bg-slate-800 border-orange-300 dark:border-orange-500/50 text-slate-900 dark:text-white hover:bg-orange-500 hover:border-orange-500 dark:hover:bg-orange-600 dark:hover:border-orange-600 font-bold transition-all duration-300"
@@ -365,7 +355,7 @@ const SettingsPage = () => {
                           onChange={(e) =>
                             handleFileChange(
                               "privacy",
-                              e.target.files?.[0] || null
+                              e.target.files?.[0] || null,
                             )
                           }
                           className="hidden"
@@ -474,16 +464,6 @@ const SettingsPage = () => {
                                 {termsData.originalName ||
                                   "terms-and-conditions.pdf"}
                               </h4>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 mt-1">
-                                <Icon
-                                  icon="mdi:clock-outline"
-                                  className="h-4 w-4"
-                                />
-                                {t("Updated:") || "Updated:"}{" "}
-                                {new Date(
-                                  termsData.updatedAt
-                                ).toLocaleDateString()}
-                              </p>
                             </div>
                           </div>
                           <Button
@@ -494,7 +474,7 @@ const SettingsPage = () => {
                                 termsData.fileUrl,
                                 `terms-and-conditions-${
                                   new Date().toISOString().split("T")[0]
-                                }.pdf`
+                                }.pdf`,
                               )
                             }
                             className="bg-white dark:bg-slate-800 border-orange-300 dark:border-orange-500/50 text-slate-900 dark:text-white hover:bg-orange-500 hover:border-orange-500 dark:hover:bg-orange-600 dark:hover:border-orange-600 font-bold transition-all duration-300"
@@ -519,7 +499,7 @@ const SettingsPage = () => {
                           onChange={(e) =>
                             handleFileChange(
                               "terms",
-                              e.target.files?.[0] || null
+                              e.target.files?.[0] || null,
                             )
                           }
                           className="hidden"

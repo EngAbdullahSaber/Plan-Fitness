@@ -23,6 +23,7 @@ import {
   Type,
 } from "lucide-react";
 import GenericDetailsModal from "../shared/GenericDetailsModal";
+import { useTranslate } from "@/config/useTranslation";
 
 interface Training {
   id: number;
@@ -67,6 +68,8 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslate();
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -114,21 +117,21 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
   const formatDuration = (seconds: string | number) => {
     const secondsNum =
       typeof seconds === "string" ? parseInt(seconds) : seconds;
-    if (secondsNum < 60) return `${secondsNum} seconds`;
+    if (secondsNum < 60) return t("SECONDS", { seconds: secondsNum });
     const minutes = Math.floor(secondsNum / 60);
     const remainingSeconds = secondsNum % 60;
 
     if (minutes < 60) {
       return remainingSeconds > 0
-        ? `${minutes}m ${remainingSeconds}s`
-        : `${minutes}m`;
+        ? t("MINUTES_SECONDS", { minutes, seconds: remainingSeconds })
+        : t("MINUTES", { minutes });
     }
 
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return remainingMinutes > 0
-      ? `${hours}h ${remainingMinutes}m`
-      : `${hours}h`;
+      ? t("HOURS_MINUTES", { hours, minutes: remainingMinutes })
+      : t("HOURS", { hours });
   };
 
   const formatDate = (dateString: string) => {
@@ -142,77 +145,77 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
     });
   };
 
-  const formatBoolean = (value: boolean) => (value ? "Yes" : "No");
+  const formatBoolean = (value: boolean) => (value ? t("YES") : t("NO"));
 
   const getRecommendedIcon = (isRecommended: boolean) =>
     isRecommended ? CheckCircle : XCircle;
 
-  const tabs = [{ id: "overview", label: "Overview", icon: Activity }];
+  const tabs = [{ id: "overview", label: t("OVERVIEW"), icon: Activity }];
 
   const sections = (record: Training) => [
     {
-      title: "Basic Information",
+      title: t("BASIC_INFORMATION"),
       icon: Activity,
       fields: [
         {
-          label: "ID",
+          label: t("ID"),
           value: record.id,
           icon: Hash,
         },
         {
-          label: "English Title",
-          value: record.title?.english || "N/A",
+          label: t("ENGLISH_TITLE"),
+          value: record.title?.english || t("NOT_AVAILABLE"),
           icon: Type,
         },
         {
-          label: "Arabic Title",
-          value: record.title?.arabic || "N/A",
+          label: t("ARABIC_TITLE"),
+          value: record.title?.arabic || t("NOT_AVAILABLE"),
           icon: Type,
         },
         {
-          label: "Category",
-          value: record.Category?.name?.english || "N/A",
+          label: t("CATEGORY"),
+          value: record.Category?.name?.english || t("NOT_AVAILABLE"),
           subtitle: record.Category?.name?.arabic,
           icon: getCategoryIcon(record.Category?.name?.english),
         },
         {
-          label: "Status",
-          value: record.status,
+          label: t("STATUS"),
+          value: t(record.status?.toUpperCase()),
           icon:
             record.status?.toLowerCase() === "active" ? CheckCircle : XCircle,
         },
       ],
     },
     {
-      title: "Content Details",
+      title: t("CONTENT_DETAILS"),
       icon: Gauge,
       fields: [
         {
-          label: "English Description",
-          value: record.description?.english || "N/A",
+          label: t("ENGLISH_DESCRIPTION"),
+          value: record.description?.english || t("NOT_AVAILABLE"),
           icon: Globe,
           isMultiline: true,
         },
         {
-          label: "Arabic Description",
-          value: record.description?.arabic || "N/A",
+          label: t("ARABIC_DESCRIPTION"),
+          value: record.description?.arabic || t("NOT_AVAILABLE"),
           icon: Globe,
           isMultiline: true,
         },
       ],
     },
     {
-      title: "Media Content",
+      title: t("MEDIA_CONTENT"),
       icon: ImageIcon,
       fields: [
         {
-          label: "Exercise Image",
+          label: t("EXERCISE_IMAGE"),
           value: record.url,
           icon: ImageIcon,
           isImage: true,
         },
         {
-          label: "Exercise Video",
+          label: t("EXERCISE_VIDEO"),
           value: record.videoUrl,
           icon: Video,
           isVideo: true,
@@ -220,68 +223,52 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
       ],
     },
     {
-      title: "Exercise Metrics",
+      title: t("EXERCISE_METRICS"),
       icon: TrendingUp,
       fields: [
         {
-          label: "Difficulty",
-          value: record.difficulty,
+          label: t("DIFFICULTY"),
+          value: t(record.difficulty?.toUpperCase()),
           icon: Target,
         },
         {
-          label: "Calories",
+          label: t("CALORIES"),
           value: record.calory,
-          format: (value: number) => `${value} kcal`,
+          format: (value: number) => `${value} ${t("KCAL")}`,
           icon: Flame,
         },
         {
-          label: "Duration",
+          label: t("DURATION"),
           value: record.duration,
-          format: formatDuration,
+          format: (value: number) => `${value} ${t("SECONDS")}`,
           icon: Clock,
         },
         ...(record.count !== null
           ? [
               {
-                label: "Repetition Count",
+                label: t("REPETITION_COUNT"),
                 value: record.count,
                 icon: BarChart3,
               },
             ]
           : []),
-        {
-          label: "Recommended",
-          value: record.isRecommended,
-          format: formatBoolean,
-          icon: getRecommendedIcon(record.isRecommended),
-        },
       ],
     },
     {
-      title: "Metadata",
+      title: t("METADATA"),
       icon: Calendar,
       fields: [
         {
-          label: "Created By User ID",
-          value: record.CreatedBy,
-          icon: Hash,
-        },
-        {
-          label: "Created At",
+          label: t("CREATED_AT"),
           value: record.createdAt,
           format: formatDate,
           icon: Calendar,
         },
         {
-          label: "Updated At",
+          label: t("UPDATED_AT"),
           value: record.updatedAt,
           format: formatDate,
           icon: Calendar,
-        },
-        {
-          label: "Category ID",
-          value: record.categoryId,
-          icon: Hash,
         },
       ],
     },
@@ -291,13 +278,13 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
     <GenericDetailsModal
       isOpen={isOpen}
       onClose={onClose}
-      title={training.title?.english || "Training Details"}
+      title={training.title?.english || t("TRAINING_DETAILS")}
       subtitle={
         <div className="flex items-center gap-4 text-xs text-white/80">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
             <span>
-              {training.Category?.name?.english || "Uncategorized"}
+              {training.Category?.name?.english || t("UNCATEGORIZED")}
               {training.Category?.name?.arabic && (
                 <span className="ml-1 text-white/60">
                   ({training.Category.name.arabic})
@@ -311,7 +298,9 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
           </div>
           <div className="flex items-center gap-1">
             <Flame className="w-3 h-3" />
-            <span>{training.calory} kcal</span>
+            <span>
+              {training.calory} {t("KCAL")}
+            </span>
           </div>
         </div>
       }
@@ -326,14 +315,14 @@ const TrainingDetailsModal: React.FC<TrainingDetailsModalProps> = ({
       roleConfig={{
         field: "difficulty",
         getColor: getDifficultyColor,
-        label: "Difficulty",
+        label: t("DIFFICULTY"),
       }}
       customHeaderContent={
         training.isRecommended && (
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30">
             <CheckCircle className="w-3.5 h-3.5 text-yellow-400 mr-1.5" />
             <span className="text-xs font-medium text-yellow-300">
-              Recommended
+              {t("RECOMMENDED")}
             </span>
           </div>
         )

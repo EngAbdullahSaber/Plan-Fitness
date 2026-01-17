@@ -253,9 +253,9 @@ const SubscriptionsPage = () => {
   // Get duration label
   const getDurationLabel = (duration: string) => {
     const labels: Record<string, string> = {
-      MONTH: "Monthly",
-      THREE_MONTH: "Quarterly",
-      ONE_YEAR: "Annual",
+      MONTH: t("Monthly"),
+      THREE_MONTH: t("Quarterly"),
+      ONE_YEAR: t("Annual"),
     };
     return labels[duration] || duration;
   };

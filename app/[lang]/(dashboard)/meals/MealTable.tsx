@@ -414,7 +414,9 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
                   disabled={isProcessing}
                   size="sm"
                   className={`
-                    bg-green-500 hover:bg-green-600 text-white
+                    bg-green-500 dark:bg-green-600 
+                    hover:bg-green-600 dark:hover:bg-green-700 
+                    text-white
                     border-0 font-medium px-3 py-1.5 h-auto
                     transition-all duration-300
                     ${isProcessing ? "opacity-70 cursor-not-allowed" : ""}
@@ -462,11 +464,21 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             {/* Standard action buttons for non-request meals */}
             {!meal.isRequest && (
               <>
-                <Link href={`/meals/${meal.id}/edit`}>
+                <Link href={`/${lang}/meals/${meal.id}/edit`}>
                   <Button
                     size="icon"
                     variant="outline"
-                    className="h-8 w-8 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                    className="
+                      h-8 w-8 
+                      border-[#25235F]/20 dark:border-blue-400/30 
+                      hover:border-[#25235F] dark:hover:border-blue-500 
+                      hover:bg-[#25235F] dark:hover:bg-blue-600 
+                      hover:text-white 
+                      transition-all duration-300 
+                      shadow-md hover:shadow-lg
+                      bg-white dark:bg-gray-800
+                      text-gray-700 dark:text-gray-300
+                    "
                   >
                     <Icon icon="heroicons:pencil" className="h-3.5 w-3.5" />
                   </Button>
@@ -515,7 +527,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Meal Image")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -529,7 +541,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             image={imageUrl}
             alt={row.original.type}
             size="md"
-            shape="square"
+            shape="circle"
             baseUrl=""
             showZoom={true}
           />
@@ -542,28 +554,28 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Meal Type")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
         const mealTypeColors = {
           BREAKFAST:
-            "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200",
+            "bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-600 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30",
           LUNCH:
-            "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200",
+            "bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white shadow-lg shadow-green-200 dark:shadow-green-900/30",
           DINNER:
-            "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-200",
+            "bg-gradient-to-r from-blue-500 to-cyan-600 dark:from-blue-600 dark:to-cyan-700 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/30",
           SNACK:
-            "bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-200",
+            "bg-gradient-to-r from-purple-500 to-violet-600 dark:from-purple-600 dark:to-violet-700 text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30",
           OTHER:
-            "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200",
+            "bg-gradient-to-r from-gray-500 to-gray-700 dark:from-gray-600 dark:to-gray-800 text-white shadow-lg shadow-gray-200 dark:shadow-gray-900/30",
         };
 
         const defaultStyle =
-          "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200";
+          "bg-gradient-to-r from-gray-500 to-gray-700 dark:from-gray-600 dark:to-gray-800 text-white shadow-lg shadow-gray-200 dark:shadow-gray-900/30";
 
         return (
-          <div className="flex items-center justify-center">
+          <div className="flex overflow-hidden items-center justify-center">
             <Badge
               className={`
                 relative
@@ -578,7 +590,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
                 }
               `}
             >
-              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300" />
               <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
                 {t(row.original.type)}
               </span>
@@ -594,7 +606,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Meal Items")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -618,9 +630,9 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
               <div key={item.id || index} className="flex items-start gap-2">
                 <Icon
                   icon="heroicons:check-badge"
-                  className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0"
+                  className="h-3 w-3 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"
                 />
-                <span className="text-sm text-gray-700 leading-relaxed">
+                <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                   {lang == "en"
                     ? item.description.english
                     : item.description.arabic}
@@ -637,13 +649,16 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Total Calories")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => (
         <div className="flex items-center justify-start gap-2">
-          <Icon icon="heroicons:fire" className="h-4 w-4 text-red-500" />
-          <span className="font-semibold text-gray-800">
+          <Icon
+            icon="heroicons:fire"
+            className="h-4 w-4 text-red-500 dark:text-red-400"
+          />
+          <span className="font-semibold text-gray-800 dark:text-gray-200">
             {row.original.totalCalory} kcal
           </span>
         </div>
@@ -655,7 +670,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Nutrition")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => (
@@ -664,30 +679,50 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             <TooltipTrigger asChild>
               <div className="flex flex-col gap-1 text-xs">
                 <div className="flex justify-between gap-2">
-                  <span className="text-blue-600 font-medium">Protein:</span>
-                  <span>{row.original.proteins}g</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Protein:
+                  </span>
+                  <span className="text-gray-800 dark:text-gray-300">
+                    {row.original.proteins}g
+                  </span>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <span className="text-orange-600 font-medium">Fat:</span>
-                  <span>{row.original.fat}g</span>
+                  <span className="text-orange-600 dark:text-orange-400 font-medium">
+                    Fat:
+                  </span>
+                  <span className="text-gray-800 dark:text-gray-300">
+                    {row.original.fat}g
+                  </span>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <span className="text-green-600 font-medium">Carbs:</span>
-                  <span>{row.original.carp}g</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">
+                    Carbs:
+                  </span>
+                  <span className="text-gray-800 dark:text-gray-300">
+                    {row.original.carp}g
+                  </span>
                 </div>
               </div>
             </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
+            <TooltipContent
+              side="top"
+              className="
+                max-w-xs 
+                bg-gray-900 dark:bg-gray-800 
+                text-white dark:text-gray-100 
+                border border-gray-700 dark:border-gray-600
+              "
+            >
               <div className="space-y-2">
                 <p className="font-semibold">{t("Nutritional Information")}</p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                  <span className="text-blue-600">Protein:</span>
+                  <span className="text-blue-400">Protein:</span>
                   <span>{row.original.proteins}g</span>
-                  <span className="text-orange-600">Fat:</span>
+                  <span className="text-orange-400">Fat:</span>
                   <span>{row.original.fat}g</span>
-                  <span className="text-green-600">Carbs:</span>
+                  <span className="text-green-400">Carbs:</span>
                   <span>{row.original.carp}g</span>
-                  <span className="text-red-600">Total Calories:</span>
+                  <span className="text-red-400">Total Calories:</span>
                   <span>{row.original.totalCalory} kcal</span>
                 </div>
               </div>
@@ -702,7 +737,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Request Status")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -710,15 +745,17 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
 
         const statusConfig = {
           true: {
-            gradient: "bg-gradient-to-r from-purple-500 to-indigo-600",
-            shadow: "shadow-lg shadow-purple-200",
+            gradient:
+              "bg-gradient-to-r from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700",
+            shadow: "shadow-lg shadow-purple-200 dark:shadow-purple-900/30",
             icon: "heroicons:clock",
             label: t("Requested"),
             badgeClass: "animate-pulse",
           },
           false: {
-            gradient: "bg-gradient-to-r from-gray-500 to-slate-600",
-            shadow: "shadow-lg shadow-gray-200",
+            gradient:
+              "bg-gradient-to-r from-gray-500 to-slate-600 dark:from-gray-600 dark:to-slate-700",
+            shadow: "shadow-lg shadow-gray-200 dark:shadow-gray-900/30",
             icon: "heroicons:check",
             label: t("Standard"),
             badgeClass: "",
@@ -729,7 +766,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
 
         return (
           <>
-            <div className="flex items-center justify-center">
+            <div className="flex  overflow-hidden items-center justify-center">
               <Badge
                 className={`
                 group relative
@@ -741,7 +778,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
                 text-white
               `}
               >
-                <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300" />
                 <Icon
                   icon={config.icon}
                   className="h-3 w-3 transition-transform group-hover:scale-110"
@@ -767,7 +804,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Status")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -775,14 +812,16 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
 
         const statusConfig = {
           active: {
-            gradient: "bg-gradient-to-r from-green-500 to-emerald-600",
-            shadow: "shadow-lg shadow-green-200",
+            gradient:
+              "bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700",
+            shadow: "shadow-lg shadow-green-200 dark:shadow-green-900/30",
             icon: "heroicons:check-circle",
             label: t("Active"),
           },
           in_active: {
-            gradient: "bg-gradient-to-r from-red-500 to-rose-600",
-            shadow: "shadow-lg shadow-red-200",
+            gradient:
+              "bg-gradient-to-r from-red-500 to-rose-600 dark:from-red-600 dark:to-rose-700",
+            shadow: "shadow-lg shadow-red-200 dark:shadow-red-900/30",
             icon: "heroicons:minus-circle",
             label: t("Inactive"),
           },
@@ -793,7 +832,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
           statusConfig.in_active;
 
         return (
-          <div className="flex items-center justify-center">
+          <div className="flex  overflow-hidden items-center justify-center">
             <Badge
               className={`
             group relative
@@ -805,7 +844,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             text-white
           `}
             >
-              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-300" />
               <Icon
                 icon={config.icon}
                 className="h-3 w-3 transition-transform group-hover:scale-110"
@@ -825,7 +864,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Created Date")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-blue-300 font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -840,9 +879,9 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="flex items-center justify-start gap-2">
             <Icon
               icon="heroicons:calendar"
-              className="h-4 w-4 text-[#25235F]"
+              className="h-4 w-4 text-[#25235F] dark:text-blue-400"
             />
-            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700">
+            <span className="max-w-[120px] truncate text-sm font-medium text-gray-700 dark:text-gray-300">
               {formattedDate}
             </span>
           </div>
@@ -871,7 +910,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
       {/* Statistics Banner */}
       {apiResponse?.data?.statistics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-90">{t("Active Meals")}</p>
@@ -885,7 +924,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
               />
             </div>
           </div>
-          <div className="bg-gradient-to-r from-gray-500 to-slate-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="bg-gradient-to-r from-gray-500 to-slate-600 dark:from-gray-600 dark:to-slate-700 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-90">{t("Inactive Meals")}</p>
@@ -899,7 +938,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
               />
             </div>
           </div>
-          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm opacity-90">{t("Meal Requests")}</p>
@@ -921,7 +960,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         initialFilters={filters}
       />
 
-      <div className="rounded-xl overflow-hidden bg-white">
+      <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
         <DataTable
           data={tableData}
           columns={columns}

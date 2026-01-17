@@ -126,16 +126,16 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("actions")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => (
         <div className="flex flex-row gap-3 items-center justify-center">
-          <Link href={`/category/${row.original.id}/edit`}>
+          <Link href={`/${lang}/category/${row.original.id}/edit`}>
             <Button
               size="icon"
               variant="outline"
-              className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              className="h-10 w-10 border-[#25235F]/20 dark:border-gray-600 hover:border-[#25235F] dark:hover:border-white hover:bg-[#25235F] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
             >
               <Icon icon="heroicons:pencil" className="h-4 w-4" />
             </Button>
@@ -161,14 +161,17 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("name_english")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:cube" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
+            <Icon
+              icon="heroicons:cube"
+              className="h-4 w-4 text-[#25235F] dark:text-gray-300"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {row.original.name.english}
             </span>
           </div>
@@ -181,14 +184,17 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("name_arabic")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:cube" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
+            <Icon
+              icon="heroicons:cube"
+              className="h-4 w-4 text-[#25235F] dark:text-gray-300"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {row.original.name.arabic}
             </span>
           </div>
@@ -201,7 +207,7 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("created_at")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -215,9 +221,9 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="flex items-center justify-center gap-2">
             <Icon
               icon="heroicons:calendar"
-              className="h-4 w-4 text-[#25235F]"
+              className="h-4 w-4 text-[#25235F] dark:text-gray-300"
             />
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {formattedDate}
             </span>
           </div>
@@ -241,9 +247,7 @@ const CategoryTable = forwardRef(({ t }: { t: any }, ref) => {
 
   return (
     <div className="space-y-6">
-      {/* Removed the refresh button from here since it's now in the header */}
-
-      <div className="rounded-xl overflow-hidden bg-white">
+      <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm dark:shadow-gray-900/30">
         <DataTable
           data={tableData}
           columns={columns}

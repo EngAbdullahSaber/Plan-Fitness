@@ -12,7 +12,10 @@ import GenericUpdateForm from "../../../shared/GenericUpdateForm";
 
 interface Category {
   id: string;
-  name: string;
+  name: {
+    english: string;
+    arabic: string;
+  };
   nameAr: string;
   createdAt?: string;
   updatedAt?: string;
@@ -36,11 +39,11 @@ const CategoryUpdateForm = () => {
       if (response.data) {
         setCategoryData(response.data.data);
       } else {
-        toast.error("Category not found");
+        toast.error(t("CATEGORY_NOT_FOUND"));
       }
     } catch (error: any) {
       console.error("Error fetching category:", error);
-      toast.error("Failed to load category data");
+      toast.error(t("FAILED_TO_LOAD_CATEGORY_DATA"));
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +78,7 @@ const CategoryUpdateForm = () => {
         toast.success(
           response.data?.message ||
             response.message ||
-            "Category updated successfully",
+            t("CATEGORY_UPDATED_SUCCESSFULLY"),
         );
 
         // Redirect to category blogs page
@@ -84,12 +87,14 @@ const CategoryUpdateForm = () => {
         toast.error(
           response?.data?.message ||
             response?.message ||
-            "Failed to update category",
+            t("FAILED_TO_UPDATE_CATEGORY"),
         );
       }
     } catch (error: any) {
       console.error("Error updating category:", error);
-      toast.error(error.response?.data?.message || "Failed to update category");
+      toast.error(
+        error.response?.data?.message || t("FAILED_TO_UPDATE_CATEGORY"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -99,9 +104,9 @@ const CategoryUpdateForm = () => {
     [
       {
         name: "name",
-        label: "Category Name (English)",
+        label: t("CATEGORY_NAME_ENGLISH"),
         type: "text",
-        placeholder: "Enter category name in English",
+        placeholder: t("ENTER_CATEGORY_NAME_ENGLISH"),
         required: true,
         validation: {
           englishOnly: true,
@@ -109,20 +114,23 @@ const CategoryUpdateForm = () => {
           maxLength: 100,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Category name is required";
-            if (value.length < 2)
-              return "Category name must be at least 2 characters";
-            if (value.length > 100)
-              return "Category name must be less than 100 characters";
+              return t("CATEGORY_NAME_REQUIRED");
+            if (value.length < 2) return t("CATEGORY_NAME_MIN_LENGTH");
+            if (value.length > 100) return t("CATEGORY_NAME_MAX_LENGTH");
+            // Check if contains Arabic characters
+            const arabicRegex = /[\u0600-\u06FF]/;
+            if (arabicRegex.test(value)) {
+              return t("ENGLISH_ONLY_ALLOWED");
+            }
             return null;
           },
         },
       },
       {
         name: "nameAr",
-        label: "Category Name (Arabic)",
+        label: t("CATEGORY_NAME_ARABIC"),
         type: "text",
-        placeholder: "أدخل اسم الفئة بالعربية",
+        placeholder: t("ENTER_CATEGORY_NAME_ARABIC"),
         required: true,
         validation: {
           arabicOnly: true,
@@ -130,11 +138,14 @@ const CategoryUpdateForm = () => {
           maxLength: 100,
           custom: (value) => {
             if (!value || value.trim() === "")
-              return "Category name in Arabic is required";
-            if (value.length < 2)
-              return "Category name must be at least 2 characters";
-            if (value.length > 100)
-              return "Category name must be less than 100 characters";
+              return t("CATEGORY_NAME_ARABIC_REQUIRED");
+            if (value.length < 2) return t("CATEGORY_NAME_MIN_LENGTH");
+            if (value.length > 100) return t("CATEGORY_NAME_MAX_LENGTH");
+            // Check if contains non-Arabic characters (English letters)
+            const englishRegex = /[a-zA-Z]/;
+            if (englishRegex.test(value)) {
+              return t("ARABIC_ONLY_ALLOWED");
+            }
             return null;
           },
         },
@@ -144,9 +155,9 @@ const CategoryUpdateForm = () => {
 
   const sections = [
     {
-      title: "Category Information",
+      title: t("CATEGORY_INFORMATION"),
       icon: "heroicons:tag",
-      description: "Update the category name in both English and Arabic",
+      description: t("CATEGORY_INFORMATION_UPDATE_DESCRIPTION"),
     },
   ];
 
@@ -160,7 +171,7 @@ const CategoryUpdateForm = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#25235F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading category data...</p>
+          <p className="text-gray-600">{t("LOADING_CATEGORY_DATA")}</p>
         </div>
       </div>
     );
@@ -186,8 +197,10 @@ const CategoryUpdateForm = () => {
               />
             </svg>
           </div>
-          <p className="text-gray-600 mb-4">Failed to load category data</p>
-          <Button onClick={handleCancel}>Go Back</Button>
+          <p className="text-gray-600 mb-4">
+            {t("FAILED_TO_LOAD_CATEGORY_DATA")}
+          </p>
+          <Button onClick={handleCancel}>{t("GO_BACK")}</Button>
         </div>
       </div>
     );
@@ -196,8 +209,8 @@ const CategoryUpdateForm = () => {
   // Prepare initial data for the form
   const initialData = {
     id: categoryData.id || categoryId,
-    name: categoryData.name.english || "",
-    nameAr: categoryData.name.arabic || "",
+    name: categoryData.name?.english || "",
+    nameAr: categoryData.name?.arabic || "",
   };
 
   console.log("Initial data for form:", initialData);
@@ -208,7 +221,17 @@ const CategoryUpdateForm = () => {
       <div className="space-y-2">
         <Button
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+          className="
+            inline-flex items-center gap-2 px-5 py-2.5 
+            bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 
+            border border-gray-300 dark:border-gray-700 
+            rounded-xl 
+            text-gray-800 dark:text-gray-200 
+            font-semibold 
+            hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-800 
+            hover:shadow-md dark:hover:shadow-gray-800/50 
+            transition-all duration-200 mb-4
+          "
         >
           <svg
             className="w-4 h-4"
@@ -223,22 +246,22 @@ const CategoryUpdateForm = () => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          {t("Back")}
+          {t("BACK")}
         </Button>
       </div>
 
       <GenericUpdateForm
-        title="Update Category"
-        description="Update the category information"
+        title={t("UPDATE_CATEGORY")}
+        description={t("UPDATE_CATEGORY_DESCRIPTION")}
         initialData={initialData}
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         showIdField={true}
-        idFieldLabel="Category ID"
-        submitButtonText="Update Category"
-        cancelButtonText="Cancel"
+        idFieldLabel={t("CATEGORY_ID")}
+        submitButtonText={t("UPDATE_CATEGORY_BUTTON")}
+        cancelButtonText={t("CANCEL")}
         isLoading={isSubmitting}
       />
     </div>

@@ -82,10 +82,10 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
   const queryClient = useQueryClient();
 
   // Status options
-  const statusOptions = ["Active", "In_Active"];
+  const statusOptions = [t("Active"), t("In_Active")];
 
   // Difficulty options based on your API data
-  const difficultyOptions = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+  const difficultyOptions = [t("BEGINNER"), t("INTERMEDIATE"), t("ADVANCED")];
 
   // Categories paginated select - Updated to match BlogTable pattern
   const categoriesPaginated = usePaginatedSelect({
@@ -323,7 +323,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("actions") || "Actions"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => (
@@ -332,15 +332,15 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             size="icon"
             onClick={() => handleViewTraining(row.original)}
             variant="outline"
-            className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+            className="h-10 w-10 border-[#25235F]/20 dark:border-gray-600 hover:border-[#25235F] dark:hover:border-white hover:bg-[#25235F] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
           >
             <Icon icon="carbon:view" className="h-4 w-4" />
           </Button>
-          <Link href={`/exercises/${row.original.id}/edit`}>
+          <Link href={`/${lang}/exercises/${row.original.id}/edit`}>
             <Button
               size="icon"
               variant="outline"
-              className="h-9 w-9 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              className="h-10 w-10 border-[#25235F]/20 dark:border-gray-600 hover:border-[#25235F] dark:hover:border-white hover:bg-[#25235F] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
             >
               <Icon icon="heroicons:pencil" className="h-4 w-4" />
             </Button>
@@ -374,7 +374,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("program_name") || "Program Name"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -383,19 +383,19 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                     <Icon
                       icon="heroicons:academic-cap"
-                      className="h-5 w-5 text-[#25235F]"
+                      className="h-5 w-5 text-[#25235F] dark:text-gray-300"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <span className="max-w-[200px] truncate font-semibold text-gray-800 hover:text-[#25235F] transition-colors duration-200">
+                    <span className="max-w-[200px] truncate font-semibold text-gray-800 dark:text-gray-200 hover:text-[#25235F] dark:hover:text-white transition-colors duration-200">
                       {lang == "en"
                         ? row.original.title.english
                         : row.original.title.arabic}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {lang === "en"
                         ? row.original.Category?.name.english
                         : row.original.Category?.name.arabic}{" "}
@@ -404,8 +404,8 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
                   </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-md">
-                <p className="font-medium">
+              <TooltipContent className="max-w-md bg-white dark:bg-gray-800 border dark:border-gray-700">
+                <p className="font-medium dark:text-white">
                   {" "}
                   {lang == "en"
                     ? row.original.title.english
@@ -423,7 +423,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("Blog Description")}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => (
@@ -446,7 +446,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("category") || "Category"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -488,7 +488,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("count_duration") || "Count/Duration"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -501,9 +501,9 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             <div className="flex items-center justify-center gap-2">
               <Icon
                 icon="heroicons:hashtag"
-                className="h-4 w-4 text-[#25235F]"
+                className="h-4 w-4 text-[#25235F] dark:text-gray-300"
               />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {row.original.count} {t("counts") || "counts"}
               </span>
             </div>
@@ -511,8 +511,11 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         } else if (hasDuration) {
           return (
             <div className="flex items-center justify-center gap-2">
-              <Icon icon="heroicons:clock" className="h-4 w-4 text-[#25235F]" />
-              <span className="text-sm font-medium text-gray-700">
+              <Icon
+                icon="heroicons:clock"
+                className="h-4 w-4 text-[#25235F] dark:text-gray-300"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {row.original.duration} {t("seconds") || "sec"}
               </span>
             </div>
@@ -520,7 +523,9 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         } else {
           return (
             <div className="flex items-center justify-center">
-              <span className="text-sm text-gray-500">-</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                -
+              </span>
             </div>
           );
         }
@@ -532,7 +537,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("difficulty") || "Difficulty"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -551,7 +556,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             <Badge
               className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${colorClass}`}
             >
-              {row.original.difficulty.toLowerCase()}
+              {t(row.original.difficulty)}
             </Badge>
           </div>
         );
@@ -566,14 +571,17 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("calories") || "Calories"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center gap-2">
-            <Icon icon="heroicons:fire" className="h-4 w-4 text-[#25235F]" />
-            <span className="text-sm font-medium text-gray-700">
+            <Icon
+              icon="heroicons:fire"
+              className="h-4 w-4 text-[#25235F] dark:text-gray-300"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {row.original.calory || 0}
             </span>
           </div>
@@ -586,7 +594,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         <DataTableColumnHeader
           column={column}
           title={t("status") || "Status"}
-          className="text-[#25235F] font-bold"
+          className="text-[#25235F] dark:text-white font-bold"
         />
       ),
       cell: ({ row }) => {
@@ -603,7 +611,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             <Badge
               className={`text-center font-semibold px-3 py-1 rounded-full border-0 ${colorClass}`}
             >
-              {row.original.status}
+              {t(row.original.status)}
             </Badge>
           </div>
         );
@@ -617,7 +625,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">
+        <div className="text-lg text-gray-600 dark:text-gray-400">
           {t("loading_trainings") || "Loading trainings..."}
         </div>
       </div>
@@ -627,11 +635,14 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">
+        <div className="text-lg text-red-600 dark:text-red-400">
           {t("error_loading_trainings") || "Error loading trainings"}:{" "}
           {error.message}
         </div>
-        <Button onClick={() => refetch()} className="ml-4">
+        <Button
+          onClick={() => refetch()}
+          className="ml-4 dark:bg-gray-700 dark:hover:bg-gray-600"
+        >
           {t("retry") || "Retry"}
         </Button>
       </div>
@@ -654,7 +665,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
       />
 
       {/* Enhanced Data Table with Custom Styling */}
-      <div className="flex flex-wrap gap-4 items-center justify-between p-4 bg-gradient-to-r from-[#25235F]/5 to-[#ED4135]/5 rounded-xl border border-gray-200">
+      <div className="flex flex-wrap gap-4 items-center justify-between p-4 bg-gradient-to-r from-[#25235F]/5 to-[#ED4135]/5 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-6"></div>
 
         <div className="flex items-center gap-4">
@@ -662,7 +673,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             onClick={() => refetch()}
             variant="ghost"
             size="sm"
-            className="text-[#25235F] hover:text-[#ED4135] hover:bg-[#25235F]/10 transition-all duration-300"
+            className="text-[#25235F] dark:text-gray-300 hover:text-[#ED4135] dark:hover:text-white hover:bg-[#25235F]/10 dark:hover:bg-gray-700 transition-all duration-300"
           >
             <Icon icon="heroicons:arrow-path" className="h-4 w-4 mr-2" />
             {t("refresh_data") || "Refresh Data"}
@@ -670,7 +681,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
         </div>
       </div>
 
-      <div className="rounded-xl overflow-hidden bg-white">
+      <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800">
         <DataTable
           data={trainingData}
           columns={columns}

@@ -51,7 +51,13 @@ export function DataTableToolbar({
           placeholder={t("Search")}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          className="h-10 pr-10"
+          className="h-10 pr-10 bg-white dark:bg-gray-800 
+                     border-gray-300 dark:border-gray-600 
+                     text-gray-900 dark:text-gray-100 
+                     placeholder:text-gray-500 dark:placeholder:text-gray-400
+                     focus:border-blue-500 dark:focus:border-blue-400 
+                     focus:ring-blue-500/20 dark:focus:ring-blue-400/20
+                     transition-colors duration-300"
           disabled={isLoading}
         />
         {localSearch && (
@@ -59,7 +65,10 @@ export function DataTableToolbar({
             variant="ghost"
             size="sm"
             onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-200"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 
+                       h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-700
+                       text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300
+                       transition-colors duration-300"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -67,7 +76,8 @@ export function DataTableToolbar({
         {isLoading && (
           <Icon
             icon="heroicons:arrow-path"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-gray-400"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 
+                       h-4 w-4 animate-spin text-gray-400 dark:text-gray-500"
           />
         )}
       </div>

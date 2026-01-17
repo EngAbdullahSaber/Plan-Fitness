@@ -44,17 +44,14 @@ const MealsCreateForm = () => {
       // Validate file type
       const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
       if (!validTypes.includes(file.type)) {
-        toast.error(
-          "Error",
-          "Please select a valid image file (JPEG, PNG, WebP)"
-        );
+        toast.error(t("ERROR"), t("INVALID_IMAGE_FILE"));
         return;
       }
 
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB in bytes
       if (file.size > maxSize) {
-        toast.error("Error", "Image size should be less than 5MB");
+        toast.error(t("ERROR"), t("IMAGE_SIZE_LIMIT"));
         return;
       }
 
@@ -78,7 +75,7 @@ const MealsCreateForm = () => {
       const uploadResponse = await CreateMethodFormData(
         "upload",
         imageFormData,
-        lang
+        lang,
       );
 
       if (
@@ -88,16 +85,16 @@ const MealsCreateForm = () => {
         return uploadResponse.data.data.url;
       } else {
         toast.error(
-          "Error",
-          uploadResponse?.data?.message || "Failed to upload image"
+          t("ERROR"),
+          uploadResponse?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
         );
         return null;
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
       toast.error(
-        "Error",
-        error.response?.data?.message || "Failed to upload image"
+        t("ERROR"),
+        error.response?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
       );
       return null;
     }
@@ -111,14 +108,11 @@ const MealsCreateForm = () => {
       const validMealItems = mealItems.filter(
         (item) =>
           item.description.english.trim() !== "" &&
-          item.description.arabic.trim() !== ""
+          item.description.arabic.trim() !== "",
       );
 
       if (validMealItems.length === 0) {
-        toast.error(
-          "Error",
-          "Please add at least one meal item with both English and Arabic descriptions"
-        );
+        toast.error(t("ERROR"), t("MEAL_ITEMS_VALIDATION"));
         return;
       }
 
@@ -159,27 +153,27 @@ const MealsCreateForm = () => {
         response?.status === 201
       ) {
         toast.success(
-          "Success!",
+          t("SUCCESS"),
           response.data?.message ||
             response.message ||
-            "Meal created successfully"
+            t("MEAL_CREATED_SUCCESSFULLY"),
         );
 
         // Redirect to meals list page
         router.push("/meals");
       } else {
         toast.error(
-          "Error",
+          t("ERROR"),
           response?.data?.message ||
             response?.message ||
-            "Failed to create meal"
+            t("FAILED_TO_CREATE_MEAL"),
         );
       }
     } catch (error: any) {
       console.error("Error creating meal:", error);
       toast.error(
-        "Error",
-        error.response?.data?.message || "Failed to create meal"
+        t("ERROR"),
+        error.response?.data?.message || t("FAILED_TO_CREATE_MEAL"),
       );
     } finally {
       setIsSubmitting(false);
@@ -190,38 +184,38 @@ const MealsCreateForm = () => {
     [
       {
         name: "type",
-        label: "Meal Type",
+        label: t("MEAL_TYPE"),
         type: "select",
         required: true,
-        placeholder: "Select meal type...",
+        placeholder: t("SELECT_MEAL_TYPE"),
         options: [
-          { value: "BREAKFAST", label: "Breakfast" },
-          { value: "LAUNCH", label: "Lunch" },
-          { value: "DINNER", label: "Dinner" },
-          { value: "SNACK", label: "Snack" },
-          { value: "OTHER", label: "Other" },
+          { value: "BREAKFAST", label: t("BREAKFAST") },
+          { value: "LAUNCH", label: t("LUNCH") },
+          { value: "DINNER", label: t("DINNER") },
+          { value: "SNACK", label: t("SNACK") },
+          { value: "OTHER", label: t("OTHER") },
         ],
         validation: {
           custom: (value) => {
-            if (!value) return "Meal type is required";
+            if (!value) return t("MEAL_TYPE_REQUIRED");
             return null;
           },
         },
       },
       {
         name: "totalCalory",
-        label: "Total Calories",
+        label: t("TOTAL_CALORIES"),
         type: "number",
-        placeholder: "Enter total calories",
+        placeholder: t("ENTER_TOTAL_CALORIES"),
         required: true,
         step: "0.1",
         validation: {
           min: 0,
           max: 5000,
           custom: (value) => {
-            if (!value || value === "") return "Total calories are required";
-            if (value < 0) return "Calories cannot be negative";
-            if (value > 5000) return "Calories seem too high";
+            if (!value || value === "") return t("TOTAL_CALORIES_REQUIRED");
+            if (value < 0) return t("CALORIES_NEGATIVE_ERROR");
+            if (value > 5000) return t("CALORIES_TOO_HIGH_ERROR");
             return null;
           },
         },
@@ -230,45 +224,45 @@ const MealsCreateForm = () => {
     [
       {
         name: "proteins",
-        label: "Proteins (g)",
+        label: t("PROTEINS_G"),
         type: "number",
-        placeholder: "Enter protein amount in grams",
+        placeholder: t("ENTER_PROTEIN_AMOUNT"),
         required: true,
         step: "0.1",
         validation: {
           min: 0,
           max: 200,
           custom: (value) => {
-            if (!value || value === "") return "Protein amount is required";
-            if (value < 0) return "Protein cannot be negative";
-            if (value > 200) return "Protein amount seems too high";
+            if (!value || value === "") return t("PROTEIN_AMOUNT_REQUIRED");
+            if (value < 0) return t("PROTEIN_NEGATIVE_ERROR");
+            if (value > 200) return t("PROTEIN_TOO_HIGH_ERROR");
             return null;
           },
         },
       },
       {
         name: "fat",
-        label: "Fat (g)",
+        label: t("FAT_G"),
         type: "number",
-        placeholder: "Enter fat amount in grams",
+        placeholder: t("ENTER_FAT_AMOUNT"),
         required: true,
         step: "0.1",
         validation: {
           min: 0,
           max: 200,
           custom: (value) => {
-            if (!value || value === "") return "Fat amount is required";
-            if (value < 0) return "Fat cannot be negative";
-            if (value > 200) return "Fat amount seems too high";
+            if (!value || value === "") return t("FAT_AMOUNT_REQUIRED");
+            if (value < 0) return t("FAT_NEGATIVE_ERROR");
+            if (value > 200) return t("FAT_TOO_HIGH_ERROR");
             return null;
           },
         },
       },
       {
         name: "carp",
-        label: "Carbohydrates (g)",
+        label: t("CARBOHYDRATES_G"),
         type: "number",
-        placeholder: "Enter carbohydrate amount in grams",
+        placeholder: t("ENTER_CARBOHYDRATE_AMOUNT"),
         required: true,
         step: "0.1",
         validation: {
@@ -276,9 +270,9 @@ const MealsCreateForm = () => {
           max: 500,
           custom: (value) => {
             if (!value || value === "")
-              return "Carbohydrate amount is required";
-            if (value < 0) return "Carbohydrates cannot be negative";
-            if (value > 500) return "Carbohydrate amount seems too high";
+              return t("CARBOHYDRATE_AMOUNT_REQUIRED");
+            if (value < 0) return t("CARBOHYDRATE_NEGATIVE_ERROR");
+            if (value > 500) return t("CARBOHYDRATE_TOO_HIGH_ERROR");
             return null;
           },
         },
@@ -289,11 +283,11 @@ const MealsCreateForm = () => {
     [
       {
         name: "image",
-        label: "Meal Image",
+        label: t("MEAL_IMAGE"),
         type: "image",
         required: false,
         accept: "image/*",
-        description: "Supported formats: JPEG, PNG, WebP. Max size: 5MB",
+        description: t("IMAGE_UPLOAD_DESCRIPTION"),
         onChange: handleImageChange,
         validation: {
           maxFileSize: 5 * 1024 * 1024, // 5MB
@@ -308,7 +302,7 @@ const MealsCreateForm = () => {
     [
       {
         name: "mealItems",
-        label: "Meal Items",
+        label: t("MEAL_ITEMS"),
         type: "mealItem",
         required: true,
         cols: 1, // Full width
@@ -318,24 +312,24 @@ const MealsCreateForm = () => {
 
   const sections = [
     {
-      title: "Basic Information",
+      title: t("BASIC_INFORMATION"),
       icon: "heroicons:document-text",
-      description: "Enter the meal type and total calories",
+      description: t("BASIC_INFORMATION_DESCRIPTION_MEAL"),
     },
     {
-      title: "Nutrition Facts",
+      title: t("NUTRITION_FACTS"),
       icon: "heroicons:chart-bar",
-      description: "Enter the protein and fat content",
+      description: t("NUTRITION_FACTS_DESCRIPTION"),
     },
     {
-      title: "Additional Information",
+      title: t("ADDITIONAL_INFORMATION"),
       icon: "heroicons:information-circle",
-      description: "Enter carbohydrates and upload meal image",
+      description: t("ADDITIONAL_INFORMATION_DESCRIPTION"),
     },
     {
-      title: "Meal Items",
+      title: t("MEAL_ITEMS"),
       icon: "heroicons:list-bullet",
-      description: "Add descriptions for each component of the meal",
+      description: t("MEAL_ITEMS_DESCRIPTION"),
     },
   ];
 
@@ -357,7 +351,17 @@ const MealsCreateForm = () => {
       <div className="space-y-2">
         <Button
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+          className="
+            inline-flex items-center gap-2 px-5 py-2.5 
+            bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 
+            border border-gray-300 dark:border-gray-700 
+            rounded-xl 
+            text-gray-800 dark:text-gray-200 
+            font-semibold 
+            hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-800 
+            hover:shadow-md dark:hover:shadow-gray-800/50 
+            transition-all duration-200 mb-4
+          "
         >
           <svg
             className="w-4 h-4"
@@ -372,21 +376,21 @@ const MealsCreateForm = () => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          {t("Back")}
+          {t("BACK")}
         </Button>
       </div>
 
       <GenericCreateForm
-        title="Create New Meal"
-        description="Add a new meal to the system"
+        title={t("CREATE_NEW_MEAL")}
+        description={t("CREATE_NEW_MEAL_DESCRIPTION")}
         initialData={initialData}
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         showIdField={false}
-        submitButtonText={t("Create Meal")}
-        cancelButtonText={"Cancel"}
+        submitButtonText={t("CREATE_MEAL")}
+        cancelButtonText={t("CANCEL")}
         isLoading={isSubmitting}
         submitButtonProps={{
           disabled: isSubmitting,

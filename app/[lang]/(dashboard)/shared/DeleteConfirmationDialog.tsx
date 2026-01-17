@@ -32,38 +32,82 @@ const DeleteConfirmationDialog = ({
 }) => {
   const { t, loading, error } = useTranslate();
 
+  // Color classes for destructive vs non-destructive modes
+  const destructiveClasses = {
+    primary: "text-red-600 dark:text-red-400",
+    border: "border-red-200 dark:border-red-800",
+    bgLight: "bg-red-50 dark:bg-red-900/20",
+    bgMedium: "bg-red-100 dark:bg-red-900/30",
+    gradientFrom: "from-red-500 dark:from-red-600",
+    gradientTo: "to-red-600 dark:to-red-700",
+    bgFull: "bg-red-500 dark:bg-red-600",
+    borderHover: "hover:border-red-500 dark:hover:border-red-400",
+    bgHover: "hover:bg-red-500 dark:hover:bg-red-600",
+    textHover: "hover:text-white",
+    shadow: "shadow-red-100/50 dark:shadow-red-900/30",
+  };
+
+  const neutralClasses = {
+    primary: "text-gray-600 dark:text-gray-400",
+    border: "border-gray-300 dark:border-gray-700",
+    bgLight: "bg-gray-100 dark:bg-gray-800",
+    bgMedium: "bg-gray-200 dark:bg-gray-700",
+    gradientFrom: "from-gray-500 dark:from-gray-600",
+    gradientTo: "to-gray-600 dark:to-gray-700",
+    bgFull: "bg-gray-500 dark:bg-gray-600",
+    borderHover: "hover:border-gray-500 dark:hover:border-gray-400",
+    bgHover: "hover:bg-gray-500 dark:hover:bg-gray-600",
+    textHover: "hover:text-white",
+    shadow: "shadow-gray-100/50 dark:shadow-gray-900/30",
+  };
+
+  const currentClasses = destructive ? destructiveClasses : neutralClasses;
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         {trigger || (
           <Button
             size={size}
-            color={variant}
-            className={`${
-              destructive
-                ? "border-[#ED4135]/20 hover:border-[#ED4135] hover:bg-[#ED4135]"
-                : "border-gray-300 hover:border-gray-500 hover:bg-red-600"
-            } hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 group ${buttonClassName}`}
+            variant={variant}
+            className={`
+              ${
+                destructive
+                  ? "border-red-200 dark:border-red-800 hover:border-red-500 dark:hover:border-red-400 hover:bg-red-500 dark:hover:bg-red-600"
+                  : "border-gray-300 dark:border-gray-700 hover:border-gray-500 dark:hover:border-gray-400 hover:bg-gray-500 dark:hover:bg-gray-600"
+              } 
+              ${destructive ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}
+              hover:text-white 
+              transition-all duration-300 
+              shadow-md hover:shadow-lg 
+              transform hover:scale-105 
+              group ${buttonClassName}
+            `}
           >
             <Icon
               icon={icon}
-              className={`h-4 w-4 group-hover:scale-110 text-[#ED4135] hover:text-[#fff] transition-transform duration-300 ${
-                size === "icon" ? "" : "mr-2"
-              }`}
+              className={`
+                h-4 w-4 
+                group-hover:scale-110 
+                transition-transform duration-300 
+                ${destructive ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}
+                group-hover:text-white
+                ${size === "icon" ? "" : "mr-2"}
+              `}
             />
             {size !== "icon" && t("Delete")}
           </Button>
         )}
       </DialogTrigger>
 
-      <DialogContent className="p-0 !h-auto border-0 shadow-2xl bg-white rounded-2xl overflow-hidden max-w-md">
+      <DialogContent className="p-0 !h-auto border-0 shadow-2xl dark:shadow-gray-900/30 bg-white dark:bg-gray-900 rounded-2xl overflow-hidden max-w-md">
         {/* Header with gradient background */}
         <DialogHeader
-          className={`bg-gradient-to-r ${
-            destructive
-              ? "from-[#ED4135] to-[#ED4135]/90"
-              : "from-gray-600 to-gray-500"
-          } text-white p-6 relative overflow-hidden`}
+          className={`
+            bg-gradient-to-r 
+            ${currentClasses.gradientFrom} ${currentClasses.gradientTo} 
+            text-white p-6 relative overflow-hidden
+          `}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform skew-x-12"></div>
           <DialogTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
@@ -83,54 +127,60 @@ const DeleteConfirmationDialog = ({
             {/* Warning Icon with Animation */}
             <div className="relative">
               <div
-                className={`w-20 h-20 rounded-full ${
-                  destructive ? "bg-[#ED4135]/10" : "bg-gray-200"
-                } flex items-center justify-center animate-pulse`}
+                className={`
+                  w-20 h-20 rounded-full 
+                  ${currentClasses.bgLight} 
+                  flex items-center justify-center
+                `}
               >
                 <div
-                  className={`w-16 h-16 rounded-full ${
-                    destructive ? "bg-[#ED4135]/20" : "bg-gray-300"
-                  } flex items-center justify-center`}
+                  className={`
+                    w-16 h-16 rounded-full 
+                    ${currentClasses.bgMedium} 
+                    flex items-center justify-center
+                  `}
                 >
                   <Icon
                     icon={icon}
-                    className={`h-8 w-8 ${
-                      destructive ? "text-[#ED4135]" : "text-gray-600"
-                    }`}
+                    className={`h-8 w-8 ${currentClasses.primary}`}
                   />
                 </div>
               </div>
               {/* Decorative rings */}
               <div
-                className={`absolute inset-0 rounded-full border-2 ${
-                  destructive ? "border-[#ED4135]/20" : "border-gray-300"
-                } animate-ping`}
+                className={`
+                  absolute inset-0 rounded-full border-2 
+                  ${currentClasses.border} 
+                  animate-ping
+                `}
               ></div>
               <div
-                className={`absolute inset-2 rounded-full border ${
-                  destructive ? "border-[#ED4135]/10" : "border-gray-200"
-                }`}
+                className={`
+                  absolute inset-2 rounded-full border 
+                  ${currentClasses.border} 
+                  opacity-30
+                `}
               ></div>
             </div>
 
             {/* Warning Text */}
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-[#25235F]">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {t("Deleting")} {t(itemName)}
               </h3>
               <div className="space-y-2">
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {t(description)}
                 </p>
                 {showItemWarning && (
                   <div
-                    className={`flex items-center justify-center gap-2 text-sm ${
-                      destructive
-                        ? "text-[#ED4135] bg-[#ED4135]/5"
-                        : "text-gray-600 bg-gray-100"
-                    } px-4 py-2 rounded-lg border ${
-                      destructive ? "border-[#ED4135]/10" : "border-gray-200"
-                    }`}
+                    className={`
+                      flex items-center justify-center gap-2 text-sm 
+                      ${currentClasses.primary} 
+                      ${currentClasses.bgLight} 
+                      px-4 py-2 rounded-lg border 
+                      ${currentClasses.border}
+                    `}
                   >
                     <Icon
                       icon="heroicons:information-circle"
@@ -145,11 +195,21 @@ const DeleteConfirmationDialog = ({
         </div>
 
         {/* Footer with Enhanced Buttons */}
-        <DialogFooter className="p-6 bg-gray-50/50 border-t border-gray-100 flex gap-4">
+        <DialogFooter className="p-6 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex gap-4">
           <DialogClose asChild>
             <Button
               variant="outline"
-              className="flex-1 border-2 border-gray-300 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 py-3 h-auto font-semibold"
+              className="
+                flex-1 border-2 
+                border-gray-300 dark:border-gray-600 
+                hover:border-gray-900 dark:hover:border-gray-300 
+                hover:bg-gray-900 dark:hover:bg-gray-300 
+                hover:text-white dark:hover:text-gray-900 
+                transition-all duration-300 
+                shadow-md hover:shadow-lg 
+                transform hover:-translate-y-0.5 
+                py-3 h-auto font-semibold
+              "
             >
               <Icon icon="heroicons:x-mark" className="h-4 w-4 mr-2" />
               {t(cancelText)}
@@ -158,11 +218,17 @@ const DeleteConfirmationDialog = ({
 
           <Button
             onClick={onConfirm}
-            className={`flex-1 bg-gradient-to-r ${
-              destructive
-                ? "from-[#ED4135] to-[#ED4135]/90 hover:from-[#ED4135]/90 hover:to-[#ED4135]"
-                : "from-gray-600 to-gray-500 hover:from-gray-500 hover:to-gray-600"
-            } text-white border-0 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 py-3 h-auto font-semibold`}
+            className={`
+              flex-1 
+              bg-gradient-to-r 
+              ${currentClasses.gradientFrom} ${currentClasses.gradientTo} 
+              hover:opacity-90 
+              text-white border-0 
+              shadow-lg hover:shadow-xl 
+              transform hover:-translate-y-0.5 
+              transition-all duration-300 
+              py-3 h-auto font-semibold
+            `}
           >
             <Icon icon={icon} className="h-4 w-4 mr-2" />
             {t(confirmText)}

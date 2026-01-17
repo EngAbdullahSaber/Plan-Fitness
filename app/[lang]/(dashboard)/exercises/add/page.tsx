@@ -74,7 +74,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         toast.success(
           response.data?.message ||
             response.message ||
-            "Exercise created successfully",
+            t("EXERCISE_CREATED_SUCCESSFULLY"),
         );
         if (onClose) onClose();
         else router.push("/exercises");
@@ -82,12 +82,14 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         toast.error(
           response?.data?.message ||
             response?.message ||
-            "Failed to create exercise",
+            t("FAILED_TO_CREATE_EXERCISE"),
         );
       }
     } catch (error: any) {
       console.error("Error creating exercise:", error);
-      toast.error(error.response?.data?.message || "Failed to create exercise");
+      toast.error(
+        error.response?.data?.message || t("FAILED_TO_CREATE_EXERCISE"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -121,9 +123,9 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
   };
 
   const difficultyOptions = [
-    { value: "BEGINNER", label: "Beginner" },
-    { value: "INTERMEDIATE", label: "Intermediate" },
-    { value: "ADVANCED", label: "Advanced" },
+    { value: "BEGINNER", label: t("BEGINNER") },
+    { value: "INTERMEDIATE", label: t("INTERMEDIATE") },
+    { value: "ADVANCED", label: t("ADVANCED") },
   ];
 
   // ✅ Dynamic fields — show both duration and count but disable based on inputType
@@ -133,16 +135,16 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "englishTitle",
-          label: "Exercise Title (English)",
+          label: t("EXERCISE_TITLE_ENGLISH"),
           type: "text",
-          placeholder: "Enter exercise title in English",
+          placeholder: t("ENTER_EXERCISE_TITLE_ENGLISH"),
           required: true,
         },
         {
           name: "arabicTitle",
-          label: "Exercise Title (Arabic)",
+          label: t("EXERCISE_TITLE_ARABIC"),
           type: "text",
-          placeholder: "أدخل عنوان التمرين بالعربية",
+          placeholder: t("ENTER_EXERCISE_TITLE_ARABIC"),
           required: true,
         },
       ],
@@ -151,16 +153,16 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "englishDescription",
-          label: "Exercise Description (English)",
+          label: t("EXERCISE_DESCRIPTION_ENGLISH"),
           type: "textarea",
-          placeholder: "Enter exercise description in English",
+          placeholder: t("ENTER_EXERCISE_DESCRIPTION_ENGLISH"),
           required: true,
         },
         {
           name: "arabicDescription",
-          label: "Exercise Description (Arabic)",
+          label: t("EXERCISE_DESCRIPTION_ARABIC"),
           type: "textarea",
-          placeholder: "أدخل وصف التمرين بالعربية",
+          placeholder: t("ENTER_EXERCISE_DESCRIPTION_ARABIC"),
           required: true,
         },
       ],
@@ -169,10 +171,10 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "categoryId",
-          label: "Category",
+          label: t("CATEGORY"),
           type: "selectPagination",
           required: true,
-          placeholder: "Select category...",
+          placeholder: t("SELECT_CATEGORY"),
           paginationOptions: {
             data: categoriesPaginated.options || [],
             isLoading: categoriesPaginated.isLoading,
@@ -187,11 +189,11 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         },
         {
           name: "difficulty",
-          label: "Difficulty Level",
+          label: t("DIFFICULTY_LEVEL"),
           type: "select",
           required: true,
           options: difficultyOptions,
-          placeholder: "Select difficulty...",
+          placeholder: t("SELECT_DIFFICULTY"),
         },
       ],
 
@@ -199,16 +201,16 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "videoUrl",
-          label: "Video URL",
+          label: t("VIDEO_URL"),
           type: "url",
-          placeholder: "https://example.com/training-video",
+          placeholder: t("VIDEO_URL_PLACEHOLDER"),
           required: true,
         },
         {
           name: "url",
-          label: "URL Of Image",
+          label: t("IMAGE_URL"),
           type: "url",
-          placeholder: "https://example.com/training-image",
+          placeholder: t("IMAGE_URL_PLACEHOLDER"),
           required: true,
         },
       ],
@@ -216,22 +218,22 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "calories",
-          label: "Calories Burned",
+          label: t("CALORIES_BURNED"),
           type: "number",
-          placeholder: "300",
+          placeholder: t("CALORIES_PLACEHOLDER"),
           required: true,
         },
         // Empty field to maintain grid structure
         {
           name: "inputType",
-          label: "Exercise Type",
+          label: t("EXERCISE_TYPE"),
           type: "select",
           required: true,
           options: [
-            { value: "duration", label: "Duration-based (seconds)" },
-            { value: "count", label: "Count-based (repetitions)" },
+            { value: "duration", label: t("DURATION_BASED") },
+            { value: "count", label: t("COUNT_BASED") },
           ],
-          placeholder: "Select exercise type...",
+          placeholder: t("SELECT_EXERCISE_TYPE"),
           defaultValue: "duration",
         },
       ],
@@ -240,26 +242,24 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "duration",
-          label: "Duration (seconds)",
+          label: t("DURATION_SECONDS"),
           type: "number",
-          placeholder: "60",
+          placeholder: t("DURATION_PLACEHOLDER"),
           required: inputType === "duration", // Only required if duration-based
           disabled: inputType === "count", // Disabled if count-based
           description:
-            inputType === "count"
-              ? "Disabled for count-based exercises"
-              : undefined,
+            inputType === "count" ? t("DISABLED_FOR_COUNT_BASED") : undefined,
         },
         {
           name: "count",
-          label: "Repetition Count",
+          label: t("REPETITION_COUNT"),
           type: "number",
-          placeholder: "10",
+          placeholder: t("REPETITION_PLACEHOLDER"),
           required: inputType === "count", // Only required if count-based
           disabled: inputType === "duration", // Disabled if duration-based
           description:
             inputType === "duration"
-              ? "Disabled for duration-based exercises"
+              ? t("DISABLED_FOR_DURATION_BASED")
               : undefined,
         },
       ],
@@ -268,7 +268,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       [
         {
           name: "status",
-          label: "Status",
+          label: t("STATUS"),
           type: "switch",
           required: false,
         },
@@ -280,55 +280,57 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       categoriesPaginated.isLoading,
       categoriesPaginated.hasMore,
       categoriesPaginated.searchTerm,
+      t,
     ],
   );
 
   // ✅ Dynamic section titles
   const sections = [
     {
-      title: "Basic Information",
+      title: t("BASIC_INFORMATION"),
       icon: "heroicons:document-text",
-      description: "Enter exercise title in both English and Arabic",
+      description: t("EXERCISE_TITLE_DESCRIPTION"),
       fieldsCount: 2, // englishTitle, arabicTitle
     },
     {
-      title: "Description",
+      title: t("DESCRIPTION"),
       icon: "heroicons:pencil-square",
-      description: "Enter exercise description in both English and Arabic",
+      description: t("EXERCISE_DESCRIPTION_DESCRIPTION"),
       fieldsCount: 2, // englishDescription, arabicDescription
     },
     {
-      title: "Category & Difficulty",
+      title: t("CATEGORY_DIFFICULTY"),
       icon: "heroicons:tag",
-      description: "Select category and difficulty level for the exercise",
+      description: t("CATEGORY_DIFFICULTY_DESCRIPTION"),
       fieldsCount: 2, // categoryId, difficulty
     },
     {
-      title: "Media URLs",
+      title: t("MEDIA_URLS"),
       icon: "heroicons:video-camera",
-      description: "Add video and image URLs for the exercise",
+      description: t("MEDIA_URLS_DESCRIPTION"),
       fieldsCount: 2, // videoUrl, url (image)
     },
     {
-      title: "Exercise Metrics",
+      title: t("EXERCISE_METRICS"),
       icon: "heroicons:fire",
-      description: "Set calories burned and select exercise type",
+      description: t("EXERCISE_METRICS_DESCRIPTION"),
       fieldsCount: 2, // calories, inputType
     },
     {
-      title: inputType === "duration" ? "Duration Settings" : "Count Settings",
+      title:
+        inputType === "duration" ? t("DURATION_SETTINGS") : t("COUNT_SETTINGS"),
       icon:
         inputType === "duration" ? "heroicons:clock" : "heroicons:arrow-path",
       description:
         inputType === "duration"
-          ? "Set duration in seconds (repetition count is disabled)"
-          : "Set repetition count (duration is disabled)",
+          ? t("DURATION_SETTINGS_DESCRIPTION")
+          : t("COUNT_SETTINGS_DESCRIPTION"),
       fieldsCount: 2, // duration, count
     },
     {
-      title: "Status",
+      title: t("STATUS"),
       icon: "heroicons:check-circle",
-      description: "Enable or disable this exercise",
+      description: t("STATUS_DESCRIPTION"),
       fieldsCount: 1, // status
     },
   ];
@@ -339,7 +341,17 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       <div className="space-y-2">
         <Button
           onClick={() => router.back()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 rounded-xl text-gray-800 font-semibold hover:from-gray-200 hover:to-gray-300 hover:shadow-md transition-all duration-200 mb-4"
+          className="
+            inline-flex items-center gap-2 px-5 py-2.5 
+            bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 
+            border border-gray-300 dark:border-gray-700 
+            rounded-xl 
+            text-gray-800 dark:text-gray-200 
+            font-semibold 
+            hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-800 
+            hover:shadow-md dark:hover:shadow-gray-800/50 
+            transition-all duration-200 mb-4
+          "
           disabled={isSubmitting}
         >
           <svg
@@ -355,22 +367,22 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          {t("Back")}
+          {t("BACK")}
         </Button>
       </div>
 
       {/* ✅ Generic Create Form */}
       <GenericCreateForm
-        title="Add New Exercise"
-        description="Create a new exercise by providing multilingual titles, category, type, and duration or count."
+        title={t("ADD_NEW_EXERCISE")}
+        description={t("ADD_NEW_EXERCISE_DESCRIPTION")}
         initialData={initialData}
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
         onFormDataChange={handleFormDataChange} // Add this prop
         onCancel={onClose}
-        submitButtonText="Create Exercise"
-        cancelButtonText="Cancel"
+        submitButtonText={t("CREATE_EXERCISE")}
+        cancelButtonText={t("CANCEL")}
         isLoading={categoriesPaginated.isLoading || isSubmitting}
         submitButtonProps={{
           disabled: isSubmitting,

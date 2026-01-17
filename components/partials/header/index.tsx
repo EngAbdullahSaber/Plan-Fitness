@@ -27,7 +27,7 @@ const NavTools = ({
   return (
     <div className="nav-tools flex items-center gap-2">
       {/* Action buttons with premium styling */}
-      <div className="flex items-center gap-1 bg-white/60 dark:bg-gray-800/60   rounded-xl p-1 border border-white/20 dark:border-gray-700/30  ">
+      <div className="flex items-center gap-1  rounded-xl p-1   ">
         <div className="relative group">
           <div className="p-2 rounded-xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-700/80 hover:from-white dark:hover:from-gray-700 transition-all duration-300 shadow-sm hover:shadow-md border border-white/40 dark:border-gray-600/40">
             <ThemeButton />
@@ -42,12 +42,12 @@ const NavTools = ({
           <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-[#ED4135] to-[#25235F] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
 
-        <div className="relative group">
+        {/* <div className="relative group">
           <div className="p-2 rounded-xl bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-700/80 hover:from-white dark:hover:from-gray-700 transition-all duration-300 shadow-sm hover:shadow-md border border-white/40 dark:border-gray-600/40">
             <FullScreen />
           </div>
           <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-[#ED4135] to-[#25235F] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
+        </div> */}
       </div>
 
       {/* Profile section with premium glass morphism */}

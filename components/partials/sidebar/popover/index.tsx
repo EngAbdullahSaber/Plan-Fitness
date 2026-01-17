@@ -81,7 +81,7 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
   return (
     <div
       className={cn(
-        "fixed top-0 h-full border-r bg-gradient-to-b from-[#25235F] via-blue-800 to-[#25235F] shadow-xl transition-all duration-300",
+        "fixed top-0 h-full border-r bg-gradient-to-b from-[#25235F] via-blue-800 to-[#25235F] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 shadow-xl transition-all duration-300",
         {
           "w-[210px]": !collapsed,
           "w-[72px]": collapsed,
@@ -90,15 +90,15 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
       )}
     >
       {/* Gradient overlay - more subtle than the image background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#403cb6] to-[#25235F]/20 z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#403cb6] to-[#25235F]/20 dark:from-gray-800 dark:to-gray-900/40 z-0"></div>
 
       {/* Optional texture - comment out if not needed */}
-      <div className="absolute inset-0 z-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
+      <div className="absolute inset-0 z-0 opacity-10 dark:opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
 
       <div className="relative z-10 flex flex-col h-full">
         <div>
           <SidebarLogo />
-          <Separator className="bg-white/10" />
+          <Separator className="bg-white/10 dark:bg-gray-700/50" />
 
           <ScrollArea
             className={cn("sidebar-menu h-[63%]  flex-1", {
@@ -156,12 +156,12 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
             </ul>
           </ScrollArea>
           {/* Logout Button - Fixed at bottom */}
-          <div className="mt-auto p-4 border-t border-white/10">
+          <div className="mt-auto p-4 border-t border-white/10 dark:border-gray-700/50">
             <Link
               href="/auth/login"
               onClick={handleLogout}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 group",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/80 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-200 group",
                 {
                   "justify-center px-0": collapsed,
                 },

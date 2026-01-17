@@ -100,7 +100,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
 
   // Default avatar based on type
   const defaultAvatar = (
-    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center">
+    <div className="w-20 h-20 rounded-full bg-white/20 dark:bg-gray-800/40 backdrop-blur-sm border-4 border-white/30 dark:border-gray-700/50 flex items-center justify-center">
       {type === "training" && <Target className="w-10 h-10 text-white" />}
       {type === "blog" && <BookOpen className="w-10 h-10 text-white" />}
       {type === "meal" && <Utensils className="w-10 h-10 text-white" />}
@@ -227,9 +227,9 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl dark:shadow-gray-950/50 w-full max-w-3xl max-h-[90vh] overflow-hidden">
         {/* Header Section */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#25235F] to-[#3A38A0]">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#25235F] via-[#3A38A0] to-[#25235F]/90">
           <div className="p-6 text-white">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
@@ -240,41 +240,45 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                     <div
                       className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${statusConfig.getColor(
                         record[statusConfig.field],
-                      )} border-3 border-white flex items-center justify-center`}
+                      )} border-3 border-white dark:border-gray-900 flex items-center justify-center`}
                     >
-                      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                      <div className="w-1.5 h-1.5 bg-white dark:bg-gray-100 rounded-full" />
                     </div>
                   )}
                 </div>
 
                 {/* Basic Info */}
                 <div>
-                  <h1 className="text-2xl font-bold mb-1">{title}</h1>
+                  <h1 className="text-2xl font-bold mb-1 dark:text-white">
+                    {title}
+                  </h1>
                   <div className="flex items-center gap-2 mb-2">
                     {record.id && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm">
                         ID: {record.id}
                       </span>
                     )}
                     {record.category && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10 capitalize">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm capitalize">
                         {record.category}
                       </span>
                     )}
                     {record.difficulty && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10 capitalize">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm capitalize">
                         {record.difficulty}
                       </span>
                     )}
                   </div>
-                  {subtitle}
+                  {subtitle && (
+                    <div className="dark:text-gray-300">{subtitle}</div>
+                  )}
                 </div>
               </div>
 
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="p-2 bg-white/20 backdrop-blur-sm rounded-lg transition-all duration-200 hover:bg-white/30"
+                className="p-2 bg-white/20 dark:bg-gray-800/40 backdrop-blur-sm rounded-lg transition-all duration-200 hover:bg-white/30 dark:hover:bg-gray-800/60"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -292,11 +296,14 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-medium transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? "bg-[#25235F] text-white"
-                        : "text-gray-600 hover:text-[#25235F] hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
+                    className={`
+                      flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-medium transition-all duration-200
+                      ${
+                        activeTab === tab.id
+                          ? "bg-[#25235F] dark:bg-[#3A38A0] text-white"
+                          : "text-gray-600 dark:text-gray-400 hover:text-[#25235F] dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }
+                    `}
                   >
                     <IconComponent className="w-4 h-4" />
                     {tab.label}
@@ -321,7 +328,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
             .map((section, index) => (
               <div key={index} className="space-y-4 mb-6 last:mb-0">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <section.icon className="w-4 h-4 text-[#25235F]" />
+                  <section.icon className="w-4 h-4 text-[#25235F] dark:text-blue-400" />
                   {section.title}
                 </h3>
 
@@ -336,26 +343,27 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                     .map((field, fieldIndex) => (
                       <div
                         key={fieldIndex}
-                        className={`flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg ${
-                          field.isImage || field.isVideo
-                            ? "flex-col"
-                            : "flex-row"
-                        }`}
+                        className={`
+                          flex items-start gap-3 p-3 rounded-lg 
+                          ${field.isImage || field.isVideo ? "flex-col" : "flex-row"}
+                          bg-gray-50 dark:bg-gray-800/50
+                          border border-gray-100 dark:border-gray-700/50
+                        `}
                       >
                         <div className="flex items-start gap-3 w-full">
-                          <field.icon className="w-4 h-4 text-gray-500 flex-shrink-0 mt-1" />
+                          <field.icon className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {field.label}
                               </p>
                               {field.subtitle && (
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
                                   ({field.subtitle})
                                 </span>
                               )}
                             </div>
-                            <div className="font-medium text-gray-900 dark:text-white">
+                            <div className="font-medium text-gray-900 dark:text-gray-100">
                               {renderFieldValue(field)}
                             </div>
                           </div>
