@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-
 import { cn, isLocationMatch, getDynamicPath } from "@/lib/utils";
 import SidebarLogo from "../common/logo";
 import { menusConfig } from "@/config/menus";
@@ -12,6 +11,11 @@ import { useSidebar, useThemeStore } from "@/store";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useParams, usePathname } from "next/navigation";
+import Link from "next/link";
+import { Icon } from "@iconify/react";
+import { useTranslate } from "@/config/useTranslation";
+import { Button } from "@/components/ui/button"; // Add if you have a Button component
+import { headerConfigKeyName } from "@/app/services/app.config";
 
 const PopoverSidebar = ({ trans }: { trans: string }) => {
   const { collapsed, sidebarBg } = useSidebar();
@@ -19,6 +23,8 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
   const menus = menusConfig?.sidebarNav?.classic || [];
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
   const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
+
+  const { t } = useTranslate();
   const { lang } = useParams();
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {
@@ -38,6 +44,15 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
 
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);
+
+  // Logout handler
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Add your logout logic here
+    // Example: Clear tokens, redirect, etc.
+    localStorage.removeItem(headerConfigKeyName);
+    sessionStorage.clear();
+  };
 
   React.useEffect(() => {
     let subMenuIndex = null;
@@ -63,8 +78,6 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
     setMultiMenu(multiMenuIndex);
   }, [locationName]);
 
-  // menu title
-
   return (
     <div
       className={cn(
@@ -73,7 +86,7 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
           "w-[210px]": !collapsed,
           "w-[72px]": collapsed,
           "m-6 bottom-0 rounded-xl": layout === "semibox",
-        }
+        },
       )}
     >
       {/* Gradient overlay - more subtle than the image background */}
@@ -82,65 +95,93 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
       {/* Optional texture - comment out if not needed */}
       <div className="absolute inset-0 z-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
 
-      <div className="relative z-10">
-        <SidebarLogo />
-        <Separator className="bg-white/10" />
+      <div className="relative z-10 flex flex-col h-full">
+        <div>
+          <SidebarLogo />
+          <Separator className="bg-white/10" />
 
-        <ScrollArea
-          className={cn("sidebar-menu h-[calc(100%-80px)]", {
-            "ps-2": !collapsed,
-          })}
-        >
-          <ul
-            dir={lang == "ar" ? "rtl" : "ltr"}
-            className={cn("space-y-1 ps-2", {
-              "space-y-2": collapsed,
+          <ScrollArea
+            className={cn("sidebar-menu h-[63%]  flex-1", {
+              "ps-2": !collapsed,
             })}
           >
-            {menus.map((item, i) => (
-              <li key={`menu_key_${i}`} className="relative">
-                {/* single menu */}
-                {!item.child && !item.isHeader && (
-                  <SingleMenuItem
-                    item={item}
-                    collapsed={collapsed}
-                    trans={trans}
-                  />
-                )}
-
-                {/* menu label */}
-                {item.isHeader && !item.child && !collapsed && (
-                  <MenuLabel item={item} trans={trans} />
-                )}
-
-                {/* sub menu */}
-                {item.child && (
-                  <>
-                    <SubMenuHandler
+            <ul
+              dir={lang == "ar" ? "rtl" : "ltr"}
+              className={cn("space-y-1 ps-2", {
+                "space-y-2": collapsed,
+              })}
+            >
+              {menus.map((item, i) => (
+                <li key={`menu_key_${i}`} className="relative">
+                  {/* single menu */}
+                  {!item.child && !item.isHeader && (
+                    <SingleMenuItem
                       item={item}
-                      toggleSubmenu={toggleSubmenu}
-                      index={i}
-                      activeSubmenu={activeSubmenu}
                       collapsed={collapsed}
-                      menuTitle={item.title}
                       trans={trans}
                     />
-                    {!collapsed && (
-                      <NestedSubMenu
-                        toggleMultiMenu={toggleMultiMenu}
-                        activeMultiMenu={activeMultiMenu}
-                        activeSubmenu={activeSubmenu}
+                  )}
+
+                  {/* menu label */}
+                  {item.isHeader && !item.child && !collapsed && (
+                    <MenuLabel item={item} trans={trans} />
+                  )}
+
+                  {/* sub menu */}
+                  {item.child && (
+                    <>
+                      <SubMenuHandler
                         item={item}
+                        toggleSubmenu={toggleSubmenu}
                         index={i}
+                        activeSubmenu={activeSubmenu}
+                        collapsed={collapsed}
+                        menuTitle={item.title}
                         trans={trans}
                       />
-                    )}
-                  </>
+                      {!collapsed && (
+                        <NestedSubMenu
+                          toggleMultiMenu={toggleMultiMenu}
+                          activeMultiMenu={activeMultiMenu}
+                          activeSubmenu={activeSubmenu}
+                          item={item}
+                          index={i}
+                          trans={trans}
+                        />
+                      )}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+          {/* Logout Button - Fixed at bottom */}
+          <div className="mt-auto p-4 border-t border-white/10">
+            <Link
+              href="/auth/login"
+              onClick={handleLogout}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 group",
+                {
+                  "justify-center px-0": collapsed,
+                },
+              )}
+            >
+              <Icon
+                icon="heroicons:arrow-right-on-rectangle"
+                className={cn(
+                  "w-5 h-5 transition-transform group-hover:scale-110",
+                  {
+                    "w-6 h-6": collapsed,
+                  },
                 )}
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
+              />
+              {!collapsed && (
+                <span className="font-medium">{t("Log Out")}</span>
+              )}
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

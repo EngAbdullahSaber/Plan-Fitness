@@ -9,10 +9,13 @@ import Link from "next/link";
 import ExercisesTable from "./ExercisesTable";
 import { useTranslate } from "@/config/useTranslation";
 import { TableRefType } from "./types";
+import { useParams } from "next/navigation";
 
 const ExercisesPage = () => {
   const { t } = useTranslate();
   const tableRef = useRef<TableRefType | null>(null); // ✅ fixed typing
+  const { lang } = useParams();
+
   const handleRefresh = () => {
     tableRef.current?.refetch(); // ✅ no more TypeScript error
   };
@@ -26,7 +29,9 @@ const ExercisesPage = () => {
               <h1 className="text-4xl font-bold text-[#25235F] leading-tight">
                 {t("Exercises Management")}
               </h1>
-              <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full"></div>
+              <div
+                className={`absolute -bottom-2 ${lang == "en" ? "left-0" : "right-0"} w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full`}
+              ></div>{" "}
             </div>
             <div className="mt-6">
               <BreadcrumbComponent

@@ -22,6 +22,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CreateMethod } from "@/app/services/apis/ApiMethod";
 import { storeTokenInLocalStorage } from "@/app/services/utils";
 import { handleApiError } from "@/app/services/handleApiError";
+import { updateAxiosHeader } from "@/app/services/axios";
 
 // Validation schema
 const loginSchema = z.object({
@@ -83,6 +84,8 @@ const LogInForm = () => {
       );
       if (response.status === 201 && response.data?.data?.token) {
         storeTokenInLocalStorage(response.data.data.token);
+        updateAxiosHeader(lang); // This will get the new token from localStorage
+
         toast.success(response.data.message);
         router.push("/dashboard");
       } else {

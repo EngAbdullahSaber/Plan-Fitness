@@ -102,6 +102,9 @@ const ExerciseUpdateForm = () => {
     if (id) {
       fetchExercise();
     }
+    if (categoriesPaginated.loadInitial) {
+      categoriesPaginated.loadInitial();
+    }
   }, [id, lang]);
 
   const handleSubmit = async (data: Record<string, any>) => {
@@ -119,7 +122,8 @@ const ExerciseUpdateForm = () => {
           arabic: data.arabicDescription,
           english: data.englishDescription,
         },
-        url: data.videoUrl,
+        url: data.url,
+        videoUrl: data.videoUrl,
         count: inputType === "count" ? parseInt(data.count) : null,
         duration: inputType === "duration" ? parseInt(data.duration) : null,
         difficulty: data.difficulty,
@@ -419,43 +423,50 @@ const ExerciseUpdateForm = () => {
 
   const sections = [
     {
-      title: "Exercise Title",
+      title: "Basic Information",
       icon: "heroicons:document-text",
-      description: "Update the exercise title in both English and Arabic",
+      description: "Enter exercise title in both English and Arabic",
+      fieldsCount: 2, // englishTitle, arabicTitle
     },
     {
-      title: "Exercise Description",
-      icon: "heroicons:document-text",
-      description: "Update the exercise description in both English and Arabic",
+      title: "Description",
+      icon: "heroicons:pencil-square",
+      description: "Enter exercise description in both English and Arabic",
+      fieldsCount: 2, // englishDescription, arabicDescription
     },
     {
       title: "Category & Difficulty",
       icon: "heroicons:tag",
-      description: "Update the category and difficulty level",
+      description: "Select category and difficulty level for the exercise",
+      fieldsCount: 2, // categoryId, difficulty
     },
     {
-      title: "Video ",
+      title: "Media URLs",
       icon: "heroicons:video-camera",
-      description: "Update video URL and Image Url  ",
+      description: "Add video and image URLs for the exercise",
+      fieldsCount: 2, // videoUrl, url (image)
     },
     {
-      title: "Calories & Exercise Type",
+      title: "Exercise Metrics",
       icon: "heroicons:fire",
-      description: "Update estimated calories burned and exercise type",
+      description: "Set calories burned and select exercise type",
+      fieldsCount: 2, // calories, inputType
     },
     {
-      title: "Exercise Values",
-      icon: "heroicons:clock",
+      title: inputType === "duration" ? "Duration Settings" : "Count Settings",
+      icon:
+        inputType === "duration" ? "heroicons:clock" : "heroicons:arrow-path",
       description:
         inputType === "duration"
-          ? "Update duration in seconds (count is disabled for duration-based exercises)"
-          : "Update repetition count (duration is disabled for count-based exercises)",
+          ? "Set duration in seconds (repetition count is disabled)"
+          : "Set repetition count (duration is disabled)",
+      fieldsCount: 2, // duration, count
     },
-
     {
       title: "Status",
       icon: "heroicons:check-circle",
-      description: "Update exercise status",
+      description: "Enable or disable this exercise",
+      fieldsCount: 1, // status
     },
   ];
 
@@ -514,7 +525,7 @@ const ExerciseUpdateForm = () => {
     arabicTitle: exerciseData.title.arabic || "",
     englishDescription: exerciseData.description.english || "",
     arabicDescription: exerciseData.description.arabic || "",
-    categoryId: exerciseData.Category.name || "",
+    categoryId: exerciseData.categoryId || "",
     videoUrl: exerciseData.videoUrl || "",
     url: exerciseData.url || "",
     duration: exerciseData.duration || "",

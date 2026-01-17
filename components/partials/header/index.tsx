@@ -54,13 +54,13 @@ const NavTools = ({
       <div className="flex items-center">
         <div className="relative group">
           {/* Animated gradient border */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ED4135] to-[#25235F] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm group-hover:blur-md"></div>
+          {/* <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ED4135] to-[#25235F] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm group-hover:blur-md"></div>
 
           <div className="relative bg-gradient-to-br from-white/90 via-white/80 to-gray-50/70 dark:from-gray-800/90 dark:via-gray-800/80 dark:to-gray-700/70 rounded-2xl p-1.5 shadow-xl border border-white/30 dark:border-gray-600/30 backdrop-blur-xl group-hover:border-white/50 dark:group-hover:border-gray-500/50 transition-all duration-300">
             <div className="relative">
               <ProfileInfo />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -155,7 +155,7 @@ const Header = ({
           <div
             className={cn(
               getHeaderStyles(),
-              "md:px-8 px-6 py-0 rounded-3xl my-6 shadow-2xl border border-white/20 dark:border-gray-700/30"
+              "md:px-8 px-6 py-0 rounded-3xl my-6 shadow-2xl border border-white/20 dark:border-gray-700/30",
             )}
           >
             {/* Floating effect background */}
@@ -225,7 +225,7 @@ const Header = ({
         <div
           className={cn(
             getHeaderStyles(),
-            "md:px-8 px-6 py-0 rounded-3xl my-6 shadow-2xl border border-white/20 dark:border-gray-700/30"
+            "md:px-8 px-6 py-0 rounded-3xl my-6 shadow-2xl border border-white/20 dark:border-gray-700/30",
           )}
         >
           {/* Premium floating effect */}

@@ -98,6 +98,9 @@ const BlogsUpdateForm = () => {
     if (blogId) {
       fetchBlog();
     }
+    if (categoriesPaginated.loadInitial) {
+      categoriesPaginated.loadInitial();
+    }
   }, [blogId, lang]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {

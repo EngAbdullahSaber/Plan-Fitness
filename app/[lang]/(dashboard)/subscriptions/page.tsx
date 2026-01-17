@@ -130,8 +130,8 @@ const SubscriptionsPage = () => {
     let nameArabic = "";
     let nameEnglish = "";
     if (typeof subscription.name === "object") {
-      nameArabic = subscription.name.ar || "";
-      nameEnglish = subscription.name.en || "";
+      nameArabic = subscription.name.arabic || "";
+      nameEnglish = subscription.name.english || "";
     } else {
       nameEnglish = subscription.name;
     }
@@ -242,29 +242,6 @@ const SubscriptionsPage = () => {
       showToast.error(errorMessage);
     } finally {
       setUploading(false);
-    }
-  };
-
-  // Toggle subscription active status
-  const toggleActiveStatus = async (
-    subscriptionId: number,
-    currentStatus: boolean,
-  ) => {
-    try {
-      const response = await UpdateMethodFormData(
-        "/subscription/toggle-status",
-        { isActive: !currentStatus },
-        subscriptionId,
-        lang,
-      );
-
-      if (response?.code === 200) {
-        showToast.success("Status updated successfully");
-        fetchSubscriptions(); // Refresh data
-      }
-    } catch (error: any) {
-      console.error("Toggle status error:", error);
-      showToast.error("Failed to update status");
     }
   };
 

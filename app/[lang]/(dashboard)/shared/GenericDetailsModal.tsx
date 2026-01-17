@@ -12,6 +12,7 @@ import {
   BookOpen,
   Utensils,
   Award,
+  ExternalLink,
 } from "lucide-react";
 
 interface TabConfig {
@@ -20,16 +21,23 @@ interface TabConfig {
   icon: React.ComponentType<any>;
 }
 
+interface FieldConfig {
+  label: string;
+  value: any;
+  icon: React.ComponentType<any>;
+  format?: (value: any) => string;
+  render?: (value: any) => React.ReactNode;
+  isLink?: boolean;
+  isMultiline?: boolean;
+  isImage?: boolean;
+  isVideo?: boolean;
+  subtitle?: string;
+}
+
 interface SectionConfig {
   title: string;
   icon: React.ComponentType<any>;
-  fields: {
-    label: string;
-    value: any;
-    icon: React.ComponentType<any>;
-    format?: (value: any) => string;
-    render?: (value: any) => React.ReactNode;
-  }[];
+  fields: FieldConfig[];
 }
 
 interface GenericDetailsModalProps {
@@ -102,30 +110,119 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
     </div>
   );
 
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  };
+  // Render field value based on configuration
+  const renderFieldValue = (field: FieldConfig) => {
+    if (field.render) {
+      return field.render(field.value);
+    }
 
-  // Format array as list
-  const formatList = (items: any[]) => {
-    return items.join(", ");
-  };
+    if (field.isImage) {
+      return (
+        <div className="space-y-2">
+          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <img
+              src={field.value}
+              alt={field.label}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <a
+            href={field.value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            View original <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      );
+    }
 
-  // Render array as bullet points
-  const renderList = (items: any[]) => {
-    return (
-      <ul className="list-disc list-inside text-sm">
-        {items.map((item, index) => (
-          <li key={index} className="text-gray-700 dark:text-gray-300">
-            {item}
-          </li>
-        ))}
-      </ul>
-    );
+    if (field.isVideo) {
+      return (
+        <div className="space-y-2">
+          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+            {field.value.includes("youtube") ||
+            field.value.includes("youtu.be") ? (
+              // YouTube video
+              <iframe
+                src={field.value.replace("watch?v=", "embed/")}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={field.label}
+              />
+            ) : field.value.includes("vimeo") ? (
+              // Vimeo video
+              <iframe
+                src={field.value.replace("vimeo.com", "player.vimeo.com/video")}
+                className="w-full h-full"
+                allowFullScreen
+                title={field.label}
+              />
+            ) : (
+              // Direct video
+              <video
+                src={field.value}
+                className="w-full h-full"
+                controls
+                controlsList="nodownload"
+              >
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+          <a
+            href={field.value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Open in new tab <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      );
+    }
+
+    if (field.isLink) {
+      return (
+        <a
+          href={field.value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline truncate"
+        >
+          {field.value}
+          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+        </a>
+      );
+    }
+
+    if (field.isMultiline) {
+      return (
+        <div className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+          {field.value}
+        </div>
+      );
+    }
+
+    if (field.format) {
+      return field.format(field.value);
+    }
+
+    if (Array.isArray(field.value)) {
+      return (
+        <ul className="list-disc list-inside text-sm space-y-1">
+          {field.value.map((item: any, index: number) => (
+            <li key={index} className="text-gray-700 dark:text-gray-300">
+              {item}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    return field.value?.toString() || "N/A";
   };
 
   return (
@@ -142,7 +239,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                   {statusConfig && record[statusConfig.field] && (
                     <div
                       className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${statusConfig.getColor(
-                        record[statusConfig.field]
+                        record[statusConfig.field],
                       )} border-3 border-white flex items-center justify-center`}
                     >
                       <div className="w-1.5 h-1.5 bg-white rounded-full" />
@@ -218,8 +315,8 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                 (field) =>
                   field.value !== undefined &&
                   field.value !== null &&
-                  field.value !== ""
-              )
+                  field.value !== "",
+              ),
             )
             .map((section, index) => (
               <div key={index} className="space-y-4 mb-6 last:mb-0">
@@ -228,32 +325,39 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                   {section.title}
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {section.fields
                     .filter(
                       (field) =>
                         field.value !== undefined &&
                         field.value !== null &&
-                        field.value !== ""
+                        field.value !== "",
                     )
                     .map((field, fieldIndex) => (
                       <div
                         key={fieldIndex}
-                        className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                        className={`flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg ${
+                          field.isImage || field.isVideo
+                            ? "flex-col"
+                            : "flex-row"
+                        }`}
                       >
-                        <field.icon className="w-4 h-4 text-gray-500 flex-shrink-0 mt-1" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-500 mb-1">
-                            {field.label}
-                          </p>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {field.render
-                              ? field.render(field.value)
-                              : field.format
-                              ? field.format(field.value)
-                              : Array.isArray(field.value)
-                              ? renderList(field.value)
-                              : field.value.toString()}
+                        <div className="flex items-start gap-3 w-full">
+                          <field.icon className="w-4 h-4 text-gray-500 flex-shrink-0 mt-1" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm text-gray-500">
+                                {field.label}
+                              </p>
+                              {field.subtitle && (
+                                <span className="text-xs text-gray-400">
+                                  ({field.subtitle})
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {renderFieldValue(field)}
+                            </div>
                           </div>
                         </div>
                       </div>

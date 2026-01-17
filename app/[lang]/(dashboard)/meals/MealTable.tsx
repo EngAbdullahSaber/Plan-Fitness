@@ -580,7 +580,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             >
               <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
               <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
-                {row.original.type}
+                {t(row.original.type)}
               </span>
               <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </Badge>
@@ -874,7 +874,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90">Active Meals</p>
+                <p className="text-sm opacity-90">{t("Active Meals")}</p>
                 <p className="text-2xl font-bold">
                   {apiResponse.data.statistics.active}
                 </p>
@@ -888,7 +888,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="bg-gradient-to-r from-gray-500 to-slate-600 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90">Inactive Meals</p>
+                <p className="text-sm opacity-90">{t("Inactive Meals")}</p>
                 <p className="text-2xl font-bold">
                   {apiResponse.data.statistics.inActive}
                 </p>
@@ -902,7 +902,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
           <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm opacity-90">Meal Requests</p>
+                <p className="text-sm opacity-90">{t("Meal Requests")}</p>
                 <p className="text-2xl font-bold">
                   {apiResponse.data.statistics.requests}
                 </p>

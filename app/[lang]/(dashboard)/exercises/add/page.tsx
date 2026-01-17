@@ -284,46 +284,54 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
   );
 
   // ✅ Dynamic section titles
-  const sections = useMemo(
-    () => [
-      {
-        title: "Exercise Title",
-        icon: "heroicons:document-text",
-        description: "Enter the exercise title in both English and Arabic",
-      },
-      {
-        title: "Exercise Description",
-        icon: "heroicons:document-text",
-        description:
-          "Enter the exercise description in both English and Arabic",
-      },
-      {
-        title: "Category & Difficulty",
-        icon: "heroicons:tag",
-        description: "Select a category and set the difficulty level",
-      },
-      {
-        title: "Video & Exercise Type",
-        icon: "heroicons:video-camera",
-        description:
-          "Add video URL and select exercise type (duration or count)",
-      },
-      {
-        title: "Exercise Values & Calories",
-        icon: "heroicons:clock",
-        description:
-          inputType === "duration"
-            ? "Set duration in seconds (count is disabled for duration-based exercises)"
-            : "Set repetition count (duration is disabled for count-based exercises)",
-      },
-      {
-        title: "Status",
-        icon: "heroicons:check-circle",
-        description: "Set exercise status",
-      },
-    ],
-    [inputType],
-  );
+  const sections = [
+    {
+      title: "Basic Information",
+      icon: "heroicons:document-text",
+      description: "Enter exercise title in both English and Arabic",
+      fieldsCount: 2, // englishTitle, arabicTitle
+    },
+    {
+      title: "Description",
+      icon: "heroicons:pencil-square",
+      description: "Enter exercise description in both English and Arabic",
+      fieldsCount: 2, // englishDescription, arabicDescription
+    },
+    {
+      title: "Category & Difficulty",
+      icon: "heroicons:tag",
+      description: "Select category and difficulty level for the exercise",
+      fieldsCount: 2, // categoryId, difficulty
+    },
+    {
+      title: "Media URLs",
+      icon: "heroicons:video-camera",
+      description: "Add video and image URLs for the exercise",
+      fieldsCount: 2, // videoUrl, url (image)
+    },
+    {
+      title: "Exercise Metrics",
+      icon: "heroicons:fire",
+      description: "Set calories burned and select exercise type",
+      fieldsCount: 2, // calories, inputType
+    },
+    {
+      title: inputType === "duration" ? "Duration Settings" : "Count Settings",
+      icon:
+        inputType === "duration" ? "heroicons:clock" : "heroicons:arrow-path",
+      description:
+        inputType === "duration"
+          ? "Set duration in seconds (repetition count is disabled)"
+          : "Set repetition count (duration is disabled)",
+      fieldsCount: 2, // duration, count
+    },
+    {
+      title: "Status",
+      icon: "heroicons:check-circle",
+      description: "Enable or disable this exercise",
+      fieldsCount: 1, // status
+    },
+  ];
 
   return (
     <div className="space-y-6">

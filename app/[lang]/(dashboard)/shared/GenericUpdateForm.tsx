@@ -118,7 +118,7 @@ interface GenericUpdateFormProps {
   onUpdateMealItem?: (
     index: number,
     field: "english" | "arabic",
-    value: string
+    value: string,
   ) => void;
   imagePreview?: string;
 }
@@ -154,14 +154,14 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<Record<string, string>>(
-    {}
+    {},
   );
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
 
   // Track changes to form data
   useEffect(() => {
     const hasChanged = Object.keys(initialData).some(
-      (key) => formData[key] !== initialData[key]
+      (key) => formData[key] !== initialData[key],
     );
     setHasChanges(hasChanged);
   }, [formData, initialData]);
@@ -393,8 +393,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
             (err) =>
               !err.field.startsWith(`mealItem_${index}_`) &&
               err.field !== `mealItem_${index}_english` &&
-              err.field !== `mealItem_${index}_arabic`
-          )
+              err.field !== `mealItem_${index}_arabic`,
+          ),
         );
       }
     }
@@ -403,7 +403,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
   const handleUpdateMealItem = (
     index: number,
     field: "english" | "arabic",
-    value: string
+    value: string,
   ) => {
     if (onUpdateMealItem) {
       onUpdateMealItem(index, field, value);
@@ -419,7 +419,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
 
@@ -628,7 +628,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
             {field.required && (
               <p className="text-sm text-gray-500 mt-1">
                 {t(
-                  "Add at least one meal item with descriptions in both English and Arabic"
+                  "Add at least one meal item with descriptions in both English and Arabic",
                 )}
               </p>
             )}
@@ -696,7 +696,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                       dir="ltr"
                     />
                     {errors.some(
-                      (err) => err.field === `mealItem_${index}_english`
+                      (err) => err.field === `mealItem_${index}_english`,
                     ) && (
                       <p className="text-red-500 text-sm flex items-center gap-1">
                         <Icon
@@ -705,7 +705,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                         />
                         {
                           errors.find(
-                            (err) => err.field === `mealItem_${index}_english`
+                            (err) => err.field === `mealItem_${index}_english`,
                           )?.message
                         }
                       </p>
@@ -731,7 +731,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                       dir="rtl"
                     />
                     {errors.some(
-                      (err) => err.field === `mealItem_${index}_arabic`
+                      (err) => err.field === `mealItem_${index}_arabic`,
                     ) && (
                       <p className="text-red-500 text-sm flex items-center gap-1">
                         <Icon
@@ -740,7 +740,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                         />
                         {
                           errors.find(
-                            (err) => err.field === `mealItem_${index}_arabic`
+                            (err) => err.field === `mealItem_${index}_arabic`,
                           )?.message
                         }
                       </p>
@@ -771,7 +771,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
               </h4>
               <p className="text-gray-500 mb-6 max-w-md mx-auto">
                 {t(
-                  "Add meal items to describe the components of this meal. Each item should have descriptions in both English and Arabic languages"
+                  "Add meal items to describe the components of this meal. Each item should have descriptions in both English and Arabic languages",
                 )}
               </p>
               <Button
@@ -886,8 +886,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                       showError
                         ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100 bg-red-50/30"
                         : field.disabled
-                        ? "border-gray-200 bg-gray-100 text-gray-500"
-                        : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
+                          ? "border-gray-200 bg-gray-100 text-gray-500"
+                          : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
                     }
                     ${disabledStyles}
                     placeholder:text-gray-400 text-gray-700 font-medium
@@ -918,10 +918,10 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     field.disabled
                       ? "text-gray-400"
                       : hasValue && !showError
-                      ? "text-emerald-500"
-                      : showError
-                      ? "text-red-500"
-                      : "text-gray-400"
+                        ? "text-emerald-500"
+                        : showError
+                          ? "text-red-500"
+                          : "text-gray-400"
                   }`}
                 >
                   {field.disabled ? (
@@ -1028,8 +1028,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     showError
                       ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-red-50/30"
                       : field.disabled
-                      ? "border-gray-200 bg-gray-100 text-gray-500"
-                      : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400 bg-white"
+                        ? "border-gray-200 bg-gray-100 text-gray-500"
+                        : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400 bg-white"
                   }
                   ${disabledStyles}
                   placeholder:text-gray-400
@@ -1086,8 +1086,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                 showError
                   ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100 bg-red-50/30"
                   : field.disabled
-                  ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
-                  : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
+                    ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    : "border-gray-300 focus:border-[#25235F] focus:ring-4 focus:ring-[#25235F]/20 hover:border-gray-400 bg-white"
               }
               ${disabledStyles}
               placeholder:text-gray-400 text-gray-700 font-medium
@@ -1120,10 +1120,10 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     field.disabled
                       ? "text-gray-400"
                       : hasValue && !showError
-                      ? "text-emerald-500"
-                      : showError
-                      ? "text-red-500"
-                      : "text-gray-400"
+                        ? "text-emerald-500"
+                        : showError
+                          ? "text-red-500"
+                          : "text-gray-400"
                   }`}
                 >
                   {field.disabled ? (
@@ -1227,8 +1227,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   showError
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                     : field.disabled
-                    ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
+                      ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
+                      : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
                 } ${disabledStyles}`}
               >
                 <SelectValue
@@ -1258,6 +1258,10 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
         );
 
       case "selectPagination":
+        const selectedOption = field.paginationOptions?.data?.find(
+          (item) => item.value == formData[field.name],
+        );
+
         return (
           <div className="w-full">
             <Label htmlFor={field.name} className="text-[#25235F] font-medium">
@@ -1288,7 +1292,15 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                           `Select ${field.label.toLowerCase()}`}
                       </span>
                     }
-                  />
+                  >
+                    {selectedOption ? (
+                      <span className="text-gray-900 font-medium">
+                        {field.paginationOptions?.getOptionLabel(
+                          selectedOption,
+                        )}
+                      </span>
+                    ) : null}
+                  </SelectValue>
                 </div>
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400/0 via-blue-400/0 to-purple-400/0 group-hover:from-purple-400/5 group-hover:via-blue-400/5 group-hover:to-purple-400/5 transition-all duration-500 pointer-events-none" />
               </SelectTrigger>
@@ -1322,7 +1334,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   {field.paginationOptions?.data?.map((item, index) => (
                     <SelectItem
                       key={`${field.paginationOptions?.getOptionValue(
-                        item
+                        item,
                       )}-${index}`}
                       value={field.paginationOptions?.getOptionValue(item)}
                       className="rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:via-blue-50/50 hover:to-purple-50 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] py-3 px-3 cursor-pointer group border border-transparent hover:border-purple-100"
@@ -1475,8 +1487,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   isDragging
                     ? "border-blue-500 bg-blue-50 scale-105"
                     : showError
-                    ? "border-red-400 bg-red-50/30"
-                    : "border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
+                      ? "border-red-400 bg-red-50/30"
+                      : "border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50"
                 }`}
               >
                 <div className="flex flex-col items-center gap-4">
@@ -1532,7 +1544,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                             })
                             .filter(
                               (value, index, self) =>
-                                self.indexOf(value) === index
+                                self.indexOf(value) === index,
                             ) // Remove duplicates
                             .join(", ")}{" "}
                           {t("(Max")}{" "}
@@ -1714,8 +1726,8 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                 showError
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : field.disabled
-                  ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
-                  : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
+                    ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    : "border-gray-300 focus:border-[#25235F] focus:ring-[#25235F]"
               } ${disabledStyles}`}
             />
             {showError && <p className="text-red-500 text-sm mt-1">{error}</p>}

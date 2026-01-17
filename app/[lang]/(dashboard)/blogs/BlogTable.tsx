@@ -67,7 +67,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
       const items = data.data || data.items || data || [];
       const transformed = items.map((category: any) => ({
         value: category.id.toString(),
-        label: category.name.en,
+        label: lang === "ar" ? category.name.arabic : category.name.english,
       }));
       console.log("Transformed categories:", transformed);
       return transformed;
@@ -384,8 +384,8 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
 
         const categoryName =
           lang == "en"
-            ? row.original.Category?.name?.en
-            : row.original.Category?.name?.ar;
+            ? row.original.Category?.name?.english
+            : row.original.Category?.name?.arabic;
         const defaultStyle =
           "bg-gradient-to-r from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-200";
 
@@ -430,7 +430,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
       ),
       cell: ({ row }) => {
         // Determine status based on deletedAt field
-        const status = row.original.deletedAt ? "ARCHIVED" : "ACTIVE";
+        const status = row.original.status;
 
         const statusConfig = {
           ACTIVE: {
@@ -502,7 +502,7 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
 
               {/* Status text */}
               <span className="relative z-10 text-sm tracking-wide drop-shadow-sm">
-                {status}
+                {t(status)}
               </span>
 
               {/* Pulse animation for active status */}

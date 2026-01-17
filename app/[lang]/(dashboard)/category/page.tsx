@@ -8,10 +8,12 @@ import TableData from "./TableData";
 import BreadcrumbComponent from "../shared/BreadcrumbComponent";
 import Link from "next/link";
 import { TableRefType } from "./types";
+import { useParams } from "next/navigation";
 
 const CategoryPage = () => {
   const { t } = useTranslate();
   const tableRef = useRef<TableRefType | null>(null); // ✅ fixed typing
+  const { lang } = useParams();
 
   const handleRefresh = () => {
     tableRef.current?.refetch(); // ✅ no more TypeScript error
@@ -25,14 +27,16 @@ const CategoryPage = () => {
           <div className="space-y-4">
             <div className="relative">
               <h1 className="text-4xl font-bold text-[#25235F] leading-tight">
-                {t("Blogs Management")}
+                {t("Category Management")}
               </h1>
-              <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full"></div>
+              <div
+                className={`absolute -bottom-2 ${lang == "en" ? "left-0" : "right-0"} w-24 h-1 bg-gradient-to-r from-[#ED4135] to-[#ED4135]/70 rounded-full`}
+              ></div>
             </div>
             <div className="mt-6">
               <BreadcrumbComponent
-                header={"Blogs Management"}
-                body={"Category of Blogs Management"}
+                header={"Category Management"}
+                body={"Category Management"}
               />
             </div>
           </div>
@@ -48,9 +52,7 @@ const CategoryPage = () => {
                   icon="heroicons:plus"
                   className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300"
                 />
-                <span className="font-semibold">
-                  {t("Add Category of Blogs")}{" "}
-                </span>
+                <span className="font-semibold">{t("Add Category")} </span>
               </Button>
             </Link>
           </div>
@@ -63,7 +65,7 @@ const CategoryPage = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform skew-x-12"></div>
             <CardTitle className="relative z-10 flex items-center gap-3 text-xl font-bold">
               <div className="w-2 h-8 bg-[#ED4135] rounded-full"></div>
-              {t("Category of Blogs Details")}
+              {t("Category Details")}
               <div className="ml-auto">
                 <div className="w-8 h-8 rounded-full bg-[#ED4135]/20 flex items-center justify-center">
                   <Icon
@@ -85,12 +87,14 @@ const CategoryPage = () => {
               {/* Table Container */}
               <div className="relative z-10 bg-white rounded-xl border border-gray-100 shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-gray-50 to-white p-4 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between">
                     <div className="w-1 h-6 bg-[#25235F] rounded-full"></div>
                     <h3 className="text-lg font-semibold text-[#25235F]">
-                      {t("Category of Blogs Overview")}
+                      {t("Category Overview")}
                     </h3>
-                    <div className="ml-auto flex items-center gap-2">
+                    <div
+                      className={`${lang == "en" ? "ml-auto" : "mr-auto"} flex items-center  gap-2`}
+                    >
                       <Button
                         variant="outline"
                         className="group border-2 border-[#25235F]/20 hover:border-[#25235F] hover:bg-[#25235F] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 px-6 py-3 h-auto"
