@@ -1,18 +1,27 @@
 /** @type {import('next').NextConfig} */
 
-
 const nextConfig = {
   eslint: {
-      ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack(config) {
 
+  // 🔹 PROXY لكل الـ API Endpoints
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://148.230.123.247/:path*",
+      },
+    ];
+  },
+
+  webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
-      rule.test?.test?.(".svg")
+      rule.test?.test?.(".svg"),
     );
 
     config.module.rules.push(
@@ -26,42 +35,28 @@ const nextConfig = {
       {
         test: /\.svg$/i,
         issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
+        resourceQuery: {
+          not: [...fileLoaderRule.resourceQuery.not, /url/],
+        },
         use: ["@svgr/webpack"],
-      }
+      },
     );
 
-    // Modify the file loader rule to ignore *.svg, since we have it handled now.
+    // Modify the file loader rule to ignore *.svg
     fileLoaderRule.exclude = /\.svg$/i;
 
     return config;
   },
-  
+
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-      {
-        protocol: "https",
-        hostname: "api.lorem.space",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "a0.muscache.com",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
+      { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "api.lorem.space" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "a0.muscache.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
   },
 };
-
 
 module.exports = nextConfig;
