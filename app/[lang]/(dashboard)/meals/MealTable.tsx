@@ -533,7 +533,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         // Handle both full URLs and relative paths
         const imageUrl = row.original.image.startsWith("http")
           ? row.original.image
-          : process.env.AUTH_BASE_URL + row.original.image;
+          : process.env.NEXT_PUBLIC_API_URL + row.original.image;
 
         return (
           <ImageCell

@@ -5,7 +5,7 @@ import axios from "axios";
 
 // Create a single axios instance
 export const api = axios.create({
-  baseURL: process.env.AUTH_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://api.forma-apps.com/",
   headers: getHeaderConfig().headers,
 });
 

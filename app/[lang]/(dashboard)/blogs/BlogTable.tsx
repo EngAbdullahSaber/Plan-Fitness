@@ -348,11 +348,11 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
       ),
       cell: ({ row }) => (
         <ImageCell
-          image={`${process.env.AUTH_BASE_URL}${row.original.image}`}
+          image={`${process.env.NEXT_PUBLIC_API_URL}${row.original.image}`}
           alt={row.original.title.english || row.original.name}
           size="md"
           shape="circle"
-          baseUrl={process.env.AUTH_BASE_URL}
+          baseUrl={process.env.NEXT_PUBLIC_API_URL}
           showZoom={true}
         />
       ),

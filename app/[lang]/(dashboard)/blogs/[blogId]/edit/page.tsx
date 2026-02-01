@@ -389,7 +389,7 @@ const BlogsUpdateForm = () => {
   // Prepare initial data for the form
   const initialData = {
     id: blogData.id || blogId,
-    image: process.env.AUTH_BASE_URL + blogData.image || "",
+    image: process.env.NEXT_PUBLIC_API_URL + blogData.image || "",
     englishTitle: blogData.title.english || "",
     arabicTitle: blogData.title.arabic || "",
     arabicDescription: blogData.description.arabic || "",

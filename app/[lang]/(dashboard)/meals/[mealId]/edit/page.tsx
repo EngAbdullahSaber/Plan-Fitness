@@ -134,7 +134,7 @@ const MealUpdateForm = ({
         // Check if the image URL already has baseUrl to avoid duplication
         const fullImageUrl = mealData.image.startsWith("http")
           ? mealData.image
-          : process.env.AUTH_BASE_URL + mealData.image;
+          : process.env.NEXT_PUBLIC_API_URL + mealData.image;
         setImagePreview(fullImageUrl);
         console.log("Setting image preview:", fullImageUrl);
       }
