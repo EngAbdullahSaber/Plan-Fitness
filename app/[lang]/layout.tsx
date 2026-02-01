@@ -8,7 +8,6 @@ import TanstackProvider from "@/provider/providers.client";
 import AuthProvider from "@/provider/auth.provider";
 import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -27,23 +26,14 @@ export default function RootLayout({
   params: { lang: string };
 }) {
   return (
-    <html lang={lang} dir={lang === "ar" ? "rtl" : "ltr"}>
-      <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="upgrade-insecure-requests"
-        />
-      </head>
-
-      <body className={inter.className}>
-        <AuthProvider>
-          <TanstackProvider>
-            <Providers>
-              <DirectionProvider lang={lang}>{children}</DirectionProvider>
-            </Providers>
-          </TanstackProvider>
-        </AuthProvider>
-      </body>
+    <html lang={lang} dir={lang == "ar" ? "rtl" : "ltr"}>
+      <AuthProvider>
+        <TanstackProvider>
+          <Providers>
+            <DirectionProvider lang={lang}>{children}</DirectionProvider>
+          </Providers>
+        </TanstackProvider>
+      </AuthProvider>
     </html>
   );
 }
