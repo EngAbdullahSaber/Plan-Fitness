@@ -25,8 +25,8 @@ api.interceptors.response.use(
       nestedError === "session expired" ||
       message === "Login session expired"
     ) {
-      // window.location.assign("/auth/login");
-      // clearAuthInfo();
+      window.location.assign("/auth/login");
+      clearAuthInfo();
     }
 
     return Promise.reject(error); // Always reject for consistent error handling

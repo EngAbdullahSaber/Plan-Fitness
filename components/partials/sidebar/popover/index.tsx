@@ -48,10 +48,13 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
   // Logout handler
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
-    // Add your logout logic here
     // Example: Clear tokens, redirect, etc.
     localStorage.removeItem(headerConfigKeyName);
-    sessionStorage.clear();
+    console.log(
+      "Logout clicked and headerConfigKeyName removed:",
+      headerConfigKeyName,
+    );
+    window.location.assign("/auth/login");
   };
 
   React.useEffect(() => {
@@ -157,8 +160,7 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
           </ScrollArea>
           {/* Logout Button - Fixed at bottom */}
           <div className="mt-auto p-4 border-t border-white/10 dark:border-gray-700/50">
-            <Link
-              href="/auth/login"
+            <button
               onClick={handleLogout}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/80 dark:text-gray-300 hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-200 group",
@@ -179,7 +181,7 @@ const PopoverSidebar = ({ trans }: { trans: string }) => {
               {!collapsed && (
                 <span className="font-medium">{t("Log Out")}</span>
               )}
-            </Link>
+            </button>
           </div>
         </div>
       </div>
