@@ -30,6 +30,7 @@ import { ApiResponse, Blog } from "./types";
 import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
 import { ImageCell } from "../shared/ImageCell";
 import { DescriptionCell } from "../shared/EnhancedReadMoreCell";
+import { baseUrl } from "@/app/services/app.config";
 
 interface Category {
   id: number;
@@ -348,11 +349,11 @@ const BlogTable = forwardRef(({ t }: { t: any }, ref) => {
       ),
       cell: ({ row }) => (
         <ImageCell
-          image={`${process.env.NEXT_PUBLIC_API_URL}${row.original.image}`}
+          image={`${baseUrl}${row.original.image}`}
           alt={row.original.title.english || row.original.name}
           size="md"
           shape="circle"
-          baseUrl={process.env.NEXT_PUBLIC_API_URL}
+          baseUrl={baseUrl}
           showZoom={true}
         />
       ),

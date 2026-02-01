@@ -33,6 +33,7 @@ import { ImageCell } from "../shared/ImageCell";
 import { DescriptionCell } from "../shared/EnhancedReadMoreCell";
 import ActivationConfirmationDialog from "../shared/DeActiviateConfirmationDialog";
 import { EnhancedReadMoreItems } from "../shared/EnhancedReadMoreItems";
+import { baseUrl } from "@/app/services/app.config";
 
 // Interfaces based on your API response
 interface MealItem {
@@ -533,7 +534,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         // Handle both full URLs and relative paths
         const imageUrl = row.original.image.startsWith("http")
           ? row.original.image
-          : process.env.NEXT_PUBLIC_API_URL + row.original.image;
+          : baseUrl + row.original.image;
 
         return (
           <ImageCell
