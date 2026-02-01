@@ -10,6 +10,7 @@ import {
 import { toast } from "../../../shared/toast";
 import { useTranslate } from "@/config/useTranslation";
 import GenericUpdateForm from "../../../shared/GenericUpdateForm";
+import { baseUrl } from "@/app/services/app.config";
 
 interface MealItem {
   id?: number;
@@ -134,7 +135,7 @@ const MealUpdateForm = ({
         // Check if the image URL already has baseUrl to avoid duplication
         const fullImageUrl = mealData.image.startsWith("http")
           ? mealData.image
-          : process.env.NEXT_PUBLIC_API_URL + mealData.image;
+          : baseUrl + mealData.image;
         setImagePreview(fullImageUrl);
         console.log("Setting image preview:", fullImageUrl);
       }

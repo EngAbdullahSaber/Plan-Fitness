@@ -7,17 +7,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  // 🔹 PROXY لكل الـ API Endpoints
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://148.230.123.247/:path*",
-      },
-    ];
-  },
-
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
@@ -35,14 +24,12 @@ const nextConfig = {
       {
         test: /\.svg$/i,
         issuer: fileLoaderRule.issuer,
-        resourceQuery: {
-          not: [...fileLoaderRule.resourceQuery.not, /url/],
-        },
+        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
         use: ["@svgr/webpack"],
       },
     );
 
-    // Modify the file loader rule to ignore *.svg
+    // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
 
     return config;
@@ -50,11 +37,26 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "api.lorem.space" },
-      { protocol: "https", hostname: "lh3.googleusercontent.com" },
-      { protocol: "https", hostname: "a0.muscache.com" },
-      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      {
+        protocol: "https",
+        hostname: "api.forma-apps.com",
+      },
+      {
+        protocol: "https",
+        hostname: "api.lorem.space",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "a0.muscache.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
     ],
   },
 };
