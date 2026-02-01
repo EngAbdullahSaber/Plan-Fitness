@@ -1881,7 +1881,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                         key={field.name}
                         className={`flex flex-col justify-end items-end w-full ${
                           field.type === "image" || field.type === "mealItem"
-                            ? `md:col-span-${row[0]?.cols || 2}`
+                            ? `md:col-span-full` // Changed from md:col-span-${row[0]?.cols || 2}
                             : ""
                         }`}
                       >

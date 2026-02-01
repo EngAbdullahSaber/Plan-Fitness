@@ -405,7 +405,7 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-md bg-white dark:bg-gray-800 border dark:border-gray-700">
-                <p className="font-medium dark:text-white">
+                <p className="font-medium text-black dark:text-white">
                   {" "}
                   {lang == "en"
                     ? row.original.title.english

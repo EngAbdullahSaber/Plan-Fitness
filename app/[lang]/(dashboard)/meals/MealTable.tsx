@@ -31,7 +31,6 @@ import GenericFilter from "../shared/GenericFilter";
 import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
 import { ImageCell } from "../shared/ImageCell";
 import { DescriptionCell } from "../shared/EnhancedReadMoreCell";
-import { baseUrl } from "@/app/services/app.config";
 import ActivationConfirmationDialog from "../shared/DeActiviateConfirmationDialog";
 import { EnhancedReadMoreItems } from "../shared/EnhancedReadMoreItems";
 
@@ -534,7 +533,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         // Handle both full URLs and relative paths
         const imageUrl = row.original.image.startsWith("http")
           ? row.original.image
-          : baseUrl + row.original.image;
+          : process.env.AUTH_BASE_URL + row.original.image;
 
         return (
           <ImageCell

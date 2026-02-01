@@ -88,10 +88,10 @@ const DeleteConfirmationDialog = ({
               icon={icon}
               className={`
                 h-4 w-4 
-                group-hover:scale-110 
+                hover:scale-110 
                 transition-transform duration-300 
                 ${destructive ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}
-                group-hover:text-white
+                hover:text-white
                 ${size === "icon" ? "" : "mr-2"}
               `}
             />

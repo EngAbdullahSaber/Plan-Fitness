@@ -1,2 +1,2 @@
-export const baseUrl = "http://148.230.123.247/",
+export const baseUrl = "https://api.forma-apps.com/",
   headerConfigKeyName = "Plan_Fitness";

@@ -2,11 +2,10 @@
 
 import { clearAuthInfo, getHeaderConfig } from "./utils";
 import axios from "axios";
-import { baseUrl } from "./app.config";
 
 // Create a single axios instance
 export const api = axios.create({
-  baseURL: baseUrl,
+  baseURL: process.env.AUTH_BASE_URL,
   headers: getHeaderConfig().headers,
 });
 
@@ -30,7 +29,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error); // Always reject for consistent error handling
-  }
+  },
 );
 
 // Function to update the language header dynamically

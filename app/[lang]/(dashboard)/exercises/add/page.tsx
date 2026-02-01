@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import {
   CreateMethod,
+  CreateMethodFormData,
   GetPanigationMethod,
 } from "@/app/services/apis/ApiMethod";
 import toast from "react-hot-toast";
 import { useTranslate } from "@/config/useTranslation";
 import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { baseUrl } from "@/app/services/app.config";
 
 const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
   const router = useRouter();
@@ -17,7 +19,9 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
   const { t } = useTranslate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputType, setInputType] = useState<"duration" | "count">("duration");
-  const [formData, setFormData] = useState<any>({}); // Add formData state
+  const [formData, setFormData] = useState<any>({});
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // ✅ Fetch categories for dropdown using paginated hook
   const categoriesPaginated = usePaginatedSelect({
@@ -40,10 +44,82 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
     },
   });
 
+  // ✅ Handle image change
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast.error(t("INVALID_IMAGE_FILE"));
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error(t("IMAGE_SIZE_LIMIT"));
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // ✅ Upload image first and get the URL
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const imageFormData = new FormData();
+      imageFormData.append("file", file);
+
+      const uploadResponse = await CreateMethodFormData(
+        "upload",
+        imageFormData,
+        lang,
+      );
+
+      if (
+        uploadResponse?.data?.code === 200 &&
+        uploadResponse?.data?.data?.url
+      ) {
+        return uploadResponse.data.data.url;
+      } else {
+        toast.error(
+          uploadResponse?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
+        );
+        return null;
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(error.response?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"));
+      return null;
+    }
+  };
+
   // ✅ Handle form submission
   const handleSubmit = async (data: Record<string, any>) => {
     try {
       setIsSubmitting(true);
+
+      let imageUrl = "";
+
+      // Upload image first if selected
+      if (selectedImage) {
+        const uploadedUrl = await uploadImage(selectedImage);
+        if (!uploadedUrl) {
+          // Stop submission if image upload failed
+          setIsSubmitting(false);
+          return;
+        }
+        imageUrl = uploadedUrl;
+      }
 
       const exerciseData = {
         categoryId: parseInt(data.categoryId),
@@ -55,7 +131,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
           arabic: data.arabicDescription,
           english: data.englishDescription,
         },
-        url: data.url,
+        url: baseUrl + imageUrl || data.url || "", // Use uploaded image URL or existing URL
         videoUrl: data.videoUrl,
         count: inputType === "count" ? parseInt(data.count) : null,
         duration: inputType === "duration" ? parseInt(data.duration) : null,
@@ -64,6 +140,40 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         calory: parseInt(data.calories),
       };
 
+      // If you need to send with FormData instead (if your API accepts FormData)
+      // Uncomment this section if your backend requires FormData
+      /*
+      const formData = new FormData();
+      formData.append('categoryId', parseInt(data.categoryId));
+      formData.append('title[arabic]', data.arabicTitle);
+      formData.append('title[english]', data.englishTitle);
+      formData.append('description[arabic]', data.arabicDescription);
+      formData.append('description[english]', data.englishDescription);
+      formData.append('videoUrl', data.videoUrl || '');
+      formData.append('difficulty', data.difficulty);
+      formData.append('status', data.status ? "Active" : "Inactive");
+      formData.append('calory', parseInt(data.calories));
+
+      // Add image if selected
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+
+      // Conditionally add count or duration
+      if (inputType === "count") {
+        formData.append('count', parseInt(data.count));
+      } else if (inputType === "duration") {
+        formData.append('duration', parseInt(data.duration));
+      }
+
+      const response = await CreateMethodFormData(
+        "training/create",
+        formData,
+        lang,
+      );
+      */
+
+      // Using regular CreateMethod (JSON data)
       const response = await CreateMethod(
         "training/create",
         exerciseData,
@@ -197,7 +307,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         },
       ],
 
-      // Video URL & Exercise Type
+      // Video URL & Image Upload
       [
         {
           name: "videoUrl",
@@ -207,14 +317,44 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
           required: true,
         },
         {
-          name: "url",
-          label: t("IMAGE_URL"),
-          type: "url",
-          placeholder: t("IMAGE_URL_PLACEHOLDER"),
-          required: true,
+          name: "image",
+          label: t("EXERCISE_IMAGE"),
+          type: "image",
+          required: false,
+          accept: "image/jpeg,image/jpg,image/png,image/webp",
+          description: t("IMAGE_UPLOAD_DESCRIPTION"),
+          onChange: handleImageChange,
+          validation: {
+            maxFileSize: 5 * 1024 * 1024, // 5MB
+            allowedTypes: [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/webp",
+            ],
+            custom: (value) => {
+              return null;
+            },
+          },
         },
       ],
-      // Calories
+
+      // URL field (optional if image is uploaded)
+      [
+        {
+          name: "url",
+          label: t("EXTERNAL_IMAGE_URL"),
+          type: "url",
+          placeholder: t("EXTERNAL_IMAGE_URL_PLACEHOLDER"),
+          required: false,
+          description: t("EXTERNAL_IMAGE_URL_DESCRIPTION"),
+          disabled: selectedImage !== null, // Disable if image is uploaded
+        },
+        // Empty field to maintain grid structure
+        {},
+      ],
+
+      // Calories & Exercise Type
       [
         {
           name: "calories",
@@ -223,7 +363,6 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
           placeholder: t("CALORIES_PLACEHOLDER"),
           required: true,
         },
-        // Empty field to maintain grid structure
         {
           name: "inputType",
           label: t("EXERCISE_TYPE"),
@@ -281,6 +420,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       categoriesPaginated.hasMore,
       categoriesPaginated.searchTerm,
       t,
+      selectedImage, // Add selectedImage to dependencies
     ],
   );
 
@@ -290,31 +430,39 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
       title: t("BASIC_INFORMATION"),
       icon: "heroicons:document-text",
       description: t("EXERCISE_TITLE_DESCRIPTION"),
-      fieldsCount: 2, // englishTitle, arabicTitle
+      fieldsCount: 2,
     },
     {
       title: t("DESCRIPTION"),
       icon: "heroicons:pencil-square",
       description: t("EXERCISE_DESCRIPTION_DESCRIPTION"),
-      fieldsCount: 2, // englishDescription, arabicDescription
+      fieldsCount: 2,
     },
     {
       title: t("CATEGORY_DIFFICULTY"),
       icon: "heroicons:tag",
       description: t("CATEGORY_DIFFICULTY_DESCRIPTION"),
-      fieldsCount: 2, // categoryId, difficulty
+      fieldsCount: 2,
     },
     {
-      title: t("MEDIA_URLS"),
+      title: t("MEDIA"),
       icon: "heroicons:video-camera",
-      description: t("MEDIA_URLS_DESCRIPTION"),
-      fieldsCount: 2, // videoUrl, url (image)
+      description: t("MEDIA_DESCRIPTION"),
+      fieldsCount: 2,
+    },
+    {
+      title: t("IMAGE_URL"),
+      icon: "heroicons:photograph",
+      description: selectedImage
+        ? t("IMAGE_UPLOADED_DESCRIPTION")
+        : t("EXTERNAL_IMAGE_URL_DESCRIPTION"),
+      fieldsCount: 2,
     },
     {
       title: t("EXERCISE_METRICS"),
       icon: "heroicons:fire",
       description: t("EXERCISE_METRICS_DESCRIPTION"),
-      fieldsCount: 2, // calories, inputType
+      fieldsCount: 2,
     },
     {
       title:
@@ -325,13 +473,13 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         inputType === "duration"
           ? t("DURATION_SETTINGS_DESCRIPTION")
           : t("COUNT_SETTINGS_DESCRIPTION"),
-      fieldsCount: 2, // duration, count
+      fieldsCount: 2,
     },
     {
       title: t("STATUS"),
       icon: "heroicons:check-circle",
       description: t("STATUS_DESCRIPTION"),
-      fieldsCount: 1, // status
+      fieldsCount: 1,
     },
   ];
 
@@ -371,6 +519,23 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         </Button>
       </div>
 
+      {/* ✅ Image Preview */}
+      {imagePreview && (
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h3 className="text-lg font-semibold mb-2">{t("IMAGE_PREVIEW")}</h3>
+          <div className="relative w-48 h-48 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+            <img
+              src={imagePreview}
+              alt="Exercise preview"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            {t("IMAGE_PREVIEW_DESCRIPTION")}
+          </p>
+        </div>
+      )}
+
       {/* ✅ Generic Create Form */}
       <GenericCreateForm
         title={t("ADD_NEW_EXERCISE")}
@@ -379,7 +544,7 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         fields={fields}
         sections={sections}
         onSubmit={handleSubmit}
-        onFormDataChange={handleFormDataChange} // Add this prop
+        onFormDataChange={handleFormDataChange}
         onCancel={onClose}
         submitButtonText={t("CREATE_EXERCISE")}
         cancelButtonText={t("CANCEL")}
@@ -387,6 +552,8 @@ const ExerciseCreateForm = ({ onClose }: { onClose?: () => void }) => {
         submitButtonProps={{
           disabled: isSubmitting,
         }}
+        // Pass image preview if needed by GenericCreateForm
+        imagePreview={imagePreview}
       />
     </div>
   );

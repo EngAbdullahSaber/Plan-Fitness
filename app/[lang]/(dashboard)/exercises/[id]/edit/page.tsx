@@ -7,6 +7,7 @@ import {
   UpdateMethod,
   UpdateMethodFormData,
   GetPanigationMethod,
+  CreateMethodFormData,
 } from "@/app/services/apis/ApiMethod";
 import toast from "react-hot-toast";
 import { useTranslate } from "@/config/useTranslation";
@@ -24,6 +25,7 @@ interface Exercise {
     arabic: string;
   };
   url: string;
+  videoUrl: string;
   count: number | null;
   duration: number | null;
   difficulty: string;
@@ -47,6 +49,9 @@ const ExerciseUpdateForm = () => {
   const [inputType, setInputType] = useState<"duration" | "count">("duration");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
   // Fetch categories for dropdown using usePaginatedSelect hook
   const categoriesPaginated = usePaginatedSelect({
@@ -78,8 +83,15 @@ const ExerciseUpdateForm = () => {
 
       if (response.data) {
         const exercise = response.data.data;
+        console.log("Fetched exercise data:", exercise); // Debug log
 
         setExerciseData(exercise);
+
+        // Set existing image URL if available
+        if (exercise.url) {
+          setExistingImageUrl(exercise.url);
+          setImagePreview(exercise.url);
+        }
 
         // Determine input type based on available data
         if (exercise.duration !== null && exercise.duration !== undefined) {
@@ -107,12 +119,89 @@ const ExerciseUpdateForm = () => {
     }
   }, [id, lang]);
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        toast.error(t("INVALID_IMAGE_FILE"));
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error(t("IMAGE_SIZE_LIMIT"));
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove selected image and revert to existing image
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(existingImageUrl); // Revert to existing image URL
+  };
+
+  // Upload image and get the URL
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const imageFormData = new FormData();
+      imageFormData.append("file", file);
+
+      const uploadResponse = await CreateMethodFormData(
+        "upload",
+        imageFormData,
+        lang,
+      );
+
+      if (
+        uploadResponse?.data?.code === 200 &&
+        uploadResponse?.data?.data?.url
+      ) {
+        return uploadResponse.data.data.url;
+      } else {
+        toast.error(
+          uploadResponse?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
+        );
+        return null;
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast.error(error.response?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"));
+      return null;
+    }
+  };
+
   const handleSubmit = async (data: Record<string, any>) => {
     try {
       setIsSubmitting(true);
 
+      let imageUrl = existingImageUrl || data.url || "";
+
+      // Upload new image if selected
+      if (selectedImage) {
+        const uploadedUrl = await uploadImage(selectedImage);
+        if (!uploadedUrl) {
+          // Stop submission if image upload failed
+          setIsSubmitting(false);
+          return;
+        }
+        imageUrl = uploadedUrl;
+      }
+
       // Prepare exercise data according to the required structure
-      const exerciseData = {
+      const exerciseDataToUpdate = {
         categoryId: parseInt(data.categoryId),
         title: {
           arabic: data.arabicTitle,
@@ -122,7 +211,7 @@ const ExerciseUpdateForm = () => {
           arabic: data.arabicDescription,
           english: data.englishDescription,
         },
-        url: data.url,
+        url: imageUrl, // Use uploaded image URL or existing URL
         videoUrl: data.videoUrl,
         count: inputType === "count" ? parseInt(data.count) : null,
         duration: inputType === "duration" ? parseInt(data.duration) : null,
@@ -131,10 +220,15 @@ const ExerciseUpdateForm = () => {
         calory: parseInt(data.calories),
       };
 
-      console.log("Exercise data to update:", exerciseData);
+      console.log("Exercise data to update:", exerciseDataToUpdate);
 
       // Call the API to update Exercise
-      const response = await UpdateMethod("training", exerciseData, id, lang);
+      const response = await UpdateMethod(
+        "training",
+        exerciseDataToUpdate,
+        id,
+        lang,
+      );
 
       console.log("API Response:", response);
 
@@ -299,20 +393,18 @@ const ExerciseUpdateForm = () => {
         },
       },
       {
-        name: "url",
-        label: t("IMAGE_URL"),
-        type: "url",
-        placeholder: t("IMAGE_URL_PLACEHOLDER"),
-        required: true,
+        name: "image",
+        label: t("EXERCISE_IMAGE"),
+        type: "image",
+        required: false,
+        accept: "image/*",
+        description: t("IMAGE_UPLOAD_DESCRIPTION_UPDATE"),
+        onChange: handleImageChange,
         validation: {
+          maxFileSize: 5 * 1024 * 1024, // 5MB
+          allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
           custom: (value) => {
-            if (!value || value.trim() === "") return t("IMAGE_URL_REQUIRED");
-            try {
-              new URL(value);
-              return null;
-            } catch {
-              return t("IMAGE_URL_INVALID");
-            }
+            return null;
           },
         },
       },
@@ -351,6 +443,7 @@ const ExerciseUpdateForm = () => {
         },
       },
     ],
+
     [
       // Duration and Count fields - both shown but one disabled
       {
@@ -417,31 +510,41 @@ const ExerciseUpdateForm = () => {
       title: t("BASIC_INFORMATION"),
       icon: "heroicons:document-text",
       description: t("EXERCISE_TITLE_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // englishTitle, arabicTitle
+      fieldsCount: 2,
     },
     {
       title: t("DESCRIPTION"),
       icon: "heroicons:pencil-square",
       description: t("EXERCISE_DESCRIPTION_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // englishDescription, arabicDescription
+      fieldsCount: 2,
     },
     {
       title: t("CATEGORY_DIFFICULTY"),
       icon: "heroicons:tag",
       description: t("CATEGORY_DIFFICULTY_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // categoryId, difficulty
+      fieldsCount: 2,
     },
     {
-      title: t("MEDIA_URLS"),
+      title: t("MEDIA"),
       icon: "heroicons:video-camera",
-      description: t("MEDIA_URLS_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // videoUrl, url (image)
+      description: t("MEDIA_UPDATE_DESCRIPTION"),
+      fieldsCount: 2,
     },
     {
-      title: t("EXERCISE_METRICS"),
-      icon: "heroicons:fire",
-      description: t("EXERCISE_METRICS_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // calories, inputType
+      title: t("IMAGE_SETTINGS"),
+      icon: "heroicons:photograph",
+      description: selectedImage
+        ? t("NEW_IMAGE_UPLOADED")
+        : existingImageUrl
+          ? t("EXISTING_IMAGE_IN_USE")
+          : t("UPLOAD_OR_ENTER_URL"),
+      fieldsCount: 2,
+    },
+    {
+      title: t("EXERCISE_TYPE_SETTINGS"),
+      icon: "heroicons:cog",
+      description: t("EXERCISE_TYPE_UPDATE_DESCRIPTION"),
+      fieldsCount: 2,
     },
     {
       title:
@@ -452,13 +555,13 @@ const ExerciseUpdateForm = () => {
         inputType === "duration"
           ? t("DURATION_SETTINGS_UPDATE_DESCRIPTION")
           : t("COUNT_SETTINGS_UPDATE_DESCRIPTION"),
-      fieldsCount: 2, // duration, count
+      fieldsCount: 2,
     },
     {
       title: t("STATUS"),
       icon: "heroicons:check-circle",
       description: t("STATUS_UPDATE_DESCRIPTION"),
-      fieldsCount: 1, // status
+      fieldsCount: 1,
     },
   ];
 
@@ -533,7 +636,7 @@ const ExerciseUpdateForm = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Back Button */}
       <div className="space-y-2">
         <Button
@@ -584,6 +687,8 @@ const ExerciseUpdateForm = () => {
         submitButtonProps={{
           disabled: isSubmitting,
         }}
+        // Pass image preview if needed by GenericUpdateForm
+        imagePreview={imagePreview}
       />
     </div>
   );

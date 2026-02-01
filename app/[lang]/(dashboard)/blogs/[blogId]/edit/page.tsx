@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { useTranslate } from "@/config/useTranslation";
 import GenericUpdateForm from "../../../shared/GenericUpdateForm";
 import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
-import { baseUrl } from "@/app/services/app.config";
 
 interface Blog {
   id: string;
@@ -390,7 +389,7 @@ const BlogsUpdateForm = () => {
   // Prepare initial data for the form
   const initialData = {
     id: blogData.id || blogId,
-    image: baseUrl + blogData.image || "",
+    image: process.env.AUTH_BASE_URL + blogData.image || "",
     englishTitle: blogData.title.english || "",
     arabicTitle: blogData.title.arabic || "",
     arabicDescription: blogData.description.arabic || "",
