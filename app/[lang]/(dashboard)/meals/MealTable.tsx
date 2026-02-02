@@ -469,7 +469,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
                     size="icon"
                     variant="outline"
                     className="
-                      h-8 w-8 
+                      h-10 w-10 
                       border-[#25235F]/20 dark:border-blue-400/30 
                       hover:border-[#25235F] dark:hover:border-blue-500 
                       hover:bg-[#25235F] dark:hover:bg-blue-600 

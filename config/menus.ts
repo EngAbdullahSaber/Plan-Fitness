@@ -31,7 +31,8 @@ export interface MenuItemProps {
 // Define menu configurations for admin and user roles
 const adminMenu = [
   { title: "Dashboard", icon: Dashboard, href: "/dashboard" },
-  // { title: "users", icon: userss, href: "/users" },
+  { title: "users", icon: userss, href: "/users" },
+  { title: "coach", icon: userss, href: "/coach" },
   { title: "blogs", icon: Blogs, href: "/blogs" },
   { title: "meals", icon: Meals, href: "/meals" },
   {

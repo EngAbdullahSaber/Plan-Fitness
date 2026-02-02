@@ -24,7 +24,6 @@ import {
   GetSpecifiedMethod,
 } from "@/app/services/apis/ApiMethod";
 import MemberDetailsModal from "./MemberDetailsModal";
-import UserDetailsModal from "./MemberDetailsModal";
 
 interface MembersTableProps {
   t: any;
@@ -77,12 +76,11 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isLoadingUserDetails, setIsLoadingUserDetails] =
-    useState<boolean>(false);
-  const [modalLoading, setModalLoading] = useState<boolean>(false);
-
   const { lang } = useParams();
   const queryClient = useQueryClient();
+
+  // Status options based on isVerified
+  const statusOptions = [t("Verified"), t("Not_Verified")];
 
   // Level options based on your API data
   const levelOptions = [t("BEGINNER"), t("INTERMEDIATE"), t("ADVANCED")];
@@ -112,7 +110,8 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
         }
 
         // Add role filter
-        queryParams.role = "CLIENT";
+
+        queryParams.role = "COACH";
 
         // Add gender filter
         if (filters.gender) {
@@ -192,38 +191,48 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
     };
   }, [refetch]);
 
-  // View user details with loading state
+  // View user details
+  // Simplified version with cleaner error handling
   const handleViewUser = async (user: User) => {
     try {
-      // Set loading states - DO NOT open modal yet
-      setIsLoadingUserDetails(true);
-      setModalLoading(true);
-      setSelectedUser(user); // Store the user for the modal
+      // Show loading state
+      setIsModalOpen(true);
+      setSelectedUser({ ...user, _isLoading: true } as any);
 
-      // Fetch detailed user data
-      const response = await GetSpecifiedMethod(
-        `user/detailed/${user.id}`,
-        lang,
-      );
-      console.log(response.data.data);
-      if (response?.data?.data) {
-        // Update the user with detailed data
-        setSelectedUser(response.data.data);
+      // Fetch using GetSpecifiedMethod
+      const response = await GetSpecifiedMethod(`users/${user.id}`, lang);
 
-        // Now open the modal AFTER data is loaded
-        setIsModalOpen(true);
+      // Extract user data with helper function
+      const extractUserData = (responseData: any): User | null => {
+        if (!responseData) return null;
+
+        // Handle axios response structure
+        const data = responseData.data || responseData;
+
+        // Check common response patterns
+        if (data?.id) return data; // Direct user object
+        if (data?.data?.id) return data.data; // Nested data
+        if (data?.user?.id) return data.user; // Nested user
+        if (Array.isArray(data) && data[0]?.id) return data[0]; // Array response
+        if (data?.code === 200 && data?.data?.id) return data.data; // Code/data pattern
+
+        return null;
+      };
+
+      const fullUserData = extractUserData(response);
+
+      if (fullUserData) {
+        setSelectedUser(fullUserData);
       } else {
-        // If no detailed data, use basic user data
-        setSelectedUser(response.data.data);
-        setIsModalOpen(true);
+        // Use table data as fallback
+        setSelectedUser(user);
+        console.log("Using table data for user details");
       }
-      console.log(selectedUser);
     } catch (error: any) {
       console.error("Failed to fetch user details:", error);
 
-      // Use table data as fallback and open modal
+      // Use table data as fallback
       setSelectedUser(user);
-      setIsModalOpen(true);
 
       // User-friendly error message
       const errorMsg =
@@ -232,14 +241,11 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
         t("failed_to_load_details") ||
         "Failed to load user details";
 
+      // Show error toast but keep modal open with basic info
       toast.error(errorMsg, {
         duration: 4000,
         icon: "⚠️",
       });
-    } finally {
-      // Reset loading states
-      setIsLoadingUserDetails(false);
-      setModalLoading(false);
     }
   };
 
@@ -324,6 +330,16 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
         label: level.charAt(0).toUpperCase() + level.slice(1),
       })),
     },
+    {
+      key: "status",
+      label: t("status") || "Status",
+      type: "select",
+      placeholder: t("all_statuses") || "All Statuses",
+      options: statusOptions.map((status) => ({
+        value: status,
+        label: status.charAt(0).toUpperCase() + status.slice(1),
+      })),
+    },
   ];
 
   // Helper function to get role badge colors
@@ -378,15 +394,10 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
           <Button
             size="icon"
             onClick={() => handleViewUser(row.original)}
-            disabled={isLoadingUserDetails}
             variant="outline"
-            className="h-10 w-10 border-[#25235F]/20 dark:border-gray-600 hover:border-[#25235F] dark:hover:border-white hover:bg-[#25235F] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 w-10 border-[#25235F]/20 dark:border-gray-600 hover:border-[#25235F] dark:hover:border-white hover:bg-[#25235F] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
           >
-            {isLoadingUserDetails && selectedUser?.id === row.original.id ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            ) : (
-              <Icon icon="carbon:view" className="h-4 w-4" />
-            )}
+            <Icon icon="carbon:view" className="h-4 w-4" />
           </Button>
 
           <DeleteConfirmationDialog
@@ -715,16 +726,11 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
           onPageSizeChange={setPageSize}
         />
         {selectedUser && (
-          <UserDetailsModal
-            member={selectedUser}
+          <MemberDetailsModal
+            user={selectedUser}
             isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false);
-              setSelectedUser(null);
-              setModalLoading(false);
-            }}
+            onClose={() => setIsModalOpen(false)}
             t={t}
-            isLoading={modalLoading}
           />
         )}
       </div>

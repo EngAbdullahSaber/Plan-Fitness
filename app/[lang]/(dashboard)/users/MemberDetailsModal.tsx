@@ -5,353 +5,501 @@ import {
   Mail,
   Phone,
   Calendar,
-  MapPin,
-  CreditCard,
   Clock,
-  UserCheck,
   Target,
   Activity,
   Dumbbell,
   Ruler,
-  TrendingUp,
   Flame,
-  BarChart3,
-  Award,
   HeartPulse,
   Footprints,
   Gauge,
   Weight,
   RulerIcon as Measure,
   Bed,
-  Crown,
+  Shield,
+  CheckCircle,
+  XCircle,
+  Cake,
+  Target as TargetIcon,
+  Award as AwardIcon,
+  Battery,
+  EyeIcon as EyeOn,
+  Zap,
+  PieChart,
+  Hash,
+  Check,
+  X,
 } from "lucide-react";
 import GenericDetailsModal from "../shared/GenericDetailsModal";
+import { useTranslate } from "@/config/useTranslation";
+import { useParams } from "next/navigation";
 
-interface Member {
-  id: string;
-  role?: string;
-  fullName?: string;
+interface User {
+  id: number;
+  name: string;
+  phone: string;
   email?: string;
-  phone?: string;
-  birthDate?: string;
-  address?: string;
-  gender?: string;
-  age?: number;
-  weights?: number;
-  height?: number;
-  membershipStatus?: string;
-  membershipPlan?: string;
-  trainer?: string;
-  bmi?: number;
-  goal?: string;
-  lastCheckin?: string;
-  joinDate?: string;
-  totalSteps?: number;
-  totalDaysTraining?: number;
-  caloriesBurnedLast7Days?: number;
-  timeTrainingLast7Days?: number;
-  sleepTime?: number;
-  chest?: number;
-  biceps?: number;
-  triceps?: number;
-  waist?: number;
-  belly?: number;
-  thigh?: number;
-  buttock?: number;
-  status?: string;
+  image: string;
+  role: "ADMIN" | "COACH" | "CLIENT";
+  isVerified: boolean;
+  height: string | null;
+  weight: string | null;
+  age: string | null;
+  gender: "male" | "female";
+  goal: string | null;
+  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | null;
+  totalSteps: number | null;
+  totalTrainingDays: number | null;
+  measurements: {
+    buttock: string | null;
+    bully: string | null;
+    chest: string | null;
+    tricep: string | null;
+    thigh: string | null;
+    waist: string | null;
+  };
+  sleepTime: string | null;
+  injuryDescription: string | null;
+  dateOfBirth: string | null;
+  lastUpdateData: string | null;
+  createdAt: string;
+  currentSubscription: any | null;
+  userMeals: Array<{
+    id: number;
+    isAiAssign: boolean;
+    mealId: number;
+    mealName: string;
+    mealImage: string;
+    mealType: string;
+    totalCalory: number;
+    proteins: number;
+    fat: number;
+    carbs: number;
+    items: Array<{
+      id: number;
+      description: string;
+    }>;
+  }>;
+  trainingPlan: Array<any>;
 }
 
-interface MemberDetailsModalProps {
-  member: Member;
+interface UserDetailsModalProps {
+  member: User;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MemberDetailsModal: React.FC<MemberDetailsModalProps> = ({
+const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   member,
   isOpen,
   onClose,
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-500";
-      case "frozen":
-        return "bg-blue-500";
-      case "expired":
-        return "bg-red-500";
-      case "staff":
-        return "bg-purple-500";
-      default:
-        return "bg-gray-500";
+  const { t } = useTranslate();
+  const { language } = useParams();
+
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return t("not_set");
+    try {
+      return new Date(dateString).toLocaleDateString(
+        language === "ar" ? "ar-SA" : "en-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        },
+      );
+    } catch {
+      return t("invalid_date");
     }
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "Premium Member":
-        return "from-red-500 to-red-600";
-      case "Standard Member":
-        return "from-blue-600 to-blue-700";
-      case "Trainer":
-        return "from-amber-500 to-amber-600";
-      case "Admin":
-        return "from-purple-500 to-purple-600";
-      default:
-        return "from-gray-500 to-gray-600";
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return t("never");
+    try {
+      return new Date(dateString).toLocaleString(
+        language === "ar" ? "ar-SA" : "en-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      );
+    } catch {
+      return t("invalid_date");
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const formatNumber = (num: number | null) => {
+    if (num === null || num === undefined) return "0";
+    return num.toLocaleString(language === "ar" ? "ar-SA" : "en-US");
   };
 
-  const formatDateTime = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatWeight = (weight: string | null) => {
+    if (!weight) return t("not_set");
+    return `${weight} ${t("kg")}`;
   };
 
-  const formatNumber = (num: number) => num.toLocaleString();
-  const formatTime = (hours: number) => `${hours} hours`;
-  const formatSleep = (hours: number) => `${hours} hours/night`;
-  const formatWeight = (weight: number) => `${weight} kg`;
-  const formatHeight = (height: number) => `${height} cm`;
-  const formatMeasurement = (measurement: number) => `${measurement} cm`;
+  const formatHeight = (height: string | null) => {
+    if (!height) return t("not_set");
+    return `${height} ${t("cm")}`;
+  };
 
-  const tabs = [
-    { id: "overview", label: "Overview", icon: User },
-    { id: "membership", label: "Membership", icon: CreditCard },
-    { id: "activity", label: "Activity", icon: Activity },
-    { id: "measurements", label: "Measurements", icon: Ruler },
-  ];
+  const formatMeasurement = (measurement: string | null) => {
+    if (!measurement) return t("not_measured");
+    return `${measurement} ${t("cm")}`;
+  };
 
-  const sections = (record: Record<string, any>) => [
+  const formatAge = (ageString: string | null) => {
+    if (!ageString) return t("not_set");
+    try {
+      const birthDate = new Date(ageString);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return t("age_years", { age });
+    } catch {
+      return t("invalid_date");
+    }
+  };
+
+  const calculateBMI = (height: string | null, weight: string | null) => {
+    if (!height || !weight) return t("not_available");
+    const heightM = parseFloat(height) / 100;
+    const weightKg = parseFloat(weight);
+    if (isNaN(heightM) || isNaN(weightKg) || heightM === 0)
+      return t("not_available");
+    const bmi = weightKg / (heightM * heightM);
+    return bmi.toFixed(1);
+  };
+
+  const getStatusColor = (isVerified: boolean) => {
+    return isVerified ? "bg-green-500" : "bg-red-500";
+  };
+
+  const formatGender = (gender: string | null) => {
+    if (!gender) return t("not_set");
+    return t(gender.toLowerCase());
+  };
+
+  const formatRole = (role: string) => {
+    return t(role.toLowerCase());
+  };
+
+  const formatLevel = (level: string | null) => {
+    if (!level) return t("not_set");
+    return t(level.toLowerCase());
+  };
+
+  const userAvatar = (
+    <div className="relative">
+      {member.image ? (
+        <img
+          src={member.image}
+          alt={member.name}
+          className="w-20 h-20 rounded-full bg-white/20 dark:bg-gray-800/40 backdrop-blur-sm border-4 border-white/30 dark:border-gray-700/50 object-cover"
+        />
+      ) : (
+        <div className="w-20 h-20 rounded-full bg-white/20 dark:bg-gray-800/40 backdrop-blur-sm border-4 border-white/30 dark:border-gray-700/50 flex items-center justify-center">
+          <User className="w-10 h-10 text-white" />
+        </div>
+      )}
+      <div
+        className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${getStatusColor(
+          member.isVerified,
+        )} border-3 border-white dark:border-gray-900 flex items-center justify-center`}
+      >
+        {member.isVerified ? (
+          <Check className="w-3 h-3 text-white" />
+        ) : (
+          <X className="w-3 h-3 text-white" />
+        )}
+      </div>
+    </div>
+  );
+
+  const sections = (record: User) => [
     {
-      title: "Personal Information",
+      title: t("personal_information"),
       icon: User,
       fields: [
         {
-          label: "Email",
-          value: record.email,
+          label: t("id"),
+          value: record.id,
+          icon: Hash,
+        },
+        {
+          label: t("name"),
+          value: record.name || t("not_provided"),
+          icon: User,
+        },
+        {
+          label: t("email"),
+          value: record.email || t("not_provided"),
           icon: Mail,
         },
         {
-          label: "Phone",
+          label: t("phone"),
           value: record.phone,
           icon: Phone,
         },
         {
-          label: "Date of Birth",
-          value: record.birthDate,
-          icon: Calendar,
+          label: t("date_of_birth"),
+          value: record.dateOfBirth,
           format: formatDate,
+          icon: Cake,
         },
         {
-          label: "Age",
-          value: record.age,
+          label: t("age"),
+          value: record.age || record.dateOfBirth,
+          format: formatAge,
           icon: User,
         },
         {
-          label: "Gender",
-          value: record.gender,
+          label: t("gender"),
+          value: formatGender(record.gender),
           icon: User,
-        },
-        {
-          label: "Address",
-          value: record.address,
-          icon: MapPin,
         },
       ],
     },
     {
-      title: "Physical Stats",
-      icon: Weight,
+      title: t("account_information"),
+      icon: Shield,
       fields: [
         {
-          label: "Weight",
-          value: record.weights,
-          icon: Weight,
-          format: formatWeight,
+          label: t("role"),
+          value: formatRole(record.role),
+          icon: AwardIcon,
         },
         {
-          label: "Height",
-          value: record.height,
-          icon: Ruler,
-          format: formatHeight,
+          label: t("level"),
+          value: formatLevel(record.level),
+          icon: TargetIcon,
         },
         {
-          label: "BMI",
-          value: record.bmi,
-          icon: Gauge,
-        },
-        {
-          label: "Sleep Time",
-          value: record.sleepTime,
-          icon: Bed,
-          format: formatSleep,
-        },
-      ],
-    },
-    {
-      title: "Membership Status",
-      icon: CreditCard,
-      fields: [
-        {
-          label: "Status",
-          value: record.membershipStatus,
-          icon: UserCheck,
-        },
-        {
-          label: "Plan",
-          value: record.membershipPlan,
-          icon: CreditCard,
-        },
-        {
-          label: "Trainer",
-          value: record.trainer,
-          icon: User,
-        },
-        {
-          label: "Goal",
-          value: record.goal,
+          label: t("goal"),
+          value: record.goal || t("not_set"),
           icon: Target,
         },
         {
-          label: "Join Date",
-          value: record.joinDate,
-          icon: Calendar,
+          label: t("verification"),
+          value: record.isVerified ? t("verified") : t("not_verified"),
+          icon: record.isVerified ? CheckCircle : XCircle,
+        },
+        {
+          label: t("account_created"),
+          value: record.createdAt,
           format: formatDate,
+          icon: Calendar,
+        },
+        {
+          label: t("last_update"),
+          value: record.lastUpdateData,
+          format: formatDateTime,
+          icon: Clock,
         },
       ],
     },
     {
-      title: "Activity & Performance",
+      title: t("physical_stats"),
+      icon: Weight,
+      fields: [
+        {
+          label: t("weight"),
+          value: record.weight,
+          format: formatWeight,
+          icon: Weight,
+        },
+        {
+          label: t("height"),
+          value: record.height,
+          format: formatHeight,
+          icon: Ruler,
+        },
+        {
+          label: t("bmi"),
+          value: calculateBMI(record.height, record.weight),
+          icon: Gauge,
+        },
+        {
+          label: t("sleep_time"),
+          value: record.sleepTime || t("not_set"),
+          icon: Bed,
+        },
+      ],
+    },
+    {
+      title: t("activity_training"),
       icon: Activity,
       fields: [
         {
-          label: "Last Check-in",
-          value: record.lastCheckin,
-          icon: Clock,
-          format: formatDateTime,
-        },
-        {
-          label: "Total Steps",
+          label: t("total_steps"),
           value: record.totalSteps,
+          format: formatNumber,
+          suffix: ` ${t("steps")}`,
           icon: Footprints,
-          format: formatNumber,
         },
         {
-          label: "Total Training Days",
-          value: record.totalDaysTraining,
-          icon: Activity,
+          label: t("total_training_days"),
+          value: record.totalTrainingDays,
           format: formatNumber,
+          suffix: ` ${t("days")}`,
+          icon: Dumbbell,
         },
         {
-          label: "Calories Burned (7 days)",
-          value: record.caloriesBurnedLast7Days,
-          icon: Flame,
-          format: formatNumber,
+          label: t("training_plans"),
+          value: record.trainingPlan?.length || 0,
+          suffix: ` ${t("plans")}`,
+          icon: Target,
         },
         {
-          label: "Training Time (7 days)",
-          value: record.timeTrainingLast7Days,
-          icon: Clock,
-          format: formatTime,
+          label: t("injury_description"),
+          value: record.injuryDescription || t("no_injuries_reported"),
+          icon: HeartPulse,
+          isMultiline: true,
         },
       ],
     },
     {
-      title: "Body Measurements",
+      title: t("body_measurements"),
       icon: Measure,
       fields: [
         {
-          label: "Chest",
-          value: record.chest,
-          icon: Measure,
+          label: t("chest"),
+          value: record.measurements?.chest,
           format: formatMeasurement,
+          icon: Measure,
         },
         {
-          label: "Biceps",
-          value: record.biceps,
-          icon: Measure,
+          label: t("buttock"),
+          value: record.measurements?.buttock,
           format: formatMeasurement,
+          icon: Measure,
         },
         {
-          label: "Triceps",
-          value: record.triceps,
-          icon: Measure,
+          label: t("belly"),
+          value: record.measurements?.bully,
           format: formatMeasurement,
+          icon: Measure,
         },
         {
-          label: "Waist",
-          value: record.waist,
-          icon: Measure,
+          label: t("triceps"),
+          value: record.measurements?.tricep,
           format: formatMeasurement,
+          icon: Measure,
         },
         {
-          label: "Belly",
-          value: record.belly,
-          icon: Measure,
+          label: t("thigh"),
+          value: record.measurements?.thigh,
           format: formatMeasurement,
+          icon: Measure,
         },
         {
-          label: "Thigh",
-          value: record.thigh,
-          icon: Measure,
+          label: t("waist"),
+          value: record.measurements?.waist,
           format: formatMeasurement,
+          icon: Measure,
+        },
+      ],
+    },
+    {
+      title: t("nutrition"),
+      icon: PieChart,
+      fields: [
+        {
+          label: t("total_meals"),
+          value: record.userMeals?.length || 0,
+          suffix: ` ${t("meals")}`,
+          icon: PieChart,
         },
         {
-          label: "Buttock",
-          value: record.buttock,
-          icon: Measure,
-          format: formatMeasurement,
+          label: t("ai_assigned_meals"),
+          value:
+            record.userMeals?.filter((meal) => meal.isAiAssign)?.length || 0,
+          suffix: ` ${t("meals")}`,
+          icon: Zap,
+        },
+        {
+          label: t("total_calories_today"),
+          value:
+            record.userMeals?.reduce(
+              (sum, meal) => sum + (meal.totalCalory || 0),
+              0,
+            ) || 0,
+          format: formatNumber,
+          suffix: ` ${t("cal")}`,
+          icon: Flame,
+        },
+        {
+          label: t("average_proteins"),
+          value:
+            record.userMeals?.length > 0
+              ? Math.round(
+                  record.userMeals.reduce(
+                    (sum, meal) => sum + (meal.proteins || 0),
+                    0,
+                  ) / record.userMeals.length,
+                )
+              : 0,
+          suffix: ` ${t("g")}`,
+          icon: Battery,
         },
       ],
     },
   ];
+
+  const preparedRecord = {
+    ...member,
+    category: member.role?.toLowerCase() || "",
+    difficulty: member.level?.toLowerCase() || "",
+  };
 
   return (
     <GenericDetailsModal
       isOpen={isOpen}
       onClose={onClose}
-      title={member.fullName || "Member Details"}
+      title={member.name || t("user_details")}
       subtitle={
         <div className="flex items-center gap-4 text-xs text-white/80">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            Joined {formatDate(member.joinDate)}
+            <span>
+              {t("joined")} {formatDate(member.createdAt)}
+            </span>
           </div>
           <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            Last seen {formatDateTime(member.lastCheckin)}
+            <EyeOn className="w-3 h-3" />
+            <span>
+              {t("member_since")} {formatDate(member.createdAt)}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            <span>
+              {t("level")}: {formatLevel(member.level)}
+            </span>
           </div>
         </div>
       }
-      record={member}
+      record={preparedRecord}
       type="member"
-      tabs={tabs}
+      tabs={[{ id: "overview", label: t("overview"), icon: User }]}
       sections={sections}
       statusConfig={{
-        field: "status",
+        field: "isVerified",
         getColor: getStatusColor,
       }}
-      roleConfig={{
-        field: "role",
-        getColor: getRoleColor,
-      }}
+      avatar={userAvatar}
     />
   );
 };
 
-export default MemberDetailsModal;
+export default UserDetailsModal;

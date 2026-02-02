@@ -79,7 +79,7 @@ const ExerciseUpdateForm = () => {
     try {
       setIsLoading(true);
 
-      const response = await GetSpecifiedMethod(`training/${id}`, lang);
+      const response = await GetSpecifiedMethod(`training/${id}/web`, lang);
 
       if (response.data) {
         const exercise = response.data.data;

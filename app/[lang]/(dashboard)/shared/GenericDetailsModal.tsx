@@ -32,6 +32,7 @@ interface FieldConfig {
   isImage?: boolean;
   isVideo?: boolean;
   subtitle?: string;
+  suffix?: string;
 }
 
 interface SectionConfig {
@@ -110,6 +111,36 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
     </div>
   );
 
+  // Safe icon renderer
+  const renderIcon = (IconComponent: React.ComponentType<any>) => {
+    if (!IconComponent || typeof IconComponent === "string") {
+      return (
+        <User className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" />
+      );
+    }
+    return (
+      <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" />
+    );
+  };
+
+  // Safe section icon renderer
+  const renderSectionIcon = (IconComponent: React.ComponentType<any>) => {
+    if (!IconComponent || typeof IconComponent === "string") {
+      return <User className="w-4 h-4 text-[#25235F] dark:text-blue-400" />;
+    }
+    return (
+      <IconComponent className="w-4 h-4 text-[#25235F] dark:text-blue-400" />
+    );
+  };
+
+  // Safe tab icon renderer
+  const renderTabIcon = (IconComponent: React.ComponentType<any>) => {
+    if (!IconComponent || typeof IconComponent === "string") {
+      return <User className="w-4 h-4" />;
+    }
+    return <IconComponent className="w-4 h-4" />;
+  };
+
   // Render field value based on configuration
   const renderFieldValue = (field: FieldConfig) => {
     if (field.render) {
@@ -142,8 +173,8 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
       return (
         <div className="space-y-2">
           <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-            {field.value.includes("youtube") ||
-            field.value.includes("youtu.be") ? (
+            {field.value?.includes("youtube") ||
+            field.value?.includes("youtu.be") ? (
               // YouTube video
               <iframe
                 src={field.value.replace("watch?v=", "embed/")}
@@ -152,7 +183,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                 allowFullScreen
                 title={field.label}
               />
-            ) : field.value.includes("vimeo") ? (
+            ) : field.value?.includes("vimeo") ? (
               // Vimeo video
               <iframe
                 src={field.value.replace("vimeo.com", "player.vimeo.com/video")}
@@ -207,7 +238,15 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
     }
 
     if (field.format) {
-      return field.format(field.value);
+      const formattedValue = field.format(field.value);
+      return (
+        <span>
+          {formattedValue}
+          {field.suffix && (
+            <span className="ml-1 text-gray-500">{field.suffix}</span>
+          )}
+        </span>
+      );
     }
 
     if (Array.isArray(field.value)) {
@@ -222,7 +261,14 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
       );
     }
 
-    return field.value?.toString() || "N/A";
+    return (
+      <span>
+        {field.value?.toString() || "N/A"}
+        {field.suffix && (
+          <span className="ml-1 text-gray-500">{field.suffix}</span>
+        )}
+      </span>
+    );
   };
 
   return (
@@ -236,7 +282,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                 {/* Avatar */}
                 <div className="relative">
                   {avatar || defaultAvatar}
-                  {statusConfig && record[statusConfig.field] && (
+                  {statusConfig && record[statusConfig.field] !== undefined && (
                     <div
                       className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${statusConfig.getColor(
                         record[statusConfig.field],
@@ -291,7 +337,6 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
           <div className="px-6 pt-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex gap-1">
               {displayTabs.map((tab) => {
-                const IconComponent = tab.icon;
                 return (
                   <button
                     key={tab.id}
@@ -305,7 +350,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                       }
                     `}
                   >
-                    <IconComponent className="w-4 h-4" />
+                    {renderTabIcon(tab.icon)}
                     {tab.label}
                   </button>
                 );
@@ -328,7 +373,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
             .map((section, index) => (
               <div key={index} className="space-y-4 mb-6 last:mb-0">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <section.icon className="w-4 h-4 text-[#25235F] dark:text-blue-400" />
+                  {renderSectionIcon(section.icon)}
                   {section.title}
                 </h3>
 
@@ -351,7 +396,7 @@ const GenericDetailsModal: React.FC<GenericDetailsModalProps> = ({
                         `}
                       >
                         <div className="flex items-start gap-3 w-full">
-                          <field.icon className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-1" />
+                          {renderIcon(field.icon)}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="text-sm text-gray-500 dark:text-gray-400">
