@@ -142,6 +142,7 @@ const MealUpdateForm = ({
 
       // Set form initial data
       const transformedData = {
+        name: mealData.name || "",
         type: mealData.type || "",
         totalCalory: mealData.totalCalory?.toString() || "",
         proteins: mealData.proteins?.toString() || "",
@@ -274,6 +275,7 @@ const MealUpdateForm = ({
 
       // Create meal data object - FIXED: use mealItem (singular) for API
       const mealData = {
+        name: data.name,
         type: data.type,
         totalCalory: Number(data.totalCalory),
         proteins: Number(data.proteins),
@@ -356,6 +358,13 @@ const MealUpdateForm = ({
   const fields = [
     [
       {
+        name: "name",
+        label: t("MEAL_TITLE"),
+        type: "text",
+        placeholder: t("ENTER_MEAL_TITLE"),
+        required: true,
+      },
+      {
         name: "type",
         label: t("MEAL_TYPE"),
         type: "select",
@@ -369,6 +378,8 @@ const MealUpdateForm = ({
           },
         },
       },
+    ],
+    [
       {
         name: "totalCalory",
         label: t("TOTAL_CALORIES"),
@@ -387,8 +398,6 @@ const MealUpdateForm = ({
           },
         },
       },
-    ],
-    [
       {
         name: "proteins",
         label: t("PROTEINS_G"),

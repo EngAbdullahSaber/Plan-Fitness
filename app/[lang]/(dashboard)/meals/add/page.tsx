@@ -130,6 +130,7 @@ const MealsCreateForm = () => {
 
       // Create meal data object
       const mealData = {
+        name: data.name,
         type: data.type,
         totalCalory: Number(data.totalCalory),
         proteins: Number(data.proteins),
@@ -183,6 +184,13 @@ const MealsCreateForm = () => {
   const fields = [
     [
       {
+        name: "name",
+        label: t("MEAL_TITLE"),
+        type: "text",
+        placeholder: t("ENTER_MEAL_TITLE"),
+        required: true,
+      },
+      {
         name: "type",
         label: t("MEAL_TYPE"),
         type: "select",
@@ -202,6 +210,8 @@ const MealsCreateForm = () => {
           },
         },
       },
+    ],
+    [
       {
         name: "totalCalory",
         label: t("TOTAL_CALORIES"),
@@ -220,8 +230,6 @@ const MealsCreateForm = () => {
           },
         },
       },
-    ],
-    [
       {
         name: "proteins",
         label: t("PROTEINS_G"),
@@ -339,6 +347,7 @@ const MealsCreateForm = () => {
 
   const initialData = {
     type: "",
+    name: "",
     totalCalory: "",
     proteins: "",
     fat: "",
