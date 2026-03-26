@@ -15,6 +15,7 @@ import {
   Dashboard,
   Products,
   cubicss,
+  Messages,
 } from "@/components/svg";
 
 export interface MenuItemProps {
@@ -42,6 +43,7 @@ const adminMenu = [
   },
   { title: "Exercises", icon: Exercises, href: "/exercises" },
   { title: "Subscriptions", icon: cubicss, href: "/subscriptions" },
+  { title: "Support", icon: Messages, href: "/support" },
   { title: "Settings", icon: Settings, href: "/settings" },
 ];
 

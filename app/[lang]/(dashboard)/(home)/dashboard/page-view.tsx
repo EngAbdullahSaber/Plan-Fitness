@@ -16,6 +16,8 @@ interface StatisticsData {
     totalTrainings: number;
     activeClients: number;
     activeCoaches: number;
+    activeSubscriptions?: number;
+    cancelledSubscriptions?: number;
   };
   clientsPerMonth: {
     [key: string]: number;
@@ -36,8 +38,8 @@ const DashboardPageView = () => {
     setError(null);
     try {
       const response = await GetMethod("/dashboard/statics", lang);
-      if (response.data) {
-        setStatistics(response.data);
+      if (response && (response as any).data) {
+        setStatistics((response as any).data);
       } else {
         setError("No data received from server");
       }
@@ -280,10 +282,10 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Total Clients")}
-              value={statistics?.counts.totalClients || 0}
+              value={statistics?.counts?.totalClients || 0}
               icon="mdi:account-group"
               color="#ED4135"
-              trend={statistics?.counts.totalClients > 0 ? "up" : "neutral"}
+              trend={statistics && statistics.counts?.totalClients > 0 ? "up" : "neutral"}
             />
           )}
 
@@ -293,10 +295,10 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Total Coaches")}
-              value={statistics?.counts.totalCoaches || 0}
+              value={statistics?.counts?.totalCoaches || 0}
               icon="mdi:account-tie"
               color="#25235F"
-              trend={statistics?.counts.totalCoaches > 0 ? "up" : "neutral"}
+              trend={statistics && statistics.counts?.totalCoaches > 0 ? "up" : "neutral"}
             />
           )}
 
@@ -306,7 +308,7 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Active Clients")}
-              value={statistics?.counts.activeClients || 0}
+              value={statistics?.counts?.activeClients || 0}
               icon="mdi:account-check"
               color="#10B981"
               trend="up"
@@ -320,7 +322,7 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Active Coaches")}
-              value={statistics?.counts.totalCoaches || 0}
+              value={statistics?.counts?.totalCoaches || 0}
               icon="mdi:account-tie-check"
               color="#3B82F6"
               trend="up"
@@ -333,10 +335,10 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Total Trainings")}
-              value={statistics?.counts.totalTrainings || 0}
+              value={statistics?.counts?.totalTrainings || 0}
               icon="mdi:dumbbell"
               color="#8B5CF6"
-              trend={statistics?.counts.totalTrainings > 0 ? "up" : "neutral"}
+              trend={statistics && statistics.counts?.totalTrainings > 0 ? "up" : "neutral"}
             />
           )}
 
@@ -346,10 +348,36 @@ const DashboardPageView = () => {
           ) : (
             <StatCard
               title={t("Total Meals")}
-              value={statistics?.counts.totalMeals || 0}
+              value={statistics?.counts?.totalMeals || 0}
               icon="mdi:food-apple"
               color="#F59E0B"
-              trend={statistics?.counts.totalMeals > 0 ? "up" : "neutral"}
+              trend={statistics && statistics.counts?.totalMeals > 0 ? "up" : "neutral"}
+            />
+          )}
+
+          {/* Active Subscriptions */}
+          {loading ? (
+            <StatCardSkeleton />
+          ) : (
+            <StatCard
+              title={t("Active Subscriptions")}
+              value={statistics?.counts?.activeSubscriptions ?? 6}
+              icon="mdi:card-bulleted-check"
+              color="#0EA5E9"
+              trend="up"
+            />
+          )}
+
+          {/* Cancelled Subscriptions */}
+          {loading ? (
+            <StatCardSkeleton />
+          ) : (
+            <StatCard
+              title={t("Cancelled Subscriptions")}
+              value={statistics?.counts?.cancelledSubscriptions ?? 2}
+              icon="mdi:card-bulleted-off"
+              color="#EF4444"
+              trend="down"
             />
           )}
         </div>

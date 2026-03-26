@@ -17,6 +17,7 @@ import {
   Crown,
 } from "lucide-react";
 import GenericDetailsModal from "../shared/GenericDetailsModal";
+import { useParams } from "next/navigation";
 
 interface Meal {
   id: string;
@@ -51,6 +52,7 @@ const MealDetailsModals: React.FC<MealDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { lang } = useParams();
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -100,7 +102,8 @@ const MealDetailsModals: React.FC<MealDetailsModalProps> = ({
   };
 
   const formatTime = (minutes: number) => `${minutes} min`;
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
+  const formatPrice = (price: number) =>
+    lang === "ar" ? `${price.toFixed(2)} ر.س` : `${price.toFixed(2)} SAR`;
   const formatMacros = (value: number) => `${value}g`;
   const formatList = (items: string[]) => items.join(", ");
 

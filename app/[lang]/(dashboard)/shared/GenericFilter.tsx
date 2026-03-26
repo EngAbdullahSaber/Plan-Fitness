@@ -35,6 +35,9 @@ export interface FilterConfig {
   onFilterChange: (filters: Record<string, string>) => void;
   onClearFilters: () => void;
   initialFilters?: Record<string, string>;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
 }
 
 const GenericFilter = ({
@@ -42,6 +45,9 @@ const GenericFilter = ({
   onFilterChange,
   onClearFilters,
   initialFilters = {},
+  searchValue,
+  onSearchChange,
+  searchPlaceholder,
 }: FilterConfig) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentFilters, setCurrentFilters] =
@@ -149,13 +155,37 @@ const GenericFilter = ({
           ></div>
 
           {/* Shine effect */}
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
                           dark:via-white/10 -skew-x-12 -translate-x-full 
                           group-hover:translate-x-full transition-transform duration-1000"
           ></div>
         </Button>
       </div>
+
+      {/* Global Search Bar (Only if props provided) */}
+      {onSearchChange && (
+        <div className="flex-1 mb-6">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+              />
+            </div>
+            <Input
+              type="text"
+              placeholder={searchPlaceholder || t("Search...")}
+              value={searchValue || ""}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-11 pr-4 py-6 bg-white/80 dark:bg-gray-800/80 
+                         backdrop-blur-sm border-2 border-gray-100 dark:border-gray-700 
+                         focus:border-blue-500 dark:focus:border-blue-400 
+                         focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-500/20 
+                         rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Filter Panel with Animation */}
       <div

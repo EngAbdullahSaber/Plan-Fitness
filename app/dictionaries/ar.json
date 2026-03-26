@@ -723,7 +723,7 @@
   "Duration": "المدة",
   "Select duration": "اختر المدة",
 
-  "Price ($)": "السعر ($)",
+  "Price ($)": "السعر (ر.س)",
 
   "Add Feature": "إضافة ميزة",
 
@@ -1253,7 +1253,7 @@
   "France": "فرنسا",
   "Spain": "إسبانيا",
   "Brazil": "البرازيل",
-  "totalusd": "الإجمالي بالدولار الأمريكي",
+  "totalusd": "الإجمالي بالريال السعودي",
   "totalsar": "الإجمالي بالريال السعودي",
   "Image Preview": "عرض الصورة",
   "all user": "جميع المستخدمين",
@@ -1577,7 +1577,7 @@
   "Date From": " التاريخ من",
   "Work Shift": "نوبة العمل",
   "total sales sar": "إجمالي المبيعات بالريال",
-  "total sales usd": "إجمالي المبيعات بالدولار",
+  "total sales usd": "إجمالي المبيعات بالريال السعودي",
   "Sales Details": "تفاصيل المبيعات",
   "store": "المتجر",
   "brand": "العلامة التجارية",
@@ -2660,5 +2660,26 @@
   "Venau Name": "اسم المكان",
 
   "start date": "من  تاريخ",
-  "end date": "الى تاريخ"
+  "end date": "الى تاريخ",
+  "Active Subscriptions": "اشتراكات نشطة",
+  "Cancelled Subscriptions": "اشتراكات ملغاة",
+  "Support Tickets": "تذاكر الدعم",
+  "All Tickets": "جميع التذاكر",
+  "Tickets List": "قائمة التذاكر",
+  "Message": "الرسالة",
+  "Replies": "الردود",
+  "OPEN": "مفتوحة",
+  "CLOSED": "مغلقة",
+  "PENDING": "قيد الانتظار",
+  "Reply to Ticket": "الرد على التذكرة",
+  "Replying to": "الرد على",
+  "Your Message": "رسالتك",
+  "Type your response here...": "اكتب ردك هنا...",
+  "Cancel": "إلغاء",
+  "Send Reply": "إرسال الرد",
+  "Reply sent successfully": "تم إرسال الرد بنجاح",
+  "Please enter a message": "يرجى إدخال رسالة",
+  "Ticket closed successfully": "تم إغلاق التذكرة بنجاح",
+  "Failed to close ticket": "فشل إغلاق التذكرة",
+  "Support": "الدعم"
 }

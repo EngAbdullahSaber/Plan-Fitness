@@ -19,6 +19,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
   const { collapsed, setCollapsed } = useSidebar();
   const [hovered, setHovered] = useState<boolean>(false);
   const { lang } = useParams();
+  const isRTL = lang === "ar";
   console.log(lang);
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {

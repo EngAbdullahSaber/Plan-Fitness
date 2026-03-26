@@ -20,7 +20,7 @@ import {
   HeartPulse,
   Footprints,
   Gauge,
-  Weight,
+  Dumbbell as Weight,
   RulerIcon as Measure,
   Bed,
   Crown,
@@ -59,6 +59,8 @@ interface Member {
   thigh?: number;
   buttock?: number;
   status?: string;
+  numberOFCoachTrainee?: string | number;
+  clientsCount?: string | number;
 }
 
 interface MemberDetailsModalProps {
@@ -141,6 +143,21 @@ const MemberDetailsModal: React.FC<MemberDetailsModalProps> = ({
       title: "Personal Information",
       icon: User,
       fields: [
+        {
+          label: "Role",
+          value: record.role,
+          icon: User,
+        },
+        {
+          label: "Trainees Limit",
+          value: record.numberOFCoachTrainee,
+          icon: User,
+        },
+        {
+          label: "Current Clients",
+          value: record.clientsCount,
+          icon: User,
+        },
         {
           label: "Email",
           value: record.email,
@@ -345,10 +362,6 @@ const MemberDetailsModal: React.FC<MemberDetailsModalProps> = ({
       statusConfig={{
         field: "status",
         getColor: getStatusColor,
-      }}
-      roleConfig={{
-        field: "role",
-        getColor: getRoleColor,
       }}
     />
   );

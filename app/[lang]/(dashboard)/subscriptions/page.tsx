@@ -247,7 +247,7 @@ const SubscriptionsPage = () => {
 
   // Format price display
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    return lang === "ar" ? `${price.toFixed(2)} ر.س` : `${price.toFixed(2)} SAR`;
   };
 
   // Get duration label
@@ -597,7 +597,7 @@ const SubscriptionsPage = () => {
 
               {/* Price */}
               <div className="space-y-2">
-                <Label htmlFor="price">{t("Price")} ($)</Label>
+                <Label htmlFor="price">{t("Price (SAR)")}</Label>
                 <Input
                   id="price"
                   type="number"

@@ -63,13 +63,15 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
       );
 
       if (
-        uploadResponse?.data?.code === 200 &&
-        uploadResponse?.data?.data?.url
+        uploadResponse &&
+        uploadResponse.data?.code === 200 &&
+        uploadResponse.data?.data?.url
       ) {
         return uploadResponse.data.data.url;
       } else {
         toast.error(
-          uploadResponse?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
+          (uploadResponse && uploadResponse.data?.message) ||
+            t("FAILED_TO_UPLOAD_IMAGE"),
         );
         return null;
       }
@@ -105,23 +107,26 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
         password: data.password,
         role: "coach",
         image: imageUrl ? baseUrl + imageUrl : "",
+        numberOFCoachTrainee: data.numberOFCoachTrainee
+          ? parseInt(data.numberOFCoachTrainee)
+          : undefined,
       };
 
       // Using CreateMethod to register coach
       const response = await CreateMethod("user/register", coachData, lang);
 
-      if (response?.data?.code === 200 || response?.code === 200) {
+      if (response && (response.status === 200 || (response.data && response.data.code === 200))) {
         toast.success(
-          response.data?.message ||
-            response.message ||
+          (response.data && response.data.message) ||
+            (response as any).message ||
             t("COACH_CREATED_SUCCESSFULLY"),
         );
         if (onClose) onClose();
         else router.push("/coach");
       } else {
         toast.error(
-          response?.data?.message ||
-            response?.message ||
+          (response && response.data && response.data.message) ||
+            (response && (response as any).message) ||
             t("FAILED_TO_CREATE_COACH"),
         );
       }
@@ -144,6 +149,7 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
     phone: "",
     password: "",
     image: "",
+    numberOFCoachTrainee: "",
   };
 
   // ✅ Password toggle function
@@ -152,7 +158,7 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
   };
 
   // ✅ Dynamic fields
-  const fields = useMemo(
+  const fields = useMemo<any>(
     () => [
       // Basic Information
       [
@@ -171,6 +177,16 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
           placeholder: t("ENTER_PHONE_NUMBER"),
           required: true,
           description: t("PHONE_NUMBER_DESCRIPTION"),
+        },
+        {
+          name: "numberOFCoachTrainee",
+          label: t("COACH_TRAINEES_LIMIT") || "Trainees Limit",
+          type: "number",
+          placeholder: t("ENTER_TRAINEES_LIMIT") || "Enter trainees limit",
+          required: false,
+          description:
+            t("COACH_TRAINEES_LIMIT_DESCRIPTION") ||
+            "The maximum number of trainees this coach can handle",
         },
       ],
 

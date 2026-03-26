@@ -163,10 +163,9 @@ const PersonalDetails = () => {
                 <SelectValue placeholder="Select Currency" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="usd">USD</SelectItem>
-                <SelectItem value="jpy">JPY</SelectItem>
-                <SelectItem value="gbp">GBP</SelectItem>
-                <SelectItem value="aud">AUD</SelectItem>
+                <SelectItem value="sar">SAR (Saudi Riyal)</SelectItem>
+                <SelectItem value="usd">USD (US Dollar)</SelectItem>
+                <SelectItem value="eur">EUR (Euro)</SelectItem>
               </SelectContent>
             </Select>
           </div>

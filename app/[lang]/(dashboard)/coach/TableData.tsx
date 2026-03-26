@@ -25,6 +25,7 @@ import {
 } from "@/app/services/apis/ApiMethod";
 import Link from "next/link";
 import CoachTraineeUpdateDialog from "../shared/CoachTraineeUpdateDialog";
+import MemberDetailsModal from "./MemberDetailsModal";
 
 interface CoachMembersTableProps {
   t: any;
@@ -422,7 +423,10 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center justify-start gap-3">
+                <div
+                  className="flex items-center justify-start gap-3 cursor-pointer group/name"
+                  onClick={() => handleViewCoach(coach)}
+                >
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
                     {coach.image ? (
                       <img
@@ -438,7 +442,7 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
                     )}
                   </div>
                   <div className="flex flex-col">
-                    <span className="max-w-[200px] truncate font-semibold text-gray-800 dark:text-gray-200 hover:text-[#25235F] dark:hover:text-white transition-colors duration-200">
+                    <span className="max-w-[200px] truncate font-semibold text-gray-800 dark:text-gray-200 group-hover/name:text-[#25235F] dark:group-hover/name:text-white transition-colors duration-200">
                       {coach.name}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -695,6 +699,22 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
           onPageSizeChange={setPageSize}
         />
       </div>
+
+      {/* Coach Details Modal */}
+      {selectedCoach && (
+        <MemberDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedCoach(null);
+          }}
+          member={{
+            ...selectedCoach,
+            fullName: selectedCoach.name, // Map name to fullName for the modal
+            status: selectedCoach.isVerified ? "active" : "inactive",
+          } as any}
+        />
+      )}
     </div>
   );
 });

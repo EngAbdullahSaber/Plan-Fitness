@@ -146,3 +146,13 @@ export async function PatchMethod(url: string, id: any, lang: any) {
   if (res) return res.data;
   else return false;
 }
+
+export async function PatchMethodWithBody(url: string, id: any, data: any, lang: any) {
+  let res = await api.patch(`${url}/${id}`, data, {
+    headers: {
+      lang: lang,
+    },
+  });
+  if (res) return res;
+  else return false;
+}

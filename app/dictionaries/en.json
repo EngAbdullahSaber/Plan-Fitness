@@ -625,7 +625,7 @@
   "Duration": "Duration",
   "Select duration": "Select duration",
 
-  "Price ($)": "Price ($)",
+  "Price ($)": "Price (SAR)",
 
   "Add Feature": "Add Feature",
 
@@ -1243,7 +1243,7 @@
   "Brazil": "Brazil",
 
   "name": "Name",
-  "totalusd": "total USD",
+  "totalusd": "total SAR",
   "totalsar": "total SAR",
   "Image Preview": "Image Preview",
   "all user": "all user",
@@ -1695,7 +1695,7 @@
   "agree": "Agree",
   "quantity": "quantity",
   "total sales sar": "total sales SAR",
-  "total sales usd": "total sales USD",
+  "total sales usd": "total sales SAR",
   "Export Excel": "Export Excel",
   "Export PDF": "Export PDF",
   "check in": "check in",
@@ -2853,5 +2853,26 @@
   "cal": "cal",
   "g": "g",
   "start date": "Start Date",
-  "end date": "End date"
+  "end date": "End date",
+  "Active Subscriptions": "Active Subscriptions",
+  "Cancelled Subscriptions": "Cancelled Subscriptions",
+  "Support Tickets": "Support Tickets",
+  "All Tickets": "All Tickets",
+  "Tickets List": "Tickets List",
+  "Message": "Message",
+  "Replies": "Replies",
+  "OPEN": "OPEN",
+  "CLOSED": "CLOSED",
+  "PENDING": "PENDING",
+  "Reply to Ticket": "Reply to Ticket",
+  "Replying to": "Replying to",
+  "Your Message": "Your Message",
+  "Type your response here...": "Type your response here...",
+  "Cancel": "Cancel",
+  "Send Reply": "Send Reply",
+  "Reply sent successfully": "Reply sent successfully",
+  "Please enter a message": "Please enter a message",
+  "Ticket closed successfully": "Ticket closed successfully",
+  "Failed to close ticket": "Failed to close ticket",
+  "Support": "Support"
 }

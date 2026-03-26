@@ -16,6 +16,7 @@ import {
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
+import { useParams } from "next/navigation";
 
 import avatar1 from "@/public/images/avatar/avatar-1.jpg";
 import avatar2 from "@/public/images/avatar/avatar-2.jpg";
@@ -37,6 +38,7 @@ import orange from "@/public/images/all-img/orange.jpg";
 import orange2 from "@/public/images/all-img/orange-2.jpg";
 import Image from "next/image";
 const ActivityTimeline = () => {
+  const { lang } = useParams();
   return (
     <Timeline>
       <TimelineItem>
@@ -381,7 +383,7 @@ const ActivityTimeline = () => {
               </div>
             </div>
             <span className="flex-none text-sm font-semibold text-default-700">
-              $20
+              {lang === "ar" ? "20 ر.س" : "20 SAR"}
             </span>
           </div>
         </TimelineContent>

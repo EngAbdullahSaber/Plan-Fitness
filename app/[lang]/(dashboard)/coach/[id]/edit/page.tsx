@@ -41,7 +41,7 @@ const CoachUpdateForm = () => {
 
       const response = await GetSpecifiedMethod(`user/detailed/${id}`, lang);
 
-      if (response.data) {
+      if (response && response.data) {
         const coach = response.data.data || response.data;
         console.log("Fetched coach data:", coach); // Debug log
 
@@ -116,13 +116,14 @@ const CoachUpdateForm = () => {
       );
 
       if (
-        uploadResponse?.data?.code === 200 &&
-        uploadResponse?.data?.data?.url
+        uploadResponse &&
+        uploadResponse.data?.code === 200 &&
+        uploadResponse.data?.data?.url
       ) {
         return uploadResponse.data.data.url;
       } else {
         toast.error(
-          uploadResponse?.data?.message || t("FAILED_TO_UPLOAD_IMAGE"),
+          (uploadResponse && uploadResponse.data?.message) || t("FAILED_TO_UPLOAD_IMAGE"),
         );
         return null;
       }
@@ -165,14 +166,17 @@ const CoachUpdateForm = () => {
         coachDataToUpdate.password = data.password;
       }
 
-      // Only include image if we have a new one
       if (imageUrl && imageUrl.trim() !== "") {
         coachDataToUpdate.image = imageUrl;
+      }
+      
+      // Only include numberOFCoachTrainee if provided
+      if (data.numberOFCoachTrainee !== undefined && data.numberOFCoachTrainee !== "") {
+        coachDataToUpdate.numberOFCoachTrainee = parseInt(data.numberOFCoachTrainee);
       }
 
       console.log("Coach data to update:", coachDataToUpdate);
 
-      // Call the API to update Coach
       const response = await UpdateMethod(
         "user/coach",
         coachDataToUpdate,
@@ -182,21 +186,15 @@ const CoachUpdateForm = () => {
 
       console.log("API Response:", response);
 
-      // Handle response based on your API structure
-      if (response?.data?.code === 200 || response?.code === 200) {
+      // Handle response - UpdateMethod returns res.data
+      if (response && (response.code === 200 || (response as any).data?.code === 200)) {
         toast.success(
-          response.data?.message ||
-            response.message ||
-            t("COACH_UPDATED_SUCCESSFULLY"),
+          response.message || (response as any).data?.message || t("COACH_UPDATED_SUCCESSFULLY"),
         );
-
-        // Redirect to coaches list page
         router.push("/coach");
       } else {
         toast.error(
-          response?.data?.message ||
-            response?.message ||
-            t("FAILED_TO_UPDATE_COACH"),
+          (response && response.message) || (response && (response as any).data?.message) || t("FAILED_TO_UPDATE_COACH"),
         );
       }
     } catch (error: any) {
@@ -213,14 +211,14 @@ const CoachUpdateForm = () => {
       {
         name: "name",
         label: t("COACH_NAME"),
-        type: "text",
+        type: "text" as any,
         placeholder: t("ENTER_COACH_NAME"),
         required: true,
         description: t("COACH_NAME_DESCRIPTION"),
         validation: {
           minLength: 2,
           maxLength: 100,
-          custom: (value) => {
+          custom: (value: any) => {
             if (!value || value.trim() === "") return t("NAME_REQUIRED");
             if (value.length < 2) return t("NAME_MIN_LENGTH");
             if (value.length > 100) return t("NAME_MAX_LENGTH");
@@ -231,10 +229,21 @@ const CoachUpdateForm = () => {
       {
         name: "phone",
         label: t("PHONE_NUMBER"),
-        type: "text",
-        placeholder: t("ENTER_PHONE_NUMBER"),
-        required: true,
+        type: "text" as any,
+        placeholder: coachData.phone || "",
+        required: false,
+        disabled: true,
         description: t("PHONE_NUMBER_CANNOT_CHANGE"),
+      },
+      {
+        name: "numberOFCoachTrainee",
+        label: t("COACH_TRAINEES_LIMIT") || "Trainees Limit",
+        type: "number" as any,
+        placeholder: t("ENTER_TRAINEES_LIMIT") || "Enter trainees limit",
+        required: false,
+        description:
+          t("COACH_TRAINEES_LIMIT_DESCRIPTION") ||
+          "The maximum number of trainees this coach can handle",
       },
     ],
     [
@@ -242,7 +251,7 @@ const CoachUpdateForm = () => {
       {
         name: "password",
         label: t("NEW_PASSWORD"),
-        type: showPassword ? "text" : "password",
+        type: (showPassword ? "text" : "password") as any,
         placeholder: t("ENTER_NEW_PASSWORD"),
         required: false,
         description: t("NEW_PASSWORD_DESCRIPTION"),
@@ -253,7 +262,7 @@ const CoachUpdateForm = () => {
       {
         name: "image",
         label: t("COACH_IMAGE"),
-        type: "image",
+        type: "image" as any,
         required: false,
         accept: "image/jpeg,image/jpg,image/png,image/webp",
         description: t("IMAGE_UPLOAD_DESCRIPTION_UPDATE"),
@@ -342,6 +351,7 @@ const CoachUpdateForm = () => {
     password: "",
     confirmPassword: "",
     image: coachData.image || "",
+    numberOFCoachTrainee: (coachData as any).numberOFCoachTrainee || "",
   };
 
   return (
