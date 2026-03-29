@@ -170,9 +170,12 @@ const CoachUpdateForm = () => {
         coachDataToUpdate.image = imageUrl;
       }
       
-      // Only include numberOFCoachTrainee if provided
       if (data.numberOFCoachTrainee !== undefined && data.numberOFCoachTrainee !== "") {
         coachDataToUpdate.numberOFCoachTrainee = parseInt(data.numberOFCoachTrainee);
+      }
+
+      if (data.startDate && data.startDate !== "") {
+        coachDataToUpdate.startDate = data.startDate;
       }
 
       console.log("Coach data to update:", coachDataToUpdate);
@@ -230,7 +233,7 @@ const CoachUpdateForm = () => {
         name: "phone",
         label: t("PHONE_NUMBER"),
         type: "text" as any,
-        placeholder: coachData.phone || "",
+        placeholder: coachData?.phone || "",
         required: false,
         disabled: true,
         description: t("PHONE_NUMBER_CANNOT_CHANGE"),
@@ -244,6 +247,14 @@ const CoachUpdateForm = () => {
         description:
           t("COACH_TRAINEES_LIMIT_DESCRIPTION") ||
           "The maximum number of trainees this coach can handle",
+      },
+      {
+        name: "startDate",
+        label: t("START_DATE") || "Start Date",
+        type: "date" as any,
+        placeholder: t("ENTER_START_DATE") || "Select start date",
+        required: false,
+        description: t("START_DATE_DESCRIPTION") || "The official start date of the coach",
       },
     ],
     [
@@ -352,6 +363,7 @@ const CoachUpdateForm = () => {
     confirmPassword: "",
     image: coachData.image || "",
     numberOFCoachTrainee: (coachData as any).numberOFCoachTrainee || "",
+    startDate: (coachData as any).startDate || (coachData as any).createdAt?.split("T")[0] || "",
   };
 
   return (

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { SearchablePaginatedSelectContent } from "./SearchablePaginatedSelectContent";
 import { SearchablePaginatedSelectContentUpdated } from "./SearchablePaginatedSelectContentUpdated";
 import { useParams } from "next/navigation";
+import Flatpickr from "react-flatpickr";
 
 interface MealItem {
   description: {
@@ -863,7 +864,6 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
       case "email":
       case "password":
       case "url":
-      case "date":
         return (
           <div className="w-full group">
             <div className="relative">
@@ -896,6 +896,117 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     placeholder:text-gray-400 dark:placeholder:text-gray-500 
                     text-gray-700 dark:text-gray-200 font-medium
                   `}
+                />
+
+                <Label
+                  htmlFor={field.name}
+                  className={`
+                    absolute ${lang == "en" ? "left-4" : "right-4"} transition-all duration-200 pointer-events-none 
+                    ${
+                      field.disabled
+                        ? "text-gray-500 dark:text-gray-400"
+                        : "text-gray-700 dark:text-gray-300"
+                    } 
+                    ${
+                      isFloating
+                        ? "top-1.5 text-xs font-semibold text-[#25235F] dark:text-blue-400"
+                        : "top-1/2 -translate-y-1/2 text-base text-gray-500 dark:text-gray-400"
+                    }
+                  `}
+                >
+                  {t(field.label)}{" "}
+                  {field.required && !field.disabled && (
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  )}
+                  {field.disabled && (
+                    <span className="text-gray-400 dark:text-gray-500 ml-1">
+                      (Disabled)
+                    </span>
+                  )}
+                </Label>
+
+                <div
+                  className={`
+                    absolute ${lang == "en" ? "right-4" : "left-4"} top-1/2 -translate-y-1/2 transition-all duration-300 
+                    ${
+                      field.disabled
+                        ? "text-gray-400 dark:text-gray-500"
+                        : hasValue && !showError
+                          ? "text-emerald-500 dark:text-emerald-400"
+                          : showError
+                            ? "text-red-500 dark:text-red-400"
+                            : "text-gray-400 dark:text-gray-500"
+                    }
+                  `}
+                >
+                  {field.disabled ? (
+                    <Icon icon="heroicons:lock-closed" className="h-5 w-5" />
+                  ) : hasValue && !showError ? (
+                    <Icon icon="heroicons:check-circle" className="h-5 w-5" />
+                  ) : showError ? (
+                    <Icon
+                      icon="heroicons:exclamation-circle"
+                      className="h-5 w-5"
+                    />
+                  ) : null}
+                </div>
+              </div>
+
+              {showError && (
+                <p className="mt-2 text-red-500 dark:text-red-400 text-sm flex items-center gap-1.5">
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="h-4 w-4"
+                  />
+                  {t(error)}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "date":
+        return (
+          <div className="w-full group">
+            <div className="relative">
+              <div className="relative">
+                <Flatpickr
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name] || ""}
+                  onChange={([date]) => {
+                    if (date) {
+                      const formattedDate = date.toISOString();
+                      handleInputChange({
+                        target: { name: field.name, value: formattedDate },
+                      } as any);
+                    }
+                  }}
+                  onOpen={() => !field.disabled && setIsFocused(true)}
+                  onClose={() => {
+                    setIsFocused(false);
+                    handleBlur(field.name);
+                  }}
+                  options={{
+                    dateFormat: "Y-m-d",
+                    disableMobile: true,
+                    allowInput: true,
+                  }}
+                  disabled={field.disabled || isLoading}
+                  className={`
+                    peer w-full h-14 px-4 pt-6 pb-2 rounded-xl border-2 transition-all duration-300
+                    ${
+                      showError
+                        ? "border-red-400 dark:border-red-500 focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-100 dark:focus:ring-red-900/30 bg-red-50/30 dark:bg-red-900/20"
+                        : field.disabled
+                          ? "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                          : "border-gray-300 dark:border-gray-600 focus:border-[#25235F] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#25235F]/20 dark:focus:ring-blue-900/30 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
+                    }
+                    ${disabledStyles}
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500 
+                    text-gray-700 dark:text-gray-200 font-medium
+                  `}
+                  placeholder={isFloating ? field.placeholder : ""}
                 />
 
                 <Label

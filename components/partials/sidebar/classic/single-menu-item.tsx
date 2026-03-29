@@ -69,7 +69,7 @@ const SingleMenuItem = ({
                   "absolute inset-0 bg-[#eef1f9]",
                   isRTL
                     ? "rounded-r-3xl rounded-l-none"
-                    : "rounded-r-3xl rounded-l-none",
+                    : "rounded-l-3xl rounded-r-none",
                 )}
               ></div>
             )}
@@ -81,7 +81,7 @@ const SingleMenuItem = ({
                   "absolute inset-0 bg-transparent group-hover:bg-[#eef1f9] transition-all duration-300",
                   isRTL
                     ? "rounded-r-3xl rounded-l-none"
-                    : "rounded-r-3xl rounded-l-none",
+                    : "rounded-l-3xl rounded-r-none",
                 )}
               ></div>
             )}

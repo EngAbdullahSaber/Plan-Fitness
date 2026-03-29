@@ -25,6 +25,7 @@ import {
 } from "@/app/services/apis/ApiMethod";
 import MemberDetailsModal from "./MemberDetailsModal";
 import UserDetailsModal from "./MemberDetailsModal";
+import UpdateUserMeasurementsModal from "./UpdateUserMeasurementsModal";
 
 interface MembersTableProps {
   t: any;
@@ -77,6 +78,7 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
   const [isLoadingUserDetails, setIsLoadingUserDetails] =
     useState<boolean>(false);
   const [modalLoading, setModalLoading] = useState<boolean>(false);
@@ -387,6 +389,18 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
             ) : (
               <Icon icon="carbon:view" className="h-4 w-4" />
             )}
+          </Button>
+
+          <Button
+            size="icon"
+            onClick={() => {
+              setSelectedUser(row.original);
+              setIsUpdateModalOpen(true);
+            }}
+            variant="outline"
+            className="h-10 w-10 border-[#ED4135]/20 dark:border-gray-600 hover:border-[#ED4135] dark:hover:border-white hover:bg-[#ED4135] dark:hover:bg-white hover:text-white dark:hover:text-gray-900 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            <Icon icon="heroicons:clipboard-document-list" className="h-4 w-4" />
           </Button>
 
           <DeleteConfirmationDialog
@@ -725,6 +739,17 @@ const MembersTable = forwardRef(({ t }: MembersTableProps, ref) => {
             }}
             t={t}
             isLoading={modalLoading}
+          />
+        )}
+        {selectedUser && (
+          <UpdateUserMeasurementsModal
+            isOpen={isUpdateModalOpen}
+            onClose={() => {
+              setIsUpdateModalOpen(false);
+              setSelectedUser(null);
+            }}
+            user={selectedUser}
+            t={t}
           />
         )}
       </div>

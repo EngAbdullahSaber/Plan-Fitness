@@ -22,7 +22,9 @@ import {
   DeleteMethod,
   GetPanigationMethodWithFilter,
   GetSpecifiedMethod,
+  UpdateMethod,
 } from "@/app/services/apis/ApiMethod";
+import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import CoachTraineeUpdateDialog from "../shared/CoachTraineeUpdateDialog";
 import MemberDetailsModal from "./MemberDetailsModal";
@@ -60,6 +62,8 @@ interface Coach {
   waist: string | null;
   lastUpdateData: string | null;
   role: "ADMIN" | "COACH" | "CLIENT";
+  isActive: boolean;
+  startDate: string | null;
 }
 
 interface CoachApiResponse {
@@ -283,6 +287,27 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
     }
   };
 
+  const handleToggleStatus = async (coachId: number, currentStatus: boolean) => {
+    try {
+      const response = await UpdateMethod(
+        "user/coach",
+        { isActive: !currentStatus },
+        coachId,
+        lang,
+      );
+
+      if (response && (response.code === 200 || response.status === 200)) {
+        toast.success(t("status_updated_successfully") || "Status updated successfully");
+        queryClient.invalidateQueries({ queryKey: ["coaches"] });
+      } else {
+        toast.error(t("failed_to_update_status") || "Failed to update status");
+      }
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast.error(error.response?.data?.message || t("failed_to_update_status") || "Failed to update status");
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     refetch,
   }));
@@ -370,12 +395,70 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
         />
       ),
       cell: ({ row }) => (
-        <div className="flex flex-row gap-3 items-center justify-center">
+        <div className="flex flex-row gap-2 items-center justify-center w-full">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => handleToggleStatus(row.original.id, row.original.isActive)}
+                  className={`
+                    h-10 w-10 
+                    transition-all duration-300 
+                    shadow-md hover:shadow-lg
+                    ${row.original.isActive 
+                      ? "border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white dark:border-emerald-400/30 dark:text-emerald-400 dark:hover:bg-emerald-600" 
+                      : "border-gray-500/20 text-gray-400 hover:bg-gray-500 hover:text-white dark:border-gray-700/30 dark:text-gray-500 dark:hover:bg-gray-600"
+                    }
+                  `}
+                >
+                  <Icon 
+                    icon={row.original.isActive ? "heroicons:check-badge" : "heroicons:no-symbol"} 
+                    className="h-5 w-5 font-bold" 
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{row.original.isActive ? t("DEACTIVATE") || "Deactivate" : t("ACTIVATE") || "Activate"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  <CoachTraineeUpdateDialog
+                    coachId={row.original.id}
+                    coachName={row.original.name}
+                    currentTrainees={
+                      row.original.numberOFCoachTrainee
+                        ? parseInt(row.original.numberOFCoachTrainee)
+                        : 0
+                    }
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({ queryKey: ["coaches"] });
+                    }}
+                    size="icon"
+                    variant="outline"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("update_trainees") || "Update Trainees"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           <Link href={`/${lang}/coach/${row.original.id}/edit`}>
-            <Button
-              size="icon"
-              variant="outline"
-              className="
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="
                 h-10 w-10 
                 border-[#25235F]/20 dark:border-blue-400/30 
                 hover:border-[#25235F] dark:hover:border-blue-500 
@@ -386,24 +469,41 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
                 bg-white dark:bg-gray-800
                 text-gray-700 dark:text-gray-300
               "
-            >
-              <Icon icon="heroicons:pencil" className="h-3.5 w-3.5" />
-            </Button>
+                  >
+                    <Icon icon="heroicons:pencil" className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("edit") || "Edit"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </Link>
-          <DeleteConfirmationDialog
-            onConfirm={() =>
-              handleDeleteCoach(row.original.id, row.original.name)
-            }
-            title={t("delete_coach") || "Delete Coach"}
-            description={
-              t("delete_coach_confirmation") ||
-              "Are you sure you want to delete this coach? This action cannot be undone."
-            }
-            confirmText={t("delete") || "Delete"}
-            itemName={t("coach") || "coach"}
-            destructive={true}
-            icon="fluent:delete-48-filled"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  <DeleteConfirmationDialog
+                    onConfirm={() =>
+                      handleDeleteCoach(row.original.id, row.original.name)
+                    }
+                    title={t("delete_coach") || "Delete Coach"}
+                    description={
+                      t("delete_coach_confirmation") ||
+                      "Are you sure you want to delete this coach? This action cannot be undone."
+                    }
+                    confirmText={t("delete") || "Delete"}
+                    itemName={t("coach") || "coach"}
+                    destructive={true}
+                    icon="fluent:delete-48-filled"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("delete") || "Delete"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ),
     },
@@ -556,21 +656,7 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
       cell: ({ row }) => {
         const coach = row.original;
         return (
-          <div className="flex items-center justify-center gap-2">
-            <CoachTraineeUpdateDialog
-              coachId={coach.id}
-              coachName={coach.name}
-              currentTrainees={
-                coach.numberOFCoachTrainee
-                  ? parseInt(coach.numberOFCoachTrainee)
-                  : 0
-              }
-              onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: ["coaches"] });
-              }}
-              size="sm"
-              variant="ghost"
-            />
+          <div className="flex items-center justify-center">
             {coach.numberOFCoachTrainee ? (
               <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold px-3 py-1 rounded-full">
                 {coach.numberOFCoachTrainee}
@@ -583,6 +669,58 @@ const CoachMembersTable = forwardRef(({ t }: CoachMembersTableProps, ref) => {
           </div>
         );
       },
+    },
+    {
+      accessorKey: "startDate",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("START_DATE") || "Start Date"}
+          className="text-[#25235F] dark:text-white font-bold"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <Icon
+            icon="heroicons:calendar-days"
+            className="h-4 w-4 text-blue-500"
+          />
+          {formatDate(row.original.startDate)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "isActive",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("STATUS") || "Status"}
+          className="text-[#25235F] dark:text-white font-bold"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Badge
+            className={`
+              px-3 py-1 rounded-full text-xs font-bold border-0
+              ${
+                row.original.isActive
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              }
+            `}
+          >
+            <div className="flex items-center gap-1.5">
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${row.original.isActive ? "bg-emerald-500 animate-pulse" : "bg-gray-400"}`}
+              />
+              {row.original.isActive
+                ? t("ACTIVE") || "Active"
+                : t("INACTIVE") || "Inactive"}
+            </div>
+          </Badge>
+        </div>
+      ),
     },
     {
       accessorKey: "createdAt",

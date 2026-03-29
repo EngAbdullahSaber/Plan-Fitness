@@ -110,6 +110,7 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
         numberOFCoachTrainee: data.numberOFCoachTrainee
           ? parseInt(data.numberOFCoachTrainee)
           : undefined,
+        startDate: data.startDate,
       };
 
       // Using CreateMethod to register coach
@@ -150,6 +151,7 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
     password: "",
     image: "",
     numberOFCoachTrainee: "",
+    startDate: "",
   };
 
   // ✅ Password toggle function
@@ -187,6 +189,14 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
           description:
             t("COACH_TRAINEES_LIMIT_DESCRIPTION") ||
             "The maximum number of trainees this coach can handle",
+        },
+        {
+          name: "startDate",
+          label: t("START_DATE"),
+          type: "date",
+          placeholder: t("ENTER_START_DATE"),
+          required: true,
+          description: t("START_DATE_DESCRIPTION"),
         },
       ],
 
@@ -360,7 +370,6 @@ const CoachCreateForm = ({ onClose }: { onClose?: () => void }) => {
         submitButtonProps={{
           disabled: isSubmitting,
         }}
-        imagePreview={imagePreview}
       />
     </div>
   );

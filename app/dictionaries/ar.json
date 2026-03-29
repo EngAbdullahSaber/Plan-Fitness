@@ -177,7 +177,12 @@
 
   "MALE": "ذكر",
   "FEMALE": "أنثى",
-
+  "active_status": "حالة النشاط",
+  "status_updated_successfully": "تم تحديث الحالة بنجاح",
+  "failed_to_update_status": "فشل في تحديث الحالة",
+  "ACTIVATE": "تفعيل",
+  "DEACTIVATE": "إلغاء التفعيل",
+  "START_DATE": "تاريخ البدء",
   "search_coaches": "البحث عن المدربين بالاسم...",
   "loading_coaches": "جاري تحميل المدربين...",
   "error_loading_coaches": "خطأ في تحميل المدربين",
@@ -451,6 +456,20 @@
   "Weight Loss": "فقدان الوزن",
   "Get Fit": "اللياقة البدنية",
   "Muscle Toning": "تشكيل العضلات",
+  "increase_fitness": "زيادة اللياقة",
+  "lose_weight": "خسارة الوزن",
+  "shredding": "تنشيف",
+  "general_fitness": "لياقة عامة",
+  "gain_weight": "زيادة الوزن",
+  "update_user_measurements": "تحديث قياسات المستخدم",
+  "updating_measurements_for": "تحديث قياسات لـ",
+  "measurements_updated_successfully": "تم تحديث القياسات بنجاح",
+  "failed_to_update_measurements": "فشل تحديث القياسات",
+  "select_goal": "اختر الهدف",
+  "saving": "جاري الحفظ...",
+  "START_DATE": "تاريخ البدء",
+  "ENTER_START_DATE": "اختر تاريخ البدء",
+  "START_DATE_DESCRIPTION": "التاريخ الذي يبدأ فيه المدرب عمله",
   "EXERCISE_NOT_FOUND": "التمرين غير موجود",
   "FAILED_TO_LOAD_EXERCISE_DATA": "فشل تحميل بيانات التمرين",
   "LOADING_EXERCISE_DATA": "جاري تحميل بيانات التمرين...",
@@ -713,10 +732,12 @@
 
   "Edit Subscription Dialog Title": "تعديل الاشتراك",
   "Update subscription details and features": "تحديث بيانات ومميزات الاشتراك",
+  "update_measurements": "تحديث القياسات",
 
   "Name (Arabic)": "الاسم بالعربية",
   "Name (English)": "الاسم بالإنجليزية",
   "Subscription Name": "اسم الاشتراك",
+  "COACH_TRAINEES_LIMIT": "عدد المتدربين",
 
   "Select type": "اختر النوع",
 
