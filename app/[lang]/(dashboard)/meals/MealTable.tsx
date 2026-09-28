@@ -36,9 +36,14 @@ import { EnhancedReadMoreItems } from "../shared/EnhancedReadMoreItems";
 import { baseUrl } from "@/app/services/app.config";
 
 // Interfaces based on your API response
+interface LocalizedText {
+  english: string;
+  arabic: string;
+}
+
 interface MealItem {
   id: number;
-  description: string;
+  description: LocalizedText;
   mealId?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -46,6 +51,7 @@ interface MealItem {
 
 interface Meal {
   id: number;
+  name?: LocalizedText | string;
   image: string;
   type: string;
   totalCalory: number;
@@ -549,6 +555,33 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
       },
     },
     {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t("Meal Name")}
+          className="text-[#25235F] dark:text-blue-300 font-bold"
+        />
+      ),
+      cell: ({ row }) => {
+        const name = row.original.name;
+        const displayName =
+          typeof name === "object"
+            ? lang == "en"
+              ? name?.english
+              : name?.arabic
+            : name;
+
+        return (
+          <div className="w-[180px] text-start">
+            <span className="line-clamp-2 font-semibold text-gray-800 dark:text-gray-200">
+              {displayName || "-"}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "type",
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -614,32 +647,58 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
 
         if (mealItems.length === 0) {
           return (
-            <EnhancedReadMoreItems
-              description={t("No meal items available")}
-              icon="heroicons:clipboard-document-list"
-              maxLength={50}
-              maxWidth="250px"
-              variant="compact"
-            />
+            <span className="text-sm text-gray-400 dark:text-gray-500">
+              {t("No meal items available")}
+            </span>
           );
         }
 
+        const getText = (item: MealItem) =>
+          lang == "en" ? item.description?.english : item.description?.arabic;
+        const visibleItems = mealItems.slice(0, 2);
+        const hiddenCount = mealItems.length - visibleItems.length;
+
         return (
-          <div className="space-y-1 max-w-[250px]">
-            {mealItems.map((item, index) => (
-              <div key={item.id || index} className="flex items-start gap-2">
-                <Icon
-                  icon="heroicons:check-badge"
-                  className="h-3 w-3 text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {lang == "en"
-                    ? item.description.english
-                    : item.description.arabic}
-                </span>
-              </div>
-            ))}
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <ul className="w-[280px] space-y-1.5 text-start cursor-default">
+                  {visibleItems.map((item, index) => (
+                    <li
+                      key={item.id || index}
+                      className="flex items-center gap-2"
+                    >
+                      <Icon
+                        icon="heroicons:check-circle"
+                        className="h-3.5 w-3.5 text-green-500 dark:text-green-400 flex-shrink-0"
+                      />
+                      <span className="truncate text-sm text-gray-700 dark:text-gray-300">
+                        {getText(item)}
+                      </span>
+                    </li>
+                  ))}
+                  {hiddenCount > 0 && (
+                    <li className="ps-5 text-xs font-medium text-[#25235F] dark:text-blue-400">
+                      +{hiddenCount} {t("more")}
+                    </li>
+                  )}
+                </ul>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="max-w-sm bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-100 border border-gray-700 dark:border-gray-600"
+              >
+                <ul className="space-y-1.5 text-sm">
+                  {mealItems.map((item, index) => (
+                    <li key={item.id || index} className="flex gap-2">
+                      <span className="text-green-400">•</span>
+                      <span>{getText(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       },
     },
@@ -653,7 +712,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         />
       ),
       cell: ({ row }) => (
-        <div className="flex items-center justify-start gap-2">
+        <div className="flex items-center justify-center gap-2 whitespace-nowrap">
           <Icon
             icon="heroicons:fire"
             className="h-4 w-4 text-red-500 dark:text-red-400"
@@ -677,7 +736,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex flex-col gap-1 text-xs">
+              <div className="mx-auto flex w-[110px] flex-col gap-1 text-xs whitespace-nowrap">
                 <div className="flex justify-between gap-2">
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
                     Protein:
@@ -791,7 +850,7 @@ const MealTable = forwardRef(({ t }: { t: any }, ref) => {
             </div>
             {isRequest && (
               <div className="relative block z-10 text-sm tracking-wide drop-shadow-sm">
-                by {row.original.requestedBy.name}
+                by {(row.original as any).requestedBy?.name}
               </div>
             )}
           </>
