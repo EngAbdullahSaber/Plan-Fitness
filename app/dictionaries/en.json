@@ -346,6 +346,11 @@
   "ERROR": "Error",
   "SUCCESS": "Success",
 
+  "MEAL_NAME_ENGLISH": "Meal Name (English)",
+  "MEAL_NAME_ARABIC": "Meal Name (Arabic)",
+  "ENTER_MEAL_NAME_ENGLISH": "Enter meal name in English",
+  "ENTER_MEAL_NAME_ARABIC": "أدخل اسم الوجبة بالعربية",
+  "MEAL_NAME_REQUIRED": "Meal name is required",
   "MEAL_TYPE": "Meal Type",
   "SELECT_MEAL_TYPE": "Select meal type...",
   "TOTAL_CALORIES": "Total Calories",

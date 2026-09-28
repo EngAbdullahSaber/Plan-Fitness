@@ -18,6 +18,10 @@ interface MealItem {
 }
 
 interface MealFormData {
+  name: {
+    english: string;
+    arabic: string;
+  };
   image: string;
   type: string;
   totalCalory: number;
@@ -130,7 +134,10 @@ const MealsCreateForm = () => {
 
       // Create meal data object
       const mealData = {
-        name: data.name,
+        name: {
+          english: data.nameEn.trim(),
+          arabic: data.nameAr.trim(),
+        },
         type: data.type,
         totalCalory: Number(data.totalCalory),
         proteins: Number(data.proteins),
@@ -184,11 +191,32 @@ const MealsCreateForm = () => {
   const fields = [
     [
       {
-        name: "name",
-        label: t("MEAL_TITLE"),
+        name: "nameEn",
+        label: t("MEAL_NAME_ENGLISH"),
         type: "text",
-        placeholder: t("ENTER_MEAL_TITLE"),
+        placeholder: t("ENTER_MEAL_NAME_ENGLISH"),
         required: true,
+        validation: {
+          englishOnly: true,
+          custom: (value) => {
+            if (!value || value.trim() === "") return t("MEAL_NAME_REQUIRED");
+            return null;
+          },
+        },
+      },
+      {
+        name: "nameAr",
+        label: t("MEAL_NAME_ARABIC"),
+        type: "text",
+        placeholder: t("ENTER_MEAL_NAME_ARABIC"),
+        required: true,
+        validation: {
+          arabicOnly: true,
+          custom: (value) => {
+            if (!value || value.trim() === "") return t("MEAL_NAME_REQUIRED");
+            return null;
+          },
+        },
       },
       {
         name: "type",
@@ -347,7 +375,8 @@ const MealsCreateForm = () => {
 
   const initialData = {
     type: "",
-    name: "",
+    nameEn: "",
+    nameAr: "",
     totalCalory: "",
     proteins: "",
     fat: "",

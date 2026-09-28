@@ -22,6 +22,7 @@ interface MealItem {
 
 interface MealData {
   id?: number;
+  name?: { english: string; arabic: string } | string;
   image: string;
   type: string;
   totalCalory: number;
@@ -33,6 +34,7 @@ interface MealData {
   createdAt?: string;
   updatedAt?: string;
   mealItem?: MealItem[]; // Note: singular 'mealItem' from API
+  mealItems?: MealItem[];
 }
 
 interface ApiResponse {
@@ -56,8 +58,12 @@ const MealUpdateForm = ({
   const [isFetching, setIsFetching] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Relative image path as stored by the API (e.g. "uploads/images/...")
+  const [existingImage, setExistingImage] = useState<string>("");
   const [mealItems, setMealItems] = useState<MealItem[]>([]);
   const [formInitialData, setFormInitialData] = useState({
+    nameEn: "",
+    nameAr: "",
     type: "",
     totalCalory: "",
     proteins: "",
@@ -122,9 +128,16 @@ const MealUpdateForm = ({
       console.log("Initializing form with data:", mealData);
 
       // Set meal items - FIXED: use mealItem (singular) from API response
-      if (mealData.mealItem && Array.isArray(mealData.mealItem)) {
-        console.log("Setting meal items from mealItem:", mealData.mealItem);
-        setMealItems(mealData.mealItem);
+      const items = mealData.mealItem ?? mealData.mealItems;
+      if (Array.isArray(items) && items.length > 0) {
+        setMealItems(
+          items.map((item) => ({
+            description: {
+              english: item.description?.english || "",
+              arabic: item.description?.arabic || "",
+            },
+          })),
+        );
       } else {
         console.log("No meal items found, setting empty array");
         setMealItems([]);
@@ -132,6 +145,7 @@ const MealUpdateForm = ({
 
       // Set image preview
       if (mealData.image) {
+        setExistingImage(mealData.image);
         // Check if the image URL already has baseUrl to avoid duplication
         const fullImageUrl = mealData.image.startsWith("http")
           ? mealData.image
@@ -141,8 +155,10 @@ const MealUpdateForm = ({
       }
 
       // Set form initial data
+      const name = mealData.name;
       const transformedData = {
-        name: mealData.name || "",
+        nameEn: typeof name === "object" ? name?.english || "" : name || "",
+        nameAr: typeof name === "object" ? name?.arabic || "" : "",
         type: mealData.type || "",
         totalCalory: mealData.totalCalory?.toString() || "",
         proteins: mealData.proteins?.toString() || "",
@@ -261,7 +277,7 @@ const MealUpdateForm = ({
         return;
       }
 
-      let imageUrl = imagePreview || "";
+      let imageUrl = existingImage;
 
       // Upload new image if selected
       if (selectedImage) {
@@ -275,16 +291,22 @@ const MealUpdateForm = ({
 
       // Create meal data object - FIXED: use mealItem (singular) for API
       const mealData = {
-        name: data.name,
+        name: {
+          english: data.nameEn.trim(),
+          arabic: data.nameAr.trim(),
+        },
         type: data.type,
         totalCalory: Number(data.totalCalory),
         proteins: Number(data.proteins),
         fat: Number(data.fat),
         carp: Number(data.carp),
-        mealItems: validMealItems, // Changed from mealItems to mealItem
-        ...(imageUrl &&
-          typeof imageUrl === "string" &&
-          imageUrl.trim() !== "" && { image: imageUrl }),
+        mealItems: validMealItems.map((item) => ({
+          description: {
+            english: item.description.english.trim(),
+            arabic: item.description.arabic.trim(),
+          },
+        })),
+        ...(imageUrl && imageUrl.trim() !== "" && { image: imageUrl }),
       };
 
       // Call the API to update Meal
@@ -358,11 +380,32 @@ const MealUpdateForm = ({
   const fields = [
     [
       {
-        name: "name",
-        label: t("MEAL_TITLE"),
+        name: "nameEn",
+        label: t("MEAL_NAME_ENGLISH"),
         type: "text",
-        placeholder: t("ENTER_MEAL_TITLE"),
+        placeholder: t("ENTER_MEAL_NAME_ENGLISH"),
         required: true,
+        validation: {
+          englishOnly: true,
+          custom: (value) => {
+            if (!value || value.trim() === "") return t("MEAL_NAME_REQUIRED");
+            return null;
+          },
+        },
+      },
+      {
+        name: "nameAr",
+        label: t("MEAL_NAME_ARABIC"),
+        type: "text",
+        placeholder: t("ENTER_MEAL_NAME_ARABIC"),
+        required: true,
+        validation: {
+          arabicOnly: true,
+          custom: (value) => {
+            if (!value || value.trim() === "") return t("MEAL_NAME_REQUIRED");
+            return null;
+          },
+        },
       },
       {
         name: "type",

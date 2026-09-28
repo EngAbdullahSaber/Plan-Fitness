@@ -373,6 +373,11 @@
   "ADDITIONAL_INFORMATION_UPDATE_DESCRIPTION": "تحديث الكربوهيدرات وصورة الوجبة",
   "MEAL_ITEMS_UPDATE_DESCRIPTION": "تحديث الأوصاف لكل مكون من مكونات الوجبة",
 
+  "MEAL_NAME_ENGLISH": "اسم الوجبة (الإنجليزية)",
+  "MEAL_NAME_ARABIC": "اسم الوجبة (العربية)",
+  "ENTER_MEAL_NAME_ENGLISH": "Enter meal name in English",
+  "ENTER_MEAL_NAME_ARABIC": "أدخل اسم الوجبة بالعربية",
+  "MEAL_NAME_REQUIRED": "اسم الوجبة مطلوب",
   "MEAL_TYPE": "نوع الوجبة",
   "SELECT_MEAL_TYPE": "اختر نوع الوجبة...",
   "TOTAL_CALORIES": "إجمالي السعرات الحرارية",
