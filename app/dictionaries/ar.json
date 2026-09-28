@@ -2709,5 +2709,22 @@
   "Please enter a message": "يرجى إدخال رسالة",
   "Ticket closed successfully": "تم إغلاق التذكرة بنجاح",
   "Failed to close ticket": "فشل إغلاق التذكرة",
-  "Support": "الدعم"
+  "Support": "الدعم",
+  "MEDIA": "الوسائط",
+  "MEDIA_UPDATE_DESCRIPTION": "تحديث رابط فيديو التمرين والصورة",
+  "EXERCISE_TYPE_SETTINGS": "السعرات ونوع التمرين",
+  "EXERCISE_TYPE_UPDATE_DESCRIPTION": "تحديث السعرات المحروقة وتحديد ما إذا كان التمرين بالمدة أو بالعدد",
+  "DISABLED": "معطل",
+  "UNSAVED_CHANGES": "تغييرات غير محفوظة",
+  "YOU_HAVE_UNSAVED_CHANGES": "لديك تغييرات غير محفوظة",
+  "PLEASE_FIX_ERRORS": "يرجى تصحيح الأخطاء التالية:",
+  "SUPPORTS": "الصيغ المدعومة:",
+  "MAX_SIZE": "الحد الأقصى",
+  "MIN_CHARACTERS": "يجب ألا يقل عن {n} أحرف",
+  "MAX_CHARACTERS": "يجب ألا يزيد عن {n} حرفًا",
+  "ENTER_VALID_NUMBER": "يرجى إدخال رقم صحيح",
+  "VALUE_MIN": "يجب ألا تقل القيمة عن {n}",
+  "VALUE_MAX": "يجب ألا تزيد القيمة عن {n}",
+  "ENTER_VALID_EMAIL": "يرجى إدخال بريد إلكتروني صحيح",
+  "INVALID_FORMAT": "صيغة غير صحيحة"
 }

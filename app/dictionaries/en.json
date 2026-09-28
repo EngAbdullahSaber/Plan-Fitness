@@ -2902,5 +2902,22 @@
   "Please enter a message": "Please enter a message",
   "Ticket closed successfully": "Ticket closed successfully",
   "Failed to close ticket": "Failed to close ticket",
-  "Support": "Support"
+  "Support": "Support",
+  "MEDIA": "Media",
+  "MEDIA_UPDATE_DESCRIPTION": "Update the exercise video URL and image",
+  "EXERCISE_TYPE_SETTINGS": "Calories & Exercise Type",
+  "EXERCISE_TYPE_UPDATE_DESCRIPTION": "Update calories burned and whether the exercise is duration or count based",
+  "DISABLED": "Disabled",
+  "UNSAVED_CHANGES": "Unsaved Changes",
+  "YOU_HAVE_UNSAVED_CHANGES": "You have unsaved changes",
+  "PLEASE_FIX_ERRORS": "Please fix the following errors:",
+  "SUPPORTS": "Supports:",
+  "MAX_SIZE": "Max",
+  "MIN_CHARACTERS": "Must be at least {n} characters",
+  "MAX_CHARACTERS": "Must be at most {n} characters",
+  "ENTER_VALID_NUMBER": "Please enter a valid number",
+  "VALUE_MIN": "Value must be at least {n}",
+  "VALUE_MAX": "Value must be at most {n}",
+  "ENTER_VALID_EMAIL": "Please enter a valid email address",
+  "INVALID_FORMAT": "Invalid format"
 }

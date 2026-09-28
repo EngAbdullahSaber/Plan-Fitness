@@ -27,6 +27,33 @@ import {
   GetPanigationMethodWithFilter,
 } from "@/app/services/apis/ApiMethod";
 import { DescriptionCell } from "../shared/EnhancedReadMoreCell";
+import { resolveImageUrl } from "@/lib/resolveImageUrl";
+
+const ExerciseThumbnail = ({ url, alt }: { url?: string; alt: string }) => {
+  const [hasError, setHasError] = useState(false);
+  const src = resolveImageUrl(url);
+
+  if (!src || hasError) {
+    return (
+      <div className="w-12 h-12 flex-shrink-0 rounded-lg bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+        <Icon
+          icon="heroicons:academic-cap"
+          className="h-5 w-5 text-[#25235F] dark:text-gray-300"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={() => setHasError(true)}
+      className="w-12 h-12 flex-shrink-0 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+    />
+  );
+};
 
 interface ExercisesTableProps {
   t: any;
@@ -383,12 +410,14 @@ const ExercisesTable = forwardRef(({ t }: ExercisesTableProps, ref) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#25235F]/10 to-[#ED4135]/10 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
-                    <Icon
-                      icon="heroicons:academic-cap"
-                      className="h-5 w-5 text-[#25235F] dark:text-gray-300"
-                    />
-                  </div>
+                  <ExerciseThumbnail
+                    url={row.original.url}
+                    alt={
+                      lang == "en"
+                        ? row.original.title.english
+                        : row.original.title.arabic
+                    }
+                  />
                   <div className="flex flex-col">
                     <span className="max-w-[200px] truncate font-semibold text-gray-800 dark:text-gray-200 hover:text-[#25235F] dark:hover:text-white transition-colors duration-200">
                       {lang == "en"

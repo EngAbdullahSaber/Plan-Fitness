@@ -238,7 +238,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
     if (field.disabled) return null;
 
     if (field.required && (!value || value.toString().trim() === "")) {
-      return `${field.label} is required`;
+      return `${t(field.label)} ${t("isRequired")}`;
     }
 
     if (!value && !field.required) return null;
@@ -260,32 +260,32 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
     if (field.type === "email" && value) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
-        return "Please enter a valid email address";
+        return t("ENTER_VALID_EMAIL");
       }
     }
 
     if (field.type === "number" && value) {
       const numValue = Number(value);
       if (isNaN(numValue)) {
-        return "Please enter a valid number";
+        return t("ENTER_VALID_NUMBER");
       }
       if (
         field.validation?.min !== undefined &&
         numValue < field.validation.min
       ) {
-        return `Value must be at least ${field.validation.min}`;
+        return t("VALUE_MIN").replace("{n}", String(field.validation.min));
       }
       if (
         field.validation?.max !== undefined &&
         numValue > field.validation.max
       ) {
-        return `Value must be at most ${field.validation.max}`;
+        return t("VALUE_MAX").replace("{n}", String(field.validation.max));
       }
     }
 
     if (field.validation?.pattern && value) {
       if (!field.validation.pattern.test(value)) {
-        return field.validation.patternMessage || "Invalid format";
+        return field.validation.patternMessage || t("INVALID_FORMAT");
       }
     }
 
@@ -293,14 +293,20 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
       field.validation?.minLength &&
       stringValue.length < field.validation.minLength
     ) {
-      return `Must be at least ${field.validation.minLength} characters`;
+      return t("MIN_CHARACTERS").replace(
+        "{n}",
+        String(field.validation.minLength),
+      );
     }
 
     if (
       field.validation?.maxLength &&
       stringValue.length > field.validation.maxLength
     ) {
-      return `Must be at most ${field.validation.maxLength} characters`;
+      return t("MAX_CHARACTERS").replace(
+        "{n}",
+        String(field.validation.maxLength),
+      );
     }
 
     if (field.validation?.custom) {
@@ -920,7 +926,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   )}
                   {field.disabled && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
-                      (Disabled)
+                      ({t("DISABLED")})
                     </span>
                   )}
                 </Label>
@@ -1031,7 +1037,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   )}
                   {field.disabled && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
-                      (Disabled)
+                      ({t("DISABLED")})
                     </span>
                   )}
                 </Label>
@@ -1094,7 +1100,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                 )}
                 {field.disabled && (
                   <span className="text-gray-400 dark:text-gray-500 text-xs ml-1">
-                    (Disabled)
+                    ({t("DISABLED")})
                   </span>
                 )}
               </Label>
@@ -1186,7 +1192,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                 <Label
                   htmlFor={field.name}
                   className={`
-                    absolute left-4 transition-all duration-200 pointer-events-none 
+                    absolute ${lang == "en" ? "left-4" : "right-4"} transition-all duration-200 pointer-events-none 
                     ${
                       field.disabled
                         ? "text-gray-500 dark:text-gray-400"
@@ -1205,14 +1211,14 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                   )}
                   {field.disabled && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
-                      (Disabled)
+                      ({t("DISABLED")})
                     </span>
                   )}
                 </Label>
 
                 <div
                   className={`
-                    absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 
+                    absolute ${lang == "en" ? "right-4" : "left-4"} top-1/2 -translate-y-1/2 transition-all duration-300 
                     ${
                       field.disabled
                         ? "text-gray-400 dark:text-gray-500"
@@ -1270,7 +1276,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
               {t(field.label)} {field.required && !field.disabled && "*"}
               {field.disabled && (
                 <span className="text-gray-400 dark:text-gray-500 text-sm ml-1">
-                  (Disabled)
+                  ({t("DISABLED")})
                 </span>
               )}
             </Label>
@@ -1654,7 +1660,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {field.validation?.allowedTypes ? (
                         <>
-                          {t("Supports:")}{" "}
+                          {t("SUPPORTS")}{" "}
                           {field.validation.allowedTypes
                             .map((type) => {
                               const ext = type.split("/")[1]?.toUpperCase();
@@ -1669,13 +1675,11 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                                 self.indexOf(value) === index,
                             ) // Remove duplicates
                             .join(", ")}{" "}
-                          {t("(Max")}{" "}
+                          ({t("MAX_SIZE")}{" "}
                           {field.validation.maxFileSize
-                            ? `${
-                                field.validation.maxFileSize / (1024 * 1024)
-                              }MB`
-                            : "10MB"}
-                          {t(")")}
+                            ? field.validation.maxFileSize / (1024 * 1024)
+                            : 10}{" "}
+                          {t("MB")})
                         </>
                       ) : (
                         // Fallback to default if no allowedTypes specified
@@ -1862,7 +1866,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
               {t(field.label)} {field.required && !field.disabled && "*"}
               {field.disabled && (
                 <span className="text-gray-400 dark:text-gray-500 text-sm ml-1">
-                  (Disabled)
+                  ({t("DISABLED")})
                 </span>
               )}
             </Label>
@@ -1911,7 +1915,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                 {hasChanges && (
                   <Badge className="bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700">
                     <Icon icon="heroicons:pencil" className="h-3 w-3 mr-1" />
-                    Unsaved Changes
+                    {t("UNSAVED_CHANGES")}
                   </Badge>
                 )}
                 <div className="w-8 h-8 rounded-full bg-[#ED4135]/20 flex items-center justify-center">
@@ -1932,7 +1936,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                     icon="heroicons:exclamation-triangle"
                     className="h-5 w-5 mr-2"
                   />
-                  Please fix the following errors:
+                  {t("PLEASE_FIX_ERRORS")}
                 </h3>
                 <ul className="list-disc list-inside text-red-700 dark:text-red-300 space-y-1">
                   {errors.map((error, index) => (
@@ -2011,7 +2015,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                         icon="heroicons:information-circle"
                         className="h-4 w-4 text-amber-500 dark:text-amber-400"
                       />
-                      <span>You have unsaved changes</span>
+                      <span>{t("YOU_HAVE_UNSAVED_CHANGES")}</span>
                     </>
                   )}
                 </div>
@@ -2035,7 +2039,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                         icon="heroicons:arrow-path"
                         className="h-4 w-4 mr-2"
                       />
-                      Reset
+                      {t("reset")}
                     </Button>
                   )}
                   {onCancel && (
@@ -2077,7 +2081,7 @@ const GenericUpdateForm: React.FC<GenericUpdateFormProps> = ({
                           icon="heroicons:arrow-path"
                           className="h-5 w-5 mr-2 animate-spin"
                         />
-                        Updating...
+                        {t("UPDATING")}
                       </>
                     ) : (
                       <>

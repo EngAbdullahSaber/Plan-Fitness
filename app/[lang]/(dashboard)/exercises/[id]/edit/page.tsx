@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { useTranslate } from "@/config/useTranslation";
 import GenericUpdateForm from "../../../shared/GenericUpdateForm";
 import { usePaginatedSelect } from "@/hooks/usePaginatedSelect";
+import { resolveImageUrl } from "@/lib/resolveImageUrl";
 
 interface Exercise {
   id: string;
@@ -88,9 +89,10 @@ const ExerciseUpdateForm = () => {
         setExerciseData(exercise);
 
         // Set existing image URL if available
-        if (exercise.url) {
-          setExistingImageUrl(exercise.url);
-          setImagePreview(exercise.url);
+        const resolvedImageUrl = resolveImageUrl(exercise.url);
+        if (resolvedImageUrl) {
+          setExistingImageUrl(resolvedImageUrl);
+          setImagePreview(resolvedImageUrl);
         }
 
         // Determine input type based on available data
@@ -197,7 +199,7 @@ const ExerciseUpdateForm = () => {
           setIsSubmitting(false);
           return;
         }
-        imageUrl = uploadedUrl;
+        imageUrl = resolveImageUrl(uploadedUrl) || "";
       }
 
       // Prepare exercise data according to the required structure
@@ -531,18 +533,8 @@ const ExerciseUpdateForm = () => {
       fieldsCount: 2,
     },
     {
-      title: t("IMAGE_SETTINGS"),
-      icon: "heroicons:photograph",
-      description: selectedImage
-        ? t("NEW_IMAGE_UPLOADED")
-        : existingImageUrl
-          ? t("EXISTING_IMAGE_IN_USE")
-          : t("UPLOAD_OR_ENTER_URL"),
-      fieldsCount: 2,
-    },
-    {
       title: t("EXERCISE_TYPE_SETTINGS"),
-      icon: "heroicons:cog",
+      icon: "heroicons:cog-6-tooth",
       description: t("EXERCISE_TYPE_UPDATE_DESCRIPTION"),
       fieldsCount: 2,
     },
