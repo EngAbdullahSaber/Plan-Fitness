@@ -90,11 +90,14 @@ const LogInForm = () => {
         router.push("/dashboard");
       } else {
         // Handle non-200 responses that don't throw errors
-        console.log(response);
-        toast.error(response.response.data.message || "Login failed");
+        const errorData = response?.response?.data ?? response?.data;
+        if (Array.isArray(errorData?.error)) setApiErrors(errorData.error);
+        toast.error(errorData?.message || "Login failed");
       }
     } catch (error: any) {
-      toast.error(error);
+      const errorData = error?.response?.data;
+      if (Array.isArray(errorData?.error)) setApiErrors(errorData.error);
+      toast.error(errorData?.message || error?.message || "Login failed");
     } finally {
       setIsPending(false);
     }
